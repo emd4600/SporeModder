@@ -129,10 +129,9 @@ public class Project {
 	}
 	
 	public void rename(String name) {
-		String path = getProjectPath();
+		File folder = getProjectPath();
 		this.name = name;
-		File folder = new File(path);
-		if (folder.exists()) folder.renameTo(new File(getProjectPath()));
+		if (folder.exists()) folder.renameTo(getProjectPath());
 		
 		if (isDefaultPackageName) {
 			packageName = getDefaultPackageName(name);
@@ -141,8 +140,8 @@ public class Project {
 		MainApp.getUserInterface().updateProjectName();
 	}
 	
-	public String getProjectPath() {
-		return MainApp.getProjectsPath() + name + "\\";
+	public File getProjectPath() {
+		return new File(MainApp.getProjectsPath(), name);
 	}
 	
 //	public List<DefaultMutableTreeNode> getTreeNodes() {
@@ -173,13 +172,13 @@ public class Project {
 		updateSources();
 	}
 	
-	public String getPackageFile() {
+	public File getPackageFile() {
 		String path = null;
 		SporeGame game = null;
 		if (packPathType == GamePathType.GALACTIC_ADVENTURES) {
 			game = SporeGame.getGalacticAdventures();
 		}
-		else if (packPathType == GamePathType.GALACTIC_ADVENTURES) {
+		else if (packPathType == GamePathType.SPORE) {
 			game = SporeGame.getSpore();
 		}
 		
@@ -190,14 +189,15 @@ public class Project {
 			path = game.getDataDir();
 		}
 		
-		if (path.length() == 0) {
-			path = MainApp.getProgramPath();
+		File file = null;
+		if (path == null || path.length() == 0) {
+			file = MainApp.getProjectsPath();
 		}
-		if (!path.endsWith("\\")) {
-			path += "\\";
+		else {
+			file = new File(path);
 		}
 		
-		return path + packageName;
+		return new File(file, packageName);
 	}
 	
 	public GamePathType getPackPathType() {
@@ -242,15 +242,14 @@ public class Project {
 	
 	
 
-	public static List<Project> loadProjects(String path) throws IOException {
-		File folder = new File(path);
-		if (!folder.isDirectory()) {
+	public static List<Project> loadProjects(File folder) throws IOException {
+		if (folder == null || !folder.isDirectory()) {
 			// throw new IOException("Given projects path is not a folder: " + path);
 			new UIChooseProjectPath("Choose Projects Folder", "The existing Projects folder cannot be found. Please choose a valid Projects folder.");
-			folder = new File(MainApp.getProjectsPath());
+			folder = MainApp.getProjectsPath();
 		}
-		if (!folder.isDirectory()) {
-			JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Error", "The program can't be started without a valid Projects path.", JOptionPane.ERROR_MESSAGE);
+		if (folder == null || !folder.isDirectory()) {
+			JOptionPane.showMessageDialog(MainApp.getUserInterface(), "The program can't be started without a valid Projects path.", "Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
 		
@@ -333,7 +332,7 @@ public class Project {
 	}
 	
 	public void createNewProject() {
-		File folder = new File(getProjectPath());
+		File folder = getProjectPath();
 		if (folder.exists()) {
 			if (folder.isFile()) folder.delete();
 			else deleteDirectory2(folder);
@@ -532,7 +531,7 @@ public class Project {
 	}
 	
 	public boolean writeProperties() {
-		File file = new File(getProjectPath() + SETTINGS_FILE_NAME);
+		File file = new File(getProjectPath(), SETTINGS_FILE_NAME);
 		try {
 			writeProperties(file);
 		} catch (IOException e) {
@@ -547,10 +546,10 @@ public class Project {
 		if (sources == null) {
 			return false;
 		}
-		String projectsPath = MainApp.getProjectsPath();
+		File projectsPath = MainApp.getProjectsPath();
 
 		for (Project source : sources) {
-			File file = new File(projectsPath + source.name + "\\" + filePath);
+			File file = new File(projectsPath, source.name + "\\" + filePath);
 			if (file.exists()) {
 				return true;
 			}
@@ -575,10 +574,10 @@ public class Project {
 		if (sources == null) {
 			return null;
 		}
-		String projectsPath = MainApp.getProjectsPath();
+		File projectsPath = MainApp.getProjectsPath();
 
 		for (Project source : sources) {
-			File file = new File(projectsPath + source.name + "\\" + filePath);
+			File file = new File(projectsPath, source.name + "\\" + filePath);
 			if (file.exists()) {
 				return source;
 			}
@@ -603,14 +602,14 @@ public class Project {
 		
 		Project source = getSourceByFile(filePath);
 		if (source != null) {
-			return new File(source.getProjectPath() + filePath);
+			return new File(source.getProjectPath(), filePath);
 		} else {
 			return null;
 		}
 	}
 	
 	public File getModFile(String filePath) {
-		File file = new File(getProjectPath() + filePath);
+		File file = new File(getProjectPath(), filePath);
 		if (file.exists()) {
 			return file;
 		}
@@ -647,7 +646,7 @@ public class Project {
 	
 	public static String getCompletePath(TreePath path) {
 		StringBuilder filePath = new StringBuilder();
-		filePath.append(MainApp.getProjectsPath());
+		filePath.append(MainApp.getProjectsPath().getAbsolutePath());
 		
 		Object[] strs = path.getPath();
 		for (Object s : strs) {
@@ -863,13 +862,13 @@ public class Project {
 			{
 				Project source = iterable.previous();
 				
-				File root = new File(source.getProjectPath());
+				File root = source.getProjectPath();
 				
 				loadNodes(treeModel, root, rootNode, 0);
 			}
 		}
 		
-		File rootFolder = new File(getProjectPath());
+		File rootFolder = getProjectPath();
 		loadNodes(treeModel, rootFolder, rootNode, true, 0);
 		
 		time1 = System.currentTimeMillis() - time1;
@@ -893,13 +892,13 @@ public class Project {
 			{
 				Project source = iterable.previous();
 				
-				File root = new File(source.getProjectPath());
+				File root = source.getProjectPath();
 				
 				loadNodesFast(treeModel, root, rootNode, false, 0, true);
 			}
 		}
 		
-		File rootFolder = new File(getProjectPath());
+		File rootFolder = getProjectPath();
 		loadNodesFast(treeModel, rootFolder, rootNode, true, 0, true);
 		
 		time1 = System.currentTimeMillis() - time1;

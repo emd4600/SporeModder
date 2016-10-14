@@ -147,8 +147,8 @@ public class FileUtils {
 			if (filePath == null) {
 				// check if the root node is selected, so we open the project folder
 				int pathCount = MainApp.getUserInterface().getProjectPanel().getTree().getSelectionPath().getPathCount();
-				if (pathCount == 0) {
-					file = new File(MainApp.getCurrentProject().getProjectPath());
+				if (pathCount == 1) {
+					file = MainApp.getCurrentProject().getProjectPath();
 				}
 			} else {
 				file = MainApp.getCurrentProject().getModFile(filePath);

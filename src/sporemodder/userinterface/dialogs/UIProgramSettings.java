@@ -152,7 +152,7 @@ public class UIProgramSettings extends JDialog {
 				
 				tfProjectsPath = new JTextField();
 				tfProjectsPath.setDropTarget(new DropTargetTextField(tfProjectsPath, true));
-				tfProjectsPath.setText(MainApp.getProjectsPath().replace(MainApp.getProgramPath(), "//"));
+				tfProjectsPath.setText(MainApp.getRelativeProjectsPath());
 				tfProjectsPath.setColumns(50);
 				
 				btnProjectsPath = new JButton("Find file");

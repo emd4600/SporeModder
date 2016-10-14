@@ -1,6 +1,7 @@
 package sporemodder.utilities.names;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +41,16 @@ public class NameRegistry {
 			in.close();
 		}
 	}
+	
+	public NameRegistry(File file) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		try {
+			read(in);
+		} finally {
+			in.close();
+		}
+	}
+	
 	
 	public NameRegistry(BufferedReader in) throws IOException {
 		read(in);
@@ -163,49 +174,4 @@ public class NameRegistry {
 		}
 	}
 	
-	private static final int TEST_COUNT = 5;
-	private static final List<Integer> TEST_HASHES = Arrays.asList(
-			// creature, creature_editor_palette~, genericDirLitAnimblendTileParticle_shader, sfx_war_missile3_launch
-			0x9EA3031A, 0x406B6B0C, 0xB26C413E, 0x5016B9A3
-			);
-	private static final List<Long> TIME_NORMAL = new ArrayList<Long>();
-	private static final List<Long> TIME_FAST = new ArrayList<Long>();
-	
-//	public static void main(String[] args) throws IOException {
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder\\reg_file.txt";
-//		OldNameRegistry normal = new OldNameRegistry(path);
-//		NameRegistry fast = new NameRegistry(path);
-//		
-//		for (int i = 0; i < TEST_COUNT; i++) {
-//			for (int hash : TEST_HASHES) {
-//				long time1 = System.nanoTime();
-//				String name1 = normal.getName(hash);
-//				time1 = System.nanoTime() - time1;
-//				
-//				long time2 = System.nanoTime();
-//				String name2 = fast.getName(hash);
-//				time2 = System.nanoTime() - time2;
-//				
-//				System.out.println(name1 + "\tnormal: " + time1);
-//				System.out.println(name2 + "\tfast:   " + time2);
-//				TIME_NORMAL.add(time1);
-//				TIME_FAST.add(time2);
-//			}
-//		}
-//		
-//		System.out.println();
-//		System.out.println(" -- AVERAGES -- ");
-//		System.out.println();
-//		long sum = 0;
-//		for (Long l : TIME_NORMAL) sum += l;
-//		double averageNormal = (sum / (double) TIME_NORMAL.size());
-//		System.out.println("Average normal: " + averageNormal);
-//		
-//		sum = 0;
-//		for (Long l : TIME_FAST) sum += l;
-//		double averageFast = (sum / (double) TIME_FAST.size());
-//		System.out.println("Average fast:   " + averageFast);
-//		
-//		System.out.println("DoubleMapNameRegistry is " + averageNormal / averageFast + " times faster than NameRegistry.");
-//	}
 }

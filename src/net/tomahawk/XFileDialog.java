@@ -368,19 +368,19 @@ public class XFileDialog
 		     return; 
 	     }
 	
-	     String programPath = MainApp.getProgramPath();
+	     File programPath = MainApp.getProgramPath();
 	     trace("JNI>>: java.library.path:" + System.getProperty("java.library.path")); 	     
 	     try
 	     {
 		     if(System.getProperty("os.arch").indexOf("64") >=0) 
 		     {
 			     trace("JNI>>: Loading X64 (amd64) DLL"); 	     
-			     System.load(programPath + "xfiledialog64.dll"); 
+			     System.load(new File(programPath, "xfiledialog64.dll").getAbsolutePath()); 
 		     }
 		     else 
 		     {
 			     trace("JNI>>: Loading X86 32bit DLL"); 	      
-			     System.load(programPath + "xfiledialog.dll"); 
+			     System.load(new File(programPath, "xfiledialog.dll").getAbsolutePath()); 
 		     }
 		
 		     nativeEnabled=true; 

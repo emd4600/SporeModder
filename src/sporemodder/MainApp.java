@@ -118,7 +118,7 @@ public class MainApp {
 		}
 	}
 	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 0, 0, VersionInfo.BETA);
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 0, 1, VersionInfo.BETA);
 	
 	private static final String PROPERTY_SAVE_MODE = "saveMode";
 	private static final String PROPERTY_SEARCHABLE_EXT = "searchableExtensions";
@@ -143,18 +143,18 @@ public class MainApp {
 	public enum SaveMode { AUTOSAVE, MANUAL };
 	
 	// Alternative paths for name registries
-	public static String FILE_REG_PATH = null;
-	public static String TYPE_REG_PATH = null;
-	public static String PROP_REG_PATH = null;
-	public static String SPUI_REG_PATH = null;
+	public static File FILE_REG_PATH = null;
+	public static File TYPE_REG_PATH = null;
+	public static File PROP_REG_PATH = null;
+	public static File SPUI_REG_PATH = null;
 	
 	private static UIMainApp userInterface;
 	
 	private static List<Project> projects;
 	private static HashMap<String, Project> projectsMap = new HashMap<String, Project>();
 	private static Project currentProject;
-	private static String programPath;
-	private static String projectsPath;
+	private static File programPath;
+	private static File projectsPath;
 	
 	// Complete path is currentProject.path + activeFile
 	private static String activeFile;
@@ -181,16 +181,34 @@ public class MainApp {
 		MainApp.userInterface = userInterface; 
 	}
 	
-	public static String getProgramPath() {
+	public static File getProgramPath() {
 		return programPath;
 	}
 	
-	public static String getProjectsPath() {
+	public static File getProjectsPath() {
 		return projectsPath;
 	}
 	
+	public static String getRelativeProjectsPath() {
+		String pPath = programPath.getAbsolutePath();
+		String path = projectsPath.getAbsolutePath();
+		
+		path = path.replace(pPath, "//");
+		if (path.startsWith("//\\")) {
+			path = "//" + path.substring(3);
+		}
+		
+		return path;
+	}
+	
 	public static void setProjectsPath(String path) {
-		String newProjectsPath = path.replace("//", programPath);
+		File newProjectsPath = null;
+		if (path.startsWith("//")) {
+			newProjectsPath = new File(programPath, path.substring(2));
+		}
+		else {
+			newProjectsPath = new File(path);
+		}
 		if (!newProjectsPath.equals(projectsPath)) {
 			projectsPath = newProjectsPath;
 			System.out.println(projectsPath);
@@ -605,8 +623,8 @@ public class MainApp {
 		File file = new File(SETTINGS_FILE);
 		if (file.exists()) {
 			settings = new Properties();
-			try {
-				settings.load(new FileInputStream(file));
+			try (FileInputStream in = new FileInputStream(file)) {
+				settings.load(in);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -617,8 +635,8 @@ public class MainApp {
 		}
 		else {
 			settings = getDefaultSettings();
-			try {
-				settings.store(new FileOutputStream(file), null);
+			try (FileOutputStream out = new FileOutputStream(file)) {
+				settings.store(out, null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -644,8 +662,12 @@ public class MainApp {
 			settings.setProperty(PROPERTY_LAST_PATH, lastFileChooserPath.getAbsolutePath());
 		}
 		
-		projectsPath = projectsPath.replace(programPath, "//");
-		settings.setProperty(PROPERTY_PROJECTS_PATH, projectsPath);
+//		String path = projectsPath.getAbsolutePath();
+//		path.replace(programPath.getAbsolutePath(), "//");
+//		
+//		settings.setProperty(PROPERTY_PROJECTS_PATH, path);
+		
+		settings.setProperty(PROPERTY_PROJECTS_PATH, getRelativeProjectsPath());
 		
 		int i = 0;
 		for (Map.Entry<String, List<String>> entry : sourcePresets.entrySet()) {
@@ -696,9 +718,11 @@ public class MainApp {
 		
 		String projectsPath = settings.getProperty(PROPERTY_PROJECTS_PATH);
 		if (projectsPath != null) {
-			MainApp.projectsPath = projectsPath.replace("//", programPath);
-			if (!MainApp.projectsPath.endsWith("\\")) {
-				MainApp.projectsPath += "\\";
+			if (projectsPath.startsWith("//")) {
+				MainApp.projectsPath = new File(programPath, projectsPath.substring(2));
+			}
+			else {
+				MainApp.projectsPath = new File(projectsPath);
 			}
 		}
 		
@@ -862,6 +886,7 @@ public class MainApp {
 	}
 	
 	public static void main(String[] args) throws IOException {
+		
 		init();
 		if (!processArguments(args)) {
 			loadProjects();
@@ -871,17 +896,26 @@ public class MainApp {
 	}
 	
 	private static void initPaths() {
-		programPath = System.getProperty("user.dir") + "\\";
-		//TODO make this configurable
-		projectsPath = programPath + "Projects\\";
+		programPath = new File(System.getProperty("user.dir"));
+		if (programPath == null || !programPath.exists())
+		{
+			try {
+				programPath = new File(ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath());
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		projectsPath = new File(programPath, "Projects");
 	}
 	
 	private static void initRegistries() throws IOException {
 		registries = new HashMap<String, NameRegistry>();
-		if (FILE_REG_PATH == null) FILE_REG_PATH = MainApp.getProgramPath() + "reg_file.txt";
-		if (TYPE_REG_PATH == null) TYPE_REG_PATH = MainApp.getProgramPath() + "reg_type.txt";
-		if (PROP_REG_PATH == null) PROP_REG_PATH = MainApp.getProgramPath() + "reg_property.txt";
-		if (SPUI_REG_PATH == null) SPUI_REG_PATH = MainApp.getProgramPath() + "reg_spui.txt";
+		if (FILE_REG_PATH == null) FILE_REG_PATH = new File(MainApp.getProgramPath(), "reg_file.txt");
+		if (TYPE_REG_PATH == null) TYPE_REG_PATH = new File(MainApp.getProgramPath(), "reg_type.txt");
+		if (PROP_REG_PATH == null) PROP_REG_PATH = new File(MainApp.getProgramPath(), "reg_property.txt");
+		if (SPUI_REG_PATH == null) SPUI_REG_PATH = new File(MainApp.getProgramPath(), "reg_spui.txt");
 		
 		registries.put(NameRegistry.NAME_FILE, new NameRegistry(FILE_REG_PATH));
 		registries.put(NameRegistry.NAME_TYPE, new NameRegistry(TYPE_REG_PATH));

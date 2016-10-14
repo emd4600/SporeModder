@@ -42,7 +42,7 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 		this.parent = parent;
 		this.converters = converters;
 		this.compressLimit = project.getCompressingLimit();
-		this.inputPath = project.getProjectPath();
+		this.inputPath = project.getProjectPath().getAbsolutePath();
 		this.dbpf = dbpf;
 	}
 	

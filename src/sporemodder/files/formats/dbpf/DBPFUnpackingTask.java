@@ -52,7 +52,7 @@ public class DBPFUnpackingTask extends SwingWorker<Void, Void> {
 	public DBPFUnpackingTask(String inputPath, Project project, List<ConvertAction> converters, Window parent) {
 		this.inputPath = inputPath;
 		this.converters = converters;
-		this.outputPath = project.getProjectPath();
+		this.outputPath = project.getProjectPath().getAbsolutePath();
 		this.parent = parent;
 	}
 	
