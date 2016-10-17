@@ -701,8 +701,8 @@ public class UIProjectSettings extends JDialog {
 		rbGamePathSpore.setEnabled(isSelected);
 		rbGamePathGA.setEnabled(isSelected);
 		rbGamePathCustom.setEnabled(isSelected);
-		tfGamePath.setEnabled(isSelected);
-		btnGamePath.setEnabled(isSelected);
+		tfGamePath.setEnabled(isSelected && project.getGamePathType() == GamePathType.CUSTOM);
+		btnGamePath.setEnabled(isSelected && project.getGamePathType() == GamePathType.CUSTOM);
 		tfGameCommandLine.setEnabled(isSelected);
 		lblCommand.setEnabled(isSelected);
 	}

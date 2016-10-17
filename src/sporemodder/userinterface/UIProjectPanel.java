@@ -573,14 +573,14 @@ public class UIProjectPanel extends JPanel {
 		{
 			Project source = iterable.previous();
 			
-			File rootFolder = new File(source.getProjectPath() + relativePath);
+			File rootFolder = new File(source.getProjectPath(), relativePath);
 			if (rootFolder.exists()) {
 				node.isSource = true;
 				Project.loadNodesFast(treeModel, rootFolder, node, false, level, true);
 			}
 		}
 		
-		File rootFolder = new File(project.getProjectPath() + relativePath);
+		File rootFolder = new File(project.getProjectPath(), relativePath);
 		if (rootFolder.exists()) {
 			node.isMod = true;
 			Project.loadNodesFast(treeModel, rootFolder, node, true, level, true);

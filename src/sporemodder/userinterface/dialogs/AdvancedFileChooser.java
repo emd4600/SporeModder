@@ -355,8 +355,4 @@ public class AdvancedFileChooser implements ActionListener {
 		}
 	}
 	
-	public static void main(String[] args) {
-		MainApp.init();
-		System.out.println(MainApp.getProgramPath());
-	}
 }

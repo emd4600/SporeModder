@@ -17,6 +17,17 @@ public class SPUIVectorSections {
 		
 		public float[][] data;
 		
+		public static float[][] getValues(SectionVec4 section, float[][] defaultValues, int count) throws InvalidBlockException {
+			if (section != null) {
+				if (section.data.length != count) {
+					throw new InvalidBlockException("Wrong section length, expected " + count + " values.", section);
+				}
+				return section.data;
+			} else {
+				return defaultValues;
+			}
+		}
+		
 		@Override
 		public String getString() {
 			StringBuilder b = new StringBuilder();

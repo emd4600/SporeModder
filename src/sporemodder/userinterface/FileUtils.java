@@ -2,10 +2,7 @@ package sporemodder.userinterface;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -30,7 +27,7 @@ public class FileUtils {
 		Project project = MainApp.getCurrentProject();
 		String filePath = MainApp.getActiveFilePath();
 		File sourceFile = project.getSourceFile(filePath);
-		File modFile = new File(project.getProjectPath() + filePath);
+		File modFile = new File(project.getProjectPath(), filePath);
 		
 		if (!modFile.getParentFile().exists()) {
 			modFile.getParentFile().mkdirs();
@@ -68,7 +65,11 @@ public class FileUtils {
 		}
 		
 		try {
-			Runtime.getRuntime().exec(MainApp.getProgramPath() + "WinMerge\\WinMergeU.exe \"" + sourceFile.getAbsolutePath() + "\" \"" +
+			String path = MainApp.getProgramPath().getAbsolutePath();
+			if (!path.endsWith("\\")) {
+				path += "\\";
+			}
+			Runtime.getRuntime().exec(path + "WinMerge\\WinMergeU.exe \"" + sourceFile.getAbsolutePath() + "\" \"" +
 					modFile.getAbsolutePath() + "\"");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -126,7 +127,7 @@ public class FileUtils {
 	public static void openSourceFolder() {
 		if (Desktop.isDesktopSupported()) {
 			String filePath = MainApp.getActiveFilePath();
-			File file = new File(MainApp.getCurrentProject().getSourceByFile(filePath).getProjectPath() + "\\" + filePath);
+			File file = new File(MainApp.getCurrentProject().getSourceByFile(filePath).getProjectPath(), filePath);
 			try {
 				if (file.isDirectory()) {
 					Desktop.getDesktop().open(file);

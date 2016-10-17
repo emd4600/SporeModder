@@ -130,6 +130,17 @@ public class SPUINumberSections {
 		
 		public short[] data;
 		
+		public static short[] getValues(SectionShort section, short[] defaultValues, int count) throws InvalidBlockException {
+			if (section != null) {
+				if (count != -1 && section.data.length != count) {
+					throw new InvalidBlockException("Wrong section length, expected " + count + " values.", section);
+				}
+				return section.data;
+			} else {
+				return defaultValues;
+			}
+		}
+		
 		private String shortToString(short s) {
 			SPUIChannel c = SPUIChannel.getChannel(channel);
 			if (c != null) {
@@ -309,6 +320,17 @@ public class SPUINumberSections {
 		public static final String TEXT_CODE = "int";
 		
 		public int[] data;
+		
+		public static int[] getValues(SectionInt section, int[] defaultValues, int count) throws InvalidBlockException {
+			if (section != null) {
+				if (section.data.length != count) {
+					throw new InvalidBlockException("Wrong section length, expected " + count + " values.", section);
+				}
+				return section.data;
+			} else {
+				return defaultValues;
+			}
+		}
 		
 		private String intToString(int i) {
 			SPUIChannel c = SPUIChannel.getChannel(channel);

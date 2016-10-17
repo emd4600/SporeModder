@@ -50,7 +50,7 @@ public class ShellContextMenu {
 	
 	public static boolean addButtonsToRegistry(Component parentComponent) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
 		
-		String exePath = MainApp.getProgramPath() + "SporeModder.exe";
+		String exePath = new File(MainApp.getProgramPath(), "SporeModder.exe").getAbsolutePath();
 		if (!new File(exePath).exists()) {
 			JOptionPane.showMessageDialog(parentComponent, "Can't add context menu buttons without SporeModder.exe. Please, be sure you have SporeModder.exe in SporeModder's path",
 					"Error", JOptionPane.ERROR_MESSAGE);

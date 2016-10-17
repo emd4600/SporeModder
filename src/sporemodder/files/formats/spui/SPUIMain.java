@@ -45,6 +45,15 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 	private final SPUIResourceList resources = new SPUIResourceList();
 	private final List<SPUIBlock> blocks = new ArrayList<SPUIBlock>();
 	
+	public Object get(short index) {
+		int count = resources.getValidResourcesCount();
+		if (index >= count) {
+			return blocks.get(index - count);
+		} else {
+			return resources.get(index);
+		}
+	}
+	
 	public void read(InputStreamAccessor in) throws IOException {
 		int magic = in.readLEInt();
 		expect(magic, MAGIC, "SPUI-H001", in.getFilePointer());
@@ -289,4 +298,5 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 //			spui.write(out);
 //		}
 	}
+
 }
