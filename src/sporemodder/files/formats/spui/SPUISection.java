@@ -52,6 +52,10 @@ public abstract class SPUISection {
 			// byte
 			sec = new SectionByte();
 		}
+		else if (type == SectionByte2.TYPE) {
+			// byte 2?
+			sec = new SectionByte2();
+		}
 		else if (type == SectionInt2.TYPE) {
 			// int2 ?
 			sec = new SectionInt2();
@@ -102,104 +106,6 @@ public abstract class SPUISection {
 		return sec;
 	}
 	
-//	public SPUISection readSectionTxt(List<String> lines, SPUIParser parser) throws IOException {
-//		
-//		String str = lines.get(parser.e++);
-////		// We remove the comments and the indentation
-////		String str = line.split("//")[0].trim();
-//		
-//		// if the line is empty
-//		if (str.length() == 0) {
-//			return null;
-//		}
-//		
-//		SPUISection section = null;
-//		
-//		// channel type data
-//		String[] splits = str.split(" ", 3);
-//		
-//		int channel = Hasher.getHash(splits[0], MainApp.getRegistry(NameRegistry.NAME_SPUI));
-//		
-//		if (splits[1].equals(SectionBoolean.TEXT_CODE)) {
-//			// byte again ?
-//			section = new SectionBoolean();
-//			section.type = SectionBoolean.TYPE;
-//		}
-//		else if (splits[1].equals(SectionByte.TEXT_CODE)) {
-//			// byte
-//			section = new SectionByte();
-//			section.type = SectionByte.TYPE;
-//		}
-//		else if (splits[1].equals(SectionInt2.TEXT_CODE)) {
-//			// int
-//			section = new SectionInt2();
-//			section.type = SectionInt2.TYPE;
-//		}
-//		else if (splits[1].equals(SectionInt.TEXT_CODE)) {
-//			// int
-//			section = new SectionInt();
-//			section.type = SectionInt.TYPE;
-//		}
-//		else if (splits[1].equals(SectionFloat.TEXT_CODE)) {
-//			// float
-//			section = new SectionFloat();
-//			section.type = SectionFloat.TYPE;
-//		}
-//		else if (splits[1].equals(SectionDimension.TEXT_CODE)) {
-//			// vector2i, used for sprite size
-//			section = new SectionDimension();
-//			section.type = SectionDimension.TYPE;
-//		}
-//		else if (splits[1].equals(SectionVec4.TEXT_CODE)) {
-//			// vector4f
-//			section = new SectionVec4();
-//			section.type = SectionVec4.TYPE;
-//		}
-//		else if (splits[1].equals(SectionVec2.TEXT_CODE)) {
-//			// vector2f
-//			section = new SectionVec2();
-//			section.type = SectionVec2.TYPE;
-//		}
-//		else if (splits[1].equals(SectionText.TEXT_CODE)) {
-//			// LocalizedString
-//			section = new SectionText();
-//			section.type = SectionText.TYPE;
-//		}
-//		else if (splits[1].equals(SectionShort.TEXT_CODE)) {
-//			// short
-//			section = new SectionShort();
-//			section.type = SectionShort.TYPE;
-//		}
-//		else if (splits[1].equals(SectionSectionList.TEXT_CODE)) {
-//			// multiple sections ?
-//			section = new SectionSectionList();
-//			section.type = SectionSectionList.TYPE;
-//		}
-//		else {
-//			System.err.println("Unknown section type!");
-//			return null;
-//		}
-//		
-//		section.channel = channel;
-//		
-//		if (section.type == SectionSectionList.TYPE) {
-//			StringBuilder sb = new StringBuilder(splits[2]);
-//			
-//			String l = null;
-//			while(true) {
-//				l = lines.get(parser.e++);
-//				if (l.trim().equals("end")) break;
-//				sb.append("\n" + l);
-//			}
-//			section.parse(sb.toString());
-//		}
-//		else {
-//			section.parse(splits[2]);
-//		}
-//		
-//		return section;
-//	}
-	
 	public static SPUISection parseSection(ArgScriptOptionable as) throws ArgScriptException, IOException {
 		SPUISection section = null;
 		
@@ -219,14 +125,22 @@ public abstract class SPUISection {
 			section = new SectionByte();
 			section.type = SectionByte.TYPE;
 		}
+		else if (typeStr.equals(SectionByte2.TEXT_CODE)) {
+			// byte 2 ?
+			section = new SectionByte2();
+			section.type = SectionByte2.TYPE;
+		}
 		else if (typeStr.equals(SectionInt2.TEXT_CODE)) {
-			// int
+			// int 2?
 			section = new SectionInt2();
 			section.type = SectionInt2.TYPE;
 		}
 		else if (typeStr.equals(SectionInt.TEXT_CODE)) {
 			// int
-			section = new SectionInt();
+//			section = new SectionInt();
+//			section.type = SectionInt.TYPE;
+			
+			section = new SectionIntName();
 			section.type = SectionInt.TYPE;
 		}
 		else if (typeStr.equals(SectionFloat.TEXT_CODE)) {
@@ -311,6 +225,9 @@ public abstract class SPUISection {
 	}
 	public int getCount() {
 		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
 	}
 	
 	public static int getType(SPUISection section) {

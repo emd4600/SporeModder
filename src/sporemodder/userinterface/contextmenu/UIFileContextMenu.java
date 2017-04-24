@@ -15,7 +15,6 @@ import javax.swing.JSeparator;
 import javax.swing.tree.TreePath;
 
 import sporemodder.MainApp;
-import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.files.formats.effects.EffectPacker;
 import sporemodder.files.formats.effects.EffectUnpacker;
@@ -69,7 +68,7 @@ public class UIFileContextMenu extends JPopupMenu {
 		String fileName = file.getName();
 		String text = null;
 		ConvertAction action = null;
-		if (fileName.endsWith(".prop")) action = new PropToXml(null);
+		if (fileName.endsWith(".prop")) action = new PropToXml();
 		else if (fileName.endsWith(".xml")) action = new XmlToProp();
 		else if (fileName.endsWith(".rw4")) action = new Rw4ToDDS();
 		else if (fileName.endsWith(".dds")) action = new DDSToRw4();
@@ -146,7 +145,7 @@ public class UIFileContextMenu extends JPopupMenu {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			try {
-				converter.convert(file, new File(converter.getOutputName(file.getAbsolutePath())));
+				converter.convert(file, converter.getOutputFile(file));
 				UIProjectPanel.refreshActiveNode();
 			}
 			catch (Exception e) {

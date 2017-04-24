@@ -7,12 +7,15 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.JPanel;
+
 import sporemodder.files.ActionCommand;
 import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.files.formats.FileFormatStructure;
+import sporemodder.files.formats.ResourceKey;
 import sporemodder.files.formats.spui.SPUIMain;
 import sporemodder.userinterface.dialogs.UIErrorsDialog;
 import sporemodder.utilities.InputOutputPaths.InputOutputPair;
@@ -55,8 +58,8 @@ public class XmlToProp implements ConvertAction {
 	}
 
 	@Override
-	public boolean isValid(int extension) {
-		return extension == 0x00B1B104 || extension == 0x02B9F662;
+	public boolean isValid(ResourceKey key) {
+		return key.getTypeID() == 0x00B1B104 || key.getTypeID() == 0x02B9F662;
 	}
 
 	@Override
@@ -76,18 +79,8 @@ public class XmlToProp implements ConvertAction {
 	}
 
 	@Override
-	public String getOutputName(String name) {
-		String result = name;
-		int index = name.indexOf(".");
-		if (index != -1) {
-			result = name.substring(0, index);
-		}
-		if (name.endsWith(".soundProp.xml")) {
-			result += ".soundProp";
-		} else {
-			result += ".prop";
-		}
-		return result;
+	public File getOutputFile(File file) {
+		return ActionCommand.replaceFileExtension(file, file.getName().endsWith(".soundProp.xml") ? ".soundProp" : ".prop");
 	}
 
 	@Override
@@ -102,6 +95,11 @@ public class XmlToProp implements ConvertAction {
 			main.readXML(in);
 			return main;
 		}
+	}
+	
+	@Override
+	public JPanel createOptionsPanel() {
+		return null;
 	}
 	
 	public static boolean processCommand(String[] args) {

@@ -1,8 +1,10 @@
 package sporemodder.utilities;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -32,6 +34,8 @@ import sporemodder.files.formats.renderWare4.DDSToRw4;
 import sporemodder.files.formats.spui.TxtToSpui;
 import sporemodder.files.formats.tlsa.TxtToTlsa;
 import sporemodder.userinterface.dialogs.UIChooseProjectPath;
+import sporemodder.utilities.names.NameRegistry;
+import sporemodder.utilities.names.SimpleNameRegistry;
 
 public class Project {
 	public enum GamePathType {
@@ -39,6 +43,27 @@ public class Project {
 		GALACTIC_ADVENTURES, 
 		CUSTOM
 		};
+		
+	public enum EditorsPackages {
+		NONE {
+			@Override
+			public String toString() {
+				return "None";
+			}
+		},
+		PATCH51 {
+			@Override
+			public String toString() {
+				return "GA Patch 5.1";
+			}
+		},
+		BOT_PARTS {
+			@Override
+			public String toString() {
+				return "Bot Parts";
+			}
+		}
+	}
 	
 	private static final String SETTINGS_FILE_NAME = "config.properties";
 	private static final String PROPERTY_LAST_TIME_USED = "lastTimeUsed";
@@ -50,6 +75,7 @@ public class Project {
 	private static final String PROPERTY_GAME_PATH = "gamePath";
 	private static final String PROPERTY_GAME_COMMANDS = "gameCommands";
 	private static final String PROPERTY_GAME_DEFAULT = "gameDefault";
+	private static final String PROPERTY_EMBEDDED_PACKAGES = "embeddedEditorPackages";
 	
 	private final List<Project> sources = new ArrayList<Project>();
 	private long lastTimeUsed;
@@ -77,6 +103,8 @@ public class Project {
 	private boolean convertGAIT = true;
 	private boolean convertEffects = true;
 	private int compressingLimit = -1;
+	
+	private EditorsPackages embeddedEditorPackages = EditorsPackages.NONE;
 	
 	public Project(String name) {
 		this.name = name;
@@ -163,6 +191,24 @@ public class Project {
 		}
 	}
 	
+	public void loadSourceProjects() throws IOException {
+		if (sourceNames != null) {
+			sources.clear();
+			
+			for (String str : sourceNames) {
+				Project p = MainApp.getProjectByName(str);
+				if (p == null) {
+					p = Project.loadProject(new File(MainApp.getProjectsPath(), str));
+				}
+
+				if (p != null) {
+					sources.add(p);
+					MainApp.addProject(p);
+				}
+			}
+		}
+	}
+	
 	public List<Project> getSources() {
 		return sources;
 	}
@@ -240,9 +286,27 @@ public class Project {
 		this.defaultGamePath = defaultGamePath;
 	}
 	
-	
+	public EditorsPackages getEmbeddedEditorPackages() {
+		return embeddedEditorPackages;
+	}
 
-	public static List<Project> loadProjects(File folder) throws IOException {
+	public void setEmbeddedEditorPackages(EditorsPackages embeddedEditorPackages) {
+		this.embeddedEditorPackages = embeddedEditorPackages;
+	}
+
+	
+	public static Project loadProject(File file) throws IOException {
+		Project project = new Project(file.getName());
+		
+		File propertiesFile = new File(file, SETTINGS_FILE_NAME);
+		if (propertiesFile.exists()) {
+			project.readProperties(propertiesFile);
+		}
+		
+		return project;
+	}
+
+	public static void loadProjects(List<Project> projects, File folder) throws IOException {
 		if (folder == null || !folder.isDirectory()) {
 			// throw new IOException("Given projects path is not a folder: " + path);
 			new UIChooseProjectPath("Choose Projects Folder", "The existing Projects folder cannot be found. Please choose a valid Projects folder.");
@@ -253,29 +317,14 @@ public class Project {
 			System.exit(1);
 		}
 		
-		List<Project> projects = new ArrayList<Project>();
 		File[] files = folder.listFiles();
 		
 		for (File f : files) {
 			if (f.isDirectory())
 			{
-				Project project = new Project(f.getName());
-//				File[] propertiesFiles = f.listFiles(new FilenameFilter() {
-//					@Override
-//					public boolean accept(File arg0, String arg1) {
-//						return arg1.equals(SETTINGS_FILE_NAME);
-//					}
-//				});
-				File propertiesFile = new File(f, SETTINGS_FILE_NAME);
-				if (propertiesFile.exists()) {
-					project.readProperties(propertiesFile);
-				}
-				//TODO read project properties;
-				projects.add(project);
+				projects.add(loadProject(f));
 			}
 		}
-		
-		return projects;
 	}
 	
 	/**
@@ -485,6 +534,15 @@ public class Project {
 			}
 			gameCommandLine = properties.getProperty(PROPERTY_GAME_COMMANDS, "");
 			defaultGamePath = Boolean.parseBoolean(properties.getProperty(PROPERTY_GAME_DEFAULT, "true"));
+			
+			String embeddedEditorPackagesStr = properties.getProperty(PROPERTY_EMBEDDED_PACKAGES);
+			if (embeddedEditorPackagesStr != null) {
+				for (EditorsPackages enumEntry : EditorsPackages.values()) {
+					if (embeddedEditorPackagesStr.equals(enumEntry.toString())) {
+						embeddedEditorPackages = enumEntry;
+					}
+				}
+			}
 		}
 	}
 	
@@ -524,6 +582,10 @@ public class Project {
 			properties.setProperty(PROPERTY_GAME_PATH_TYPE, gamePathType.toString());
 			properties.setProperty(PROPERTY_GAME_COMMANDS, gameCommandLine);
 			
+			if (embeddedEditorPackages != null) {
+				properties.setProperty(PROPERTY_EMBEDDED_PACKAGES, embeddedEditorPackages.toString());
+			}
+			
 			properties.store(out, null);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -540,6 +602,37 @@ public class Project {
 			return false;
 		}
 		return true;
+	}
+	
+	public void loadNames() {
+		File file = getFile("sporemaster/names.txt");
+		if (file != null) {
+			try {
+				Hasher.UsedNames = new SimpleNameRegistry(file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				Hasher.UsedNames = null;
+			}
+		} else {
+			// disable the other project's names
+			Hasher.UsedNames = null;
+		}
+	}
+	
+	public void saveNames() {
+		if (Hasher.UsedNames != null) {
+			File file = new File(getProjectPath(), "sporemaster/names.txt");
+			file.getParentFile().mkdir();
+			
+			try (BufferedWriter out = new BufferedWriter(new FileWriter(file))) {
+				Hasher.UsedNames.write(out);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public boolean hasSource(String filePath) {
@@ -688,7 +781,7 @@ public class Project {
 		return name.replaceAll("\\s", "_") + ".package";
 	}
 	
-	private void loadNodes(FilteredTreeModel treeModel, File rootFolder, DefaultMutableTreeNode rootNode, boolean isMod, int level) {
+	private void loadNodes(ProjectTreeModel treeModel, File rootFolder, DefaultMutableTreeNode rootNode, boolean isMod, int level) {
 		File[] folders = rootFolder.listFiles();
 		
 		for (File folder : folders) 
@@ -846,12 +939,12 @@ public class Project {
 //		}
 //	}
 	
-	private void loadNodes(FilteredTreeModel treeModel, File rootFolder, DefaultMutableTreeNode rootNode, int level) {
+	private void loadNodes(ProjectTreeModel treeModel, File rootFolder, DefaultMutableTreeNode rootNode, int level) {
 		loadNodes(treeModel, rootFolder, rootNode, false, level);
 //		loadNodesFast(treeModel, rootFolder, rootNode, false, level);
 	}
 	
-	public boolean loadNodesEx(FilteredTreeModel treeModel, DefaultMutableTreeNode rootNode) {
+	public boolean loadNodesEx(ProjectTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		long time1 = System.currentTimeMillis();
 		//List<DefaultMutableTreeNode> result = new ArrayList<DefaultMutableTreeNode>(treeNodes);
 		if (sources != null) {
@@ -881,7 +974,7 @@ public class Project {
 //	private class LoadedNode {
 //		private SortedMap<String, LoadedNode> childs = new SortedMap<String, LoadedNode>();
 //	}
-	public boolean loadNodesFastEx(FilteredTreeModel treeModel, ProjectTreeNode rootNode) {
+	public boolean loadNodesFastEx(ProjectTreeModel treeModel, ProjectTreeNode rootNode) {
 		long time1 = System.currentTimeMillis();
 		//List<DefaultMutableTreeNode> result = new ArrayList<DefaultMutableTreeNode>(treeNodes);
 		if (sources != null) {
@@ -909,7 +1002,7 @@ public class Project {
 		return true;
 	}
 	
-	public static void loadNodesFast(FilteredTreeModel treeModel, File rootFolder, ProjectTreeNode rootNode, boolean isMod, int level, boolean parentExists) {
+	public static void loadNodesFast(ProjectTreeModel treeModel, File rootFolder, ProjectTreeNode rootNode, boolean isMod, int level, boolean parentExists) {
 		File[] folders = rootFolder.listFiles();
 		
 		for (File folder : folders) 

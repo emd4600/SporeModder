@@ -32,7 +32,7 @@ import sporemodder.MainApp.SaveMode;
 import sporemodder.userinterface.contextmenu.UITreePopClickListener;
 import sporemodder.userinterface.fileview.FileView;
 import sporemodder.userinterface.fileview.TextFileView;
-import sporemodder.utilities.FilteredTreeModel;
+import sporemodder.utilities.ProjectTreeModel;
 import sporemodder.utilities.Project;
 import sporemodder.utilities.ProjectTreeNode;
 import sporemodder.utilities.SearchSpec;
@@ -53,7 +53,7 @@ public class UIProjectPanel extends JPanel {
 	private JScrollPane scrollPane;
 	// We must add a placeholder name or we won't be able to change it otherwise
 	private ProjectTreeNode rootNode = new ProjectTreeNode("My Project", true);
-	private FilteredTreeModel treeModel = new FilteredTreeModel(rootNode);
+	private ProjectTreeModel treeModel = new ProjectTreeModel(rootNode);
 	private final JTree tree = new JTree(treeModel);
 	
 	public UIProjectPanel() {
@@ -77,9 +77,9 @@ public class UIProjectPanel extends JPanel {
 		scrollPane = new JScrollPane(tree);
 		
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-//		tree.setDragEnabled(true);
-//		tree.setDropMode(DropMode.INSERT);
-//		tree.setTransferHandler(new TreeTransferHandler());
+		tree.setDragEnabled(true);
+		tree.setDropMode(DropMode.INSERT);
+		tree.setTransferHandler(new TreeTransferHandler());
 		tree.setCellRenderer(new ProjectTreeCellRenderer());
 		tree.addMouseListener(new UITreePopClickListener(tree));
 		tree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -144,7 +144,7 @@ public class UIProjectPanel extends JPanel {
 		
 		//TODO only for testing
 		rootNode = new ProjectTreeNode(project.getProjectName(), true);
-		treeModel = new FilteredTreeModel(rootNode);
+		treeModel = new ProjectTreeModel(rootNode);
 		tree.setModel(treeModel);
 		
 		project.loadNodesFastEx(treeModel, rootNode);
@@ -183,7 +183,7 @@ public class UIProjectPanel extends JPanel {
 		return findChild(rootNode, components, 0);
 	}
 
-	public FilteredTreeModel getTreeModel() {
+	public ProjectTreeModel getTreeModel() {
 		return treeModel;
 	}
 	
@@ -453,7 +453,7 @@ public class UIProjectPanel extends JPanel {
 			List<String> searchStrings = MainApp.getSearchStrings(searchText);
 			MainApp.setSearchStrings(searchStrings);
 			//rootNode.searchFast(SearchSpec.generateSearchSpecs(searchStrings), cbShowMod.isSelected(), dontSearchInMods, searchOnlyVisible, true);
-			rootNode.searchFast(SearchSpec.generateSearchSpecs(searchStrings));
+			rootNode.searchFast(SearchSpec.generateSearchSpecs(searchStrings), true);
 		}
 		else {
 			//setChildNodesVisible(rootNode, cbShowMod.isSelected());

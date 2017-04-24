@@ -19,9 +19,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import sporemodder.MainApp;
@@ -102,6 +102,13 @@ public class UIConvertDialog extends JPanel {
 		this.outputSelectionMode = outputSelectionMode;
 		this.inputMultiSelectEnabled = inputMultiSelectEnabled;
 		this.outputMultiSelectEnabled = outputMultiSelectEnabled;
+		
+		if (advancedOptionsPanel == null) {
+			advancedOptionsPanel = convertAction.createOptionsPanel();
+			if (advancedOptionsPanel != null) {
+				advancedOptionsPanel.setBorder(BorderFactory.createTitledBorder("Advanced options"));
+			}
+		}
 		
 		setLayout(new BorderLayout());
 		
@@ -353,12 +360,16 @@ public class UIConvertDialog extends JPanel {
 			}
 		}
 	}
+
 	
-//	public void setOutputChooserSelectionMode(int selectionMode, boolean multiSelectEnabled) {
-//		outputFileChooser.setSelectionMode(selectionMode, multiSelectEnabled);
-//	}
-//	
-//	public void setInputChooserSelectionMode(int selectionMode, boolean multiSelectEnabled) {
-//		inputFileChooser.setSelectionMode(selectionMode, multiSelectEnabled);
-//	}
+	public static void addConvertTab(JDialog parent, JTabbedPane tabbedPane, ConvertAction action, String title, 
+			FileNameExtensionFilter inFilter, FileNameExtensionFilter outFilter, String inExtension, String outExtension, boolean removeExtension) {
+		
+		JPanel panel = action.createOptionsPanel();
+		if (panel != null) {
+			panel.setBorder(BorderFactory.createTitledBorder("Advanced options"));
+		}
+		
+		tabbedPane.addTab(title, new UIConvertDialog(parent, inFilter, outFilter, inExtension, outExtension, removeExtension, action, panel));
+	}
 }

@@ -9,9 +9,9 @@ import java.util.List;
 
 public class SearchSpec {
 	
-	static {
-		System.load(System.getProperty("user.dir") + "\\SporeModder JNI.dll");
-	}
+//	static {
+//		System.load(System.getProperty("user.dir") + "\\SporeModder JNI.dll");
+//	}
 
 	private String str;
 	private String lowercaseStr;
@@ -21,9 +21,9 @@ public class SearchSpec {
 	// String must be lowercase
 	public SearchSpec(String str) {
 		this.str = str;
-		lowercaseStr = str;
+		lowercaseStr = str.toLowerCase();
 		try {
-			chars = str.getBytes("US-ASCII");
+			chars = lowercaseStr.getBytes("US-ASCII");
 			upperCaseChars = str.toUpperCase().getBytes("US-ASCII");
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -68,8 +68,10 @@ public class SearchSpec {
 	
 	public static List<SearchSpec> generateSearchSpecs(List<String> strings) {
 		List<SearchSpec> list = new ArrayList<SearchSpec>();
-		for (String s : strings) {
-			list.add(new SearchSpec(s));
+		if (strings != null) {
+			for (String s : strings) {
+				list.add(new SearchSpec(s));
+			}
 		}
 		return list;
 	}

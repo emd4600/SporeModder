@@ -1,5 +1,6 @@
 package sporemodder.files;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,5 +61,16 @@ public class ActionCommand {
 		}
 		
 		return pairs;
+	}
+	
+	public static File replaceFileExtension(File file, String extension) {
+		String name = file.getName();
+		int index = name.indexOf(".");
+		if (index != -1) {
+			name = name.substring(0, index);
+		}
+		name += extension;
+		
+		return new File(file.getParentFile(), name);
 	}
 }

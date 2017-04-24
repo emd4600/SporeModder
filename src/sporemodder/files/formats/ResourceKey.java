@@ -1,5 +1,7 @@
 package sporemodder.files.formats;
 
+import javax.swing.tree.TreePath;
+
 import sporemodder.utilities.Hasher;
 
 public class ResourceKey {
@@ -78,5 +80,55 @@ public class ResourceKey {
 		instanceID = Hasher.getFileHash(groupFile[1]);
 		typeID = Hasher.getTypeHash(spl[1]);
 	}
+	
+	public void parseTreePath(TreePath path) {
+		if (path.getPathCount() != 3) {
+			throw new IllegalArgumentException("TreePath must be formed of 3 objects (root, group, instance)");
+		}
+		
+		groupID = Hasher.getFileHash(path.getPathComponent(1).toString());
+		
+		String[] splits = path.getPathComponent(2).toString().split("\\.", 2);
+		instanceID = Hasher.getFileHash(splits[0]);
+		typeID = Hasher.getTypeHash(splits[1]);
+	}
+	
+	
+	public static String getStringFromTreePath(TreePath path) {
+		if (path.getPathCount() != 3) {
+			throw new IllegalArgumentException("TreePath must be formed of 3 objects (root, group, instance)");
+		}
+		
+		return path.getPathComponent(1).toString() + "!" + path.getPathComponent(2);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + groupID;
+		result = prime * result + instanceID;
+		result = prime * result + typeID;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ResourceKey other = (ResourceKey) obj;
+		if (groupID != other.groupID)
+			return false;
+		if (instanceID != other.instanceID)
+			return false;
+		if (typeID != other.typeID)
+			return false;
+		return true;
+	}
+	
 	
 }

@@ -4,12 +4,15 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.JPanel;
+
 import sporemodder.files.ActionCommand;
 import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.files.formats.FileFormatStructure;
+import sporemodder.files.formats.ResourceKey;
 import sporemodder.userinterface.dialogs.UIErrorsDialog;
 import sporemodder.utilities.InputOutputPaths.InputOutputPair;
 
@@ -44,8 +47,8 @@ public class DDSToRw4 implements ConvertAction {
 	}
 
 	@Override
-	public boolean isValid(int extension) {
-		return extension == 0x2F4E681B;
+	public boolean isValid(ResourceKey key) {
+		return key.getTypeID() == 0x2F4E681B;
 	}
 
 	@Override
@@ -64,14 +67,8 @@ public class DDSToRw4 implements ConvertAction {
 	}
 
 	@Override
-	public String getOutputName(String name) {
-		String result = name;
-		int index = name.indexOf(".");
-		if (index != -1) {
-			result = name.substring(0, index);
-		}
-		result += ".rw4";
-		return result;
+	public File getOutputFile(File file) {
+		return ActionCommand.replaceFileExtension(file, ".rw4");
 	}
 
 	@Override
@@ -79,7 +76,10 @@ public class DDSToRw4 implements ConvertAction {
 		return 0x2F4E681B;
 	}
 	
-	
+	@Override
+	public JPanel createOptionsPanel() {
+		return null;
+	}
 
 	public static boolean processCommand(String[] args) {
 		List<InputOutputPair> pairs = ActionCommand.parseDefaultArguments(args, "dds", "rw4", true);

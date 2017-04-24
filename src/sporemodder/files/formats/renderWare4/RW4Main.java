@@ -577,7 +577,20 @@ public class RW4Main extends FileStructure implements FileFormatStructure {
 //			e.printStackTrace();
 //		}
 		
-		String inputPath = "E:\\Eric\\SporeModder\\Projects\\CreaturePartTest\\editor_rigblocks~\\TEST-ce_mouths_chameleorex.rw4\\TEST-ce_mouths_chameleorex.rw4";
+		//String inputPath = "E:\\Eric\\SporeModder\\Projects\\CreaturePartTest\\editor_rigblocks~\\TEST-ce_mouths_chameleorex.rw4\\TEST-ce_mouths_chameleorex.rw4";
+		
+		//String inputPath = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\editor_rigblocks~\\be_classic_01.rw4\\raw.rw4";
+		
+		//String inputPath = "C:\\Users\\Eric\\Desktop\\untitled.rw4";
+		
+		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\Horn.rw4";
+		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\StaticModel_Cube.rw4";
+		String inputPath = "E:\\Eric\\SporeModder\\Projects\\SporeModder Models Test\\ModAPITestModels\\StaticModel_Cube.rw4";
+		
+		//String inputPath = "C:\\Users\\Eric\\Desktop\\Working_StaticModel_Cube.rw4";
+		
+		//String inputPath = "C:\\Users\\Eric\\Desktop\\trg_sacrifice_altar1.rw4";
+		RW4TexMetadata.READ_COMPILED_STATE = false;
 		
 		try (FileStreamAccessor in = new FileStreamAccessor(inputPath, "r")) {
 			RW4Main main = new RW4Main();

@@ -1,10 +1,13 @@
 package sporemodder.files.formats.prop;
 
+import java.awt.Component;
+import java.awt.GridLayout;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
 import sporemodder.files.ActionCommand;
 import sporemodder.files.FileStreamAccessor;
@@ -12,15 +15,16 @@ import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.files.formats.FileFormatStructure;
+import sporemodder.files.formats.ResourceKey;
 import sporemodder.userinterface.dialogs.UIErrorsDialog;
 import sporemodder.utilities.InputOutputPaths.InputOutputPair;
 
 public class PropToXml implements ConvertAction {
 	
 	private JCheckBox cbDebugMode;
+	private JCheckBox cbConvertEditorPackages;
 	
-	public PropToXml(JCheckBox cbDebugMode) {
-		this.cbDebugMode = cbDebugMode;
+	public PropToXml() {
 	}
 
 	@Override
@@ -56,8 +60,11 @@ public class PropToXml implements ConvertAction {
 	}
 
 	@Override
-	public boolean isValid(int extension) {
-		return extension == 0x00B1B104 || extension == 0x02B9F662;
+	public boolean isValid(ResourceKey key) {
+		if (cbConvertEditorPackages != null && !cbConvertEditorPackages.isSelected() && key.getGroupID() == 0x40404000) {
+			return false;
+		}
+		return key.getTypeID() == 0x00B1B104 || key.getTypeID() == 0x02B9F662;
 	}
 
 	@Override
@@ -76,18 +83,8 @@ public class PropToXml implements ConvertAction {
 	}
 
 	@Override
-	public String getOutputName(String name) {
-		String result = name;
-		int index = name.indexOf(".");
-		if (index != -1) {
-			result = name.substring(0, index);
-		}
-		if (name.endsWith(".soundProp")) {
-			result += ".soundProp.xml";
-		} else {
-			result += ".prop.xml";
-		}
-		return result;
+	public File getOutputFile(File file) {
+		return ActionCommand.replaceFileExtension(file, file.getName().endsWith(".soundProp") ? ".soundProp.xml" : ".prop.xml");
 	}
 
 	@Override
@@ -102,6 +99,21 @@ public class PropToXml implements ConvertAction {
 			main.readProp(in);
 			return main;
 		}
+	}
+	
+	@Override
+	public JPanel createOptionsPanel() {
+		JPanel panel = new JPanel(new GridLayout(2, 1));
+		
+		cbDebugMode = new JCheckBox("Debug mode");
+		cbDebugMode.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel.add(cbDebugMode);
+		
+		cbConvertEditorPackages = new JCheckBox("Convert editorPackages~ files");
+		cbConvertEditorPackages.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel.add(cbConvertEditorPackages);
+		
+		return panel;
 	}
 	
 	public static boolean processCommand(String[] args) {

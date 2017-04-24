@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -23,11 +24,16 @@ import sporemodder.userinterface.ErrorManager;
 import sporemodder.userinterface.dialogs.UIErrorsDialog;
 import sporemodder.utilities.Hasher;
 import sporemodder.utilities.Project;
+import sporemodder.utilities.Project.EditorsPackages;
 import sporemodder.utilities.names.SimpleNameRegistry;
 
 public class DBPFPackingTask extends SwingWorker<Void, Void> {
 	
 	private static final int INDEX_PROGRESS = 20;
+	private static final int BUFFER_SIZE = 8192;
+	
+	private static final String EDITORSPACKAGES_BP2 = "/sporemodder/files/resources/BoosterPack2.prop";
+	private static final String EDITORSPACKAGES_EP1 = "/sporemodder/files/resources/ExpansionPack1.prop";
 	
 	private Window parent;
 	private List<ConvertAction> converters;
@@ -36,6 +42,7 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 	private HashMap<File, Exception> failedFiles;
 	private DBPFMain dbpf;
 	private boolean success = false;
+	private EditorsPackages embedEditorsPackages;
 	
 	public DBPFPackingTask(DBPFMain dbpf, Project project, List<ConvertAction> converters, Window parent) {
 		super();
@@ -44,6 +51,7 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 		this.compressLimit = project.getCompressingLimit();
 		this.inputPath = project.getProjectPath().getAbsolutePath();
 		this.dbpf = dbpf;
+		this.embedEditorsPackages = project.getEmbeddedEditorPackages();
 	}
 	
 	public DBPFPackingTask(DBPFMain dbpf, String inputPath, int compressLimit, List<ConvertAction> converters, Window parent) {
@@ -69,9 +77,9 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 		if (autoLocale != null) {
 			int nameID = Hasher.getFileHash("auto_" + folder + "_" + name);
 			DBPFItem item = new DBPFItem();
-			item.group = Hasher.getFileHash("locale~");
-			item.name = nameID;
-			item.type = Hasher.getTypeHash("locale");
+			item.key.setGroupID(Hasher.getFileHash("locale~"));
+			item.key.setInstanceID(nameID);
+			item.key.setTypeID(Hasher.getTypeHash("locale"));
 			item.chunkOffset = dbpf.source.getFilePointer();
 			dbpf.source.write(autoLocale.getBytes("US-ASCII"));
 			item.memSize = dbpf.source.getFilePointer() - item.chunkOffset;
@@ -85,6 +93,8 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 	@Override
 	protected Void doInBackground() throws Exception {
 		try {
+			
+			boolean alreadyHasEditorsPackages = false;
 			
 			int originalBasePos = dbpf.source.getBaseOffset();
 			dbpf.source.setBaseOffset(originalBasePos + dbpf.basePos);
@@ -142,8 +152,17 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 					}
 					
 					int dotIndex = name.indexOf(".");
-					String fileName = name.substring(0, dotIndex);
-					String extension = name.substring(dotIndex + 1);
+					String fileName;
+					String extension;
+					
+					if (dotIndex != -1) {
+						fileName = name.substring(0, dotIndex);
+						extension = name.substring(dotIndex + 1);
+					}
+					else {
+						fileName = name;
+						extension = "";
+					}
 					
 					for (ConvertAction converter : converters) {
 						if (converter.isValid(file)) {
@@ -152,9 +171,9 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 							
 							
 							item = new DBPFItem();
-							item.group = folderHash;
-							item.name = nameHash;
-							item.type = typeHash;
+							item.key.setGroupID(folderHash);
+							item.key.setInstanceID(nameHash);
+							item.key.setTypeID(typeHash);
 							item.chunkOffset = dbpf.source.getFilePointer();
 							
 							//TODO Known bug: these files won't be compressed
@@ -209,9 +228,9 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 						int nameHash = Hasher.getFileHash(fileName);
 						int typeHash = Hasher.getTypeHash(extension);
 						
-						item.group = folderHash;
-						item.name = nameHash;
-						item.type = typeHash;
+						item.key.setGroupID(folderHash);
+						item.key.setInstanceID(nameHash);
+						item.key.setTypeID(typeHash);
 						item.chunkOffset = dbpf.source.getFilePointer();
 						
 						input = Files.readAllBytes(file.toPath());
@@ -231,6 +250,10 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 							item.memSize = dbpf.source.getFilePointer() - item.chunkOffset;
 							item.compressedSize = item.memSize;
 						}
+					}
+					
+					if (!alreadyHasEditorsPackages && item.key.getGroupID() == 0x40404000) {
+						alreadyHasEditorsPackages = true;
 					}
 					
 					dbpf.index.items.add(item);
@@ -262,9 +285,9 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 				
 				if (array != null) {
 					DBPFItem item = new DBPFItem();
-					item.group = Hasher.getFileHash("sporemaster");
-					item.name = Hasher.getFileHash("names");
-					item.type = Hasher.getTypeHash("txt");
+					item.key.setGroupID(Hasher.getFileHash("sporemaster"));
+					item.key.setInstanceID(Hasher.getFileHash("names"));
+					item.key.setTypeID(Hasher.getTypeHash("txt"));
 					item.chunkOffset = dbpf.source.getFilePointer();
 					dbpf.source.write(array);
 					item.memSize = dbpf.source.getFilePointer() - item.chunkOffset;
@@ -272,6 +295,40 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 					
 					dbpf.index.items.add(item);
 				}
+			}
+			
+			// embed editorsPackages
+			if (embedEditorsPackages != EditorsPackages.NONE && !alreadyHasEditorsPackages) {
+				
+				DBPFItem item = new DBPFItem();
+				item.key.setGroupID(0x40404000);
+				item.key.setTypeID(0x00B1B104);
+				item.chunkOffset = dbpf.source.getFilePointer();
+				
+				String path = null;
+				
+				if (embedEditorsPackages == EditorsPackages.BOT_PARTS) {
+					item.key.setInstanceID(Hasher.getFileHash("BoosterPack2"));
+					path = EDITORSPACKAGES_BP2;
+				}
+				else if (embedEditorsPackages == EditorsPackages.PATCH51) {
+					item.key.setInstanceID(Hasher.getFileHash("ExpansionPack1"));
+					path = EDITORSPACKAGES_EP1;
+				}
+				
+				try (InputStream is = DBPFPackingTask.class.getResourceAsStream(path)) {
+					byte[] buffer = new byte[BUFFER_SIZE];
+					int n;
+					
+					while ((n = is.read(buffer)) > 0) {
+						dbpf.source.write(buffer, 0, n);
+					}
+				}
+				
+				item.memSize = dbpf.source.getFilePointer() - item.chunkOffset;
+				item.compressedSize = item.memSize;
+				
+				dbpf.index.items.add(item);
 			}
 			
 			

@@ -18,7 +18,7 @@ import sporemodder.userinterface.dialogs.UIDialogPack;
 import sporemodder.userinterface.dialogs.UIDialogUnpack;
 import sporemodder.userinterface.dialogs.UIOpenProject;
 import sporemodder.userinterface.dialogs.UIProgramSettings;
-import sporemodder.userinterface.dialogs.UIProjectSettings;
+import sporemodder.userinterface.settings.project.UIProjectSettings;
 import sporemodder.utilities.Project;
 
 public class UIFileMenu extends JMenu {
@@ -42,7 +42,7 @@ public class UIFileMenu extends JMenu {
 		mntmNewProject.setMnemonic(KeyEvent.VK_N);
 		mntmNewProject.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				new UIProjectSettings(new Project(MainApp.getNewProjectName()), UIProjectSettings.Mode.NEW);
+				new UIProjectSettings(new Project(MainApp.getNewProjectName()), UIProjectSettings.SettingsMode.NEW);
 			}
 		});
 		add(mntmNewProject);
@@ -113,7 +113,7 @@ public class UIFileMenu extends JMenu {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (MainApp.getCurrentProject() != null) new UIProjectSettings(MainApp.getCurrentProject(), UIProjectSettings.Mode.NONE);
+				if (MainApp.getCurrentProject() != null) new UIProjectSettings(MainApp.getCurrentProject(), UIProjectSettings.SettingsMode.NONE);
 			}
 			
 		});

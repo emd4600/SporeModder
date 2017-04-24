@@ -8,27 +8,33 @@ import java.util.List;
 import sporemodder.MainApp;
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
-import sporemodder.files.formats.FileStructure;
 import sporemodder.files.formats.argscript.ArgScriptBlock;
-import sporemodder.files.formats.argscript.ArgScriptCommand;
 import sporemodder.files.formats.argscript.ArgScriptException;
 import sporemodder.files.formats.argscript.ArgScriptOptionable;
+import sporemodder.files.formats.spui.SPUIObject.SPUIDefaultObject;
 import sporemodder.utilities.Hasher;
 import sporemodder.utilities.names.Condition;
 import sporemodder.utilities.names.NameRegistry;
 
-public class SPUIBlock extends FileStructure {
+public class SPUIBlock extends SPUIDefaultObject implements SPUISectionContainer {
 	private static final int ROOT_FLAG = 0x8000;
 	
-	protected int blockIndex = -1; // we need this when writing to the file, since we don't have names for blocks
-	private SPUIMain parent;
 	private SPUIStructResource resource;
-	private int resourceIndex = -1;
 	private boolean isRoot; // sectionCount & 0x8000 ?
 	private final List<SPUISection> sections = new ArrayList<SPUISection>();
 	
 	public SPUIBlock(SPUIMain parent) {
 		this.parent = parent;
+	}
+	
+	@Override
+	public String getTypeString() {
+		return resource.getHashString();
+	}
+	
+	@Override
+	public int getObjectType() {
+		return resource.getHash();
 	}
 	
 	public void read(InputStreamAccessor in, int resourceIndex) throws IOException {
@@ -46,7 +52,7 @@ public class SPUIBlock extends FileStructure {
 	
 	public void write(OutputStreamAccessor out) throws IOException {
 		out.writeLEShort(0x5FF5); // magic
-		out.writeLEShort(resourceIndex);
+		out.writeLEShort(getBlockIndex());
 		out.writeLEShort(sections.size() | (isRoot ? ROOT_FLAG : 0));
 		for (SPUISection section : sections) {
 			section.write(out);
@@ -54,7 +60,7 @@ public class SPUIBlock extends FileStructure {
 	}
 	
 	public void writeTxt(BufferedWriter out) throws IOException {
-		out.write("block " + Integer.toString(blockIndex) + (isRoot ? " unk=true " : " ") + resource.getString());
+		out.write("block " + getBlockIndex() + (isRoot ? " unk=true " : " ") + resource.getString());
 		out.newLine();
 		// We set this to allow conditions in name registry
 		Condition.setObject(((SPUIStructResource)resource).hash);
@@ -127,7 +133,7 @@ public class SPUIBlock extends FileStructure {
 		
 		resource = new SPUIStructResource();
 		resource.parse(args.get(count - 1));
-		resourceIndex = parent.getResources().getNextStructIndex();
+//		resourceIndex = parent.getResources().getNextStructIndex();
 		parent.getResources().add(resource);
 		
 		Condition.setObject(resource.hash);
@@ -140,7 +146,7 @@ public class SPUIBlock extends FileStructure {
 	}
 	
 	public ArgScriptBlock toBlock() {
-		ArgScriptBlock block = new ArgScriptBlock("block", Integer.toString(blockIndex));
+		ArgScriptBlock block = new ArgScriptBlock("block", Integer.toString(getBlockIndex()));
 		if (isRoot) {
 			block.addArgument("root");
 		}
@@ -169,18 +175,19 @@ public class SPUIBlock extends FileStructure {
 	}
 
 	public void setResource(SPUIStructResource resource) {
-		if (this.resource == null) {
-			// we must add a new resource
-			if (parent == null) {
-				throw new UnsupportedOperationException("Need a parent in order to update resource in SPUIBlock.");
-			}
-			resourceIndex = parent.getResources().getNextStructIndex();
-			parent.getResources().add(resource);
-			this.resource = resource;
-		} else {
-			// just edit the existing one
-			this.resource.setHash(resource.getHash());
-		}
+		this.resource = resource;
+//		if (this.resource == null) {
+//			// we must add a new resource
+//			if (parent == null) {
+//				throw new UnsupportedOperationException("Need a parent in order to update resource in SPUIBlock.");
+//			}
+////			resourceIndex = parent.getResources().getNextStructIndex();
+//			parent.getResources().add(resource);
+//			this.resource = resource;
+//		} else {
+//			// just edit the existing one
+//			this.resource.setHash(resource.getHash());
+//		}
 	}
 
 	public boolean isRoot() {
@@ -191,14 +198,23 @@ public class SPUIBlock extends FileStructure {
 		this.isRoot = isRoot;
 	}
 
+	@Override
 	public int getBlockIndex() {
-		return blockIndex;
+		if (parent == null || parent.getResources() == null || resource == null) {
+			return -1;
+		}
+		// this might return the same index for different objects??
+		//return parent.getResources().indexOf(resource);
+		
+		return parent.getResources().getValidResourcesCount() + parent.getBlocks().indexOf(this);
 	}
 
+	@Override
 	public List<SPUISection> getSections() {
 		return sections;
 	}
 	
+	@Override
 	public SPUISection getSection(int channel) {
 		for (SPUISection section : sections) {
 			if (section.channel == channel) {
@@ -208,6 +224,7 @@ public class SPUIBlock extends FileStructure {
 		return null;
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends SPUISection> T getSection(int channel, Class<T> clazz) {
 		SPUISection sec = getSection(channel);

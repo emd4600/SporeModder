@@ -121,6 +121,17 @@ public class SPUIVectorSections {
 		
 		public float[][] data;
 		
+		public static float[][] getValues(SectionVec2 section, float[][] defaultValues, int count) throws InvalidBlockException {
+			if (section != null) {
+				if (section.data.length != count) {
+					throw new InvalidBlockException("Wrong section length, expected " + count + " values.", section);
+				}
+				return section.data;
+			} else {
+				return defaultValues;
+			}
+		}
+		
 		@Override
 		public String getString() {
 			StringBuilder b = new StringBuilder();
@@ -213,6 +224,17 @@ public class SPUIVectorSections {
 		public static final String TEXT_CODE = "dimension";
 		
 		public int[][] data;
+		
+		public static int[][] getValues(SectionDimension section, int[][] defaultValues, int count) throws InvalidBlockException {
+			if (section != null) {
+				if (count != -1 && section.data.length != count) {
+					throw new InvalidBlockException("Wrong section length, expected " + count + " values.", section);
+				}
+				return section.data;
+			} else {
+				return defaultValues;
+			}
+		}
 		
 		@Override
 		public String getString() {

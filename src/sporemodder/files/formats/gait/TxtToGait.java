@@ -6,11 +6,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 
+import javax.swing.JPanel;
+
+import sporemodder.files.ActionCommand;
 import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.files.formats.FileFormatStructure;
+import sporemodder.files.formats.ResourceKey;
 import sporemodder.files.formats.argscript.ArgScript;
 
 public class TxtToGait implements ConvertAction {
@@ -53,8 +57,8 @@ public class TxtToGait implements ConvertAction {
 	}
 
 	@Override
-	public boolean isValid(int extension) {
-		return extension == 0x25DF0112;
+	public boolean isValid(ResourceKey key) {
+		return key.getTypeID() == 0x25DF0112;
 	}
 
 	@Override
@@ -71,16 +75,10 @@ public class TxtToGait implements ConvertAction {
 	public boolean isValid(File file) {
 		return file.isFile() && file.getName().endsWith(".gait.gait_t");
 	}
-
+	
 	@Override
-	public String getOutputName(String name) {
-		String result = name;
-		int index = name.indexOf(".");
-		if (index != -1) {
-			result = name.substring(0, index);
-		}
-		result += ".gait";
-		return result;
+	public File getOutputFile(File file) {
+		return ActionCommand.replaceFileExtension(file, ".gait");
 	}
 
 	@Override
@@ -95,5 +93,10 @@ public class TxtToGait implements ConvertAction {
 			main.parse(new ArgScript(input));
 			return main;
 		}
+	}
+	
+	@Override
+	public JPanel createOptionsPanel() {
+		return null;
 	}
 }

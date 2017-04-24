@@ -16,6 +16,7 @@ import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
+import sporemodder.extras.spuieditor.SPUIViewer;
 import sporemodder.files.formats.dbpf.DBPFPacker;
 import sporemodder.files.formats.dbpf.DBPFUnpacker;
 import sporemodder.files.formats.effects.EffectPacker;
@@ -118,7 +119,7 @@ public class MainApp {
 		}
 	}
 	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 0, 1, VersionInfo.BETA);
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 1, 0, VersionInfo.BETA);
 	
 	private static final String PROPERTY_SAVE_MODE = "saveMode";
 	private static final String PROPERTY_SEARCHABLE_EXT = "searchableExtensions";
@@ -131,6 +132,7 @@ public class MainApp {
 	private static final String PROPERTY_COLOR_SOURCE = "colorSource";
 	private static final String PROPERTY_COLOR_SOURCEMOD = "colorSourceMod";
 	private static final String PROPERTY_COLOR_MOD = "colorMod";
+	private static final String PROPERTY_SPUIEDITOR_ANIMATED = "spuiEditorRenderAnimated";
 	private static final String SETTINGS_FILE = "settings.properties";
 	
 	private static final int MAX_PRESETS = 10;
@@ -150,8 +152,8 @@ public class MainApp {
 	
 	private static UIMainApp userInterface;
 	
-	private static List<Project> projects;
-	private static HashMap<String, Project> projectsMap = new HashMap<String, Project>();
+	private static final List<Project> projects = new ArrayList<Project>();
+	private static final HashMap<String, Project> projectsMap = new HashMap<String, Project>();
 	private static Project currentProject;
 	private static File programPath;
 	private static File projectsPath;
@@ -222,12 +224,11 @@ public class MainApp {
 	
 	public static void setCurrentProject(Project project) {
 		processAutoSave();
-		//TODO Update last projects
 		currentProject = project;
 		
-		//TODO Update Recent projects too
 		project.setLastTimeUsed();
 		project.writeProperties();
+		project.loadNames();
 		
 		setActiveFile(null);
 		
@@ -299,7 +300,11 @@ public class MainApp {
 	}
 	
 	public static File getActiveFile() {
-		return currentProject.getFile(activeFile);
+		if (activeFile != null) {
+			return currentProject.getFile(activeFile);
+		} else {
+			return null;
+		}
 	}
 	
 	public static void setActiveFile(String file) {
@@ -331,9 +336,11 @@ public class MainApp {
 		} else {
 			activeFileView = null;
 		}
-		userInterface.getDisplayPanel().setCurrentFileView(activeFileView);
-		userInterface.update();
-//		userInterface.getProjectMenu().update(activeFileView);
+		
+		if (userInterface != null) {
+			userInterface.getDisplayPanel().setCurrentFileView(activeFileView);
+			userInterface.update();
+		}
 	}
 	
 	public static void reloadActiveFileView() {
@@ -396,28 +403,10 @@ public class MainApp {
 	
 	
 	public static Project getProjectByName(String name) {
-//		for (Project project : projects) {
-//			if (project.getProjectName().equals(name)) {
-//				return project;
-//			}
-//		}
-//		return null;
-		
 		return projectsMap.get(name);
 	}
 	
 	public static Project setProject(Project project, String name) {
-//		int size = projects.size();
-//		for (int i = 0; i < size; i++)
-//		{
-//			Project p = projects.get(i);
-//			if (p.getProjectName().equals(name)) {
-//				projects.set(i, project);
-//				return p;
-//			}
-//		}
-//		return null;
-		
 		return projectsMap.put(name, project);
 	}
 	
@@ -510,7 +499,6 @@ public class MainApp {
 		
 		for (int i = 0; i < splits.length;) 
 		{
-			System.out.println(splits[i]);
 			if (splits[i].length() == 0) {
 				i++;
 				continue;
@@ -537,8 +525,6 @@ public class MainApp {
 				strings.add(splits[i++]);
 			}
 		}
-		
-		System.out.println(strings.toString());
 		
 		return strings;
 	}
@@ -690,6 +676,8 @@ public class MainApp {
 		settings.setProperty(PROPERTY_COLOR_SOURCEMOD, ProjectTreeCellRenderer.generateColorString(ProjectTreeCellRenderer.COLOR_SOURCE_MOD));
 		settings.setProperty(PROPERTY_COLOR_MOD, ProjectTreeCellRenderer.generateColorString(ProjectTreeCellRenderer.COLOR_MOD));
 		
+		settings.setProperty(PROPERTY_SPUIEDITOR_ANIMATED, Boolean.toString(SPUIViewer.RENDER_ANIMATED_ICONS));
+		
 		try {
 			try (FileOutputStream out = new FileOutputStream(SETTINGS_FILE)) {
 				settings.store(out, null);
@@ -766,6 +754,7 @@ public class MainApp {
 		String colorMod = settings.getProperty(PROPERTY_COLOR_MOD);
 		if (colorMod != null) ProjectTreeCellRenderer.COLOR_MOD = ProjectTreeCellRenderer.hex2Rgb(colorMod);
 		
+		SPUIViewer.RENDER_ANIMATED_ICONS = Boolean.parseBoolean(settings.getProperty(PROPERTY_SPUIEDITOR_ANIMATED, Boolean.toString(SPUIViewer.RENDER_ANIMATED_ICONS)));
 	}
 	
 	private static Properties getDefaultSettings() {
@@ -782,6 +771,7 @@ public class MainApp {
 		p.setProperty(PROPERTY_COLOR_SOURCE, ProjectTreeCellRenderer.generateColorString(ProjectTreeCellRenderer.COLOR_SOURCE));
 		p.setProperty(PROPERTY_COLOR_SOURCEMOD, ProjectTreeCellRenderer.generateColorString(ProjectTreeCellRenderer.COLOR_SOURCE_MOD));
 		p.setProperty(PROPERTY_COLOR_MOD, ProjectTreeCellRenderer.generateColorString(ProjectTreeCellRenderer.COLOR_MOD));
+		p.setProperty(PROPERTY_SPUIEDITOR_ANIMATED, Boolean.toString(SPUIViewer.RENDER_ANIMATED_ICONS));
 		
 		return p;
 	}
@@ -858,12 +848,36 @@ public class MainApp {
 		return false;
 	}
 	
+	public static Project loadProject(String name)
+	{
+		try {
+			Project project = Project.loadProject(new File(getProjectsPath(), name));
+			
+			projectsMap.put(name, project);
+			projects.add(project);
+
+//			project.updateSources();
+			
+			project.loadSourceProjects();
+			
+			if (userInterface != null) {
+				userInterface.updateProjects();
+			}
+			
+			return project;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public static void loadProjects()
 	{
 		try {
-			projects = Project.loadProjects(getProjectsPath());
-			
+			projects.clear();
 			projectsMap.clear();
+			
+			Project.loadProjects(projects, getProjectsPath());
 			
 			for (Project p : projects) {
 				projectsMap.put(p.getProjectName(), p);

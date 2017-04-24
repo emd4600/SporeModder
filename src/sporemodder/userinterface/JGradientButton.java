@@ -15,16 +15,20 @@ public class JGradientButton extends JButton {
 	private static final long serialVersionUID = 5987321611378710248L;
 	
 	private Color color;
+	
     public JGradientButton() {
-        super("Gradient Button");
-        setContentAreaFilled(false);
-//        setFocusPainted(false); // used for demonstration
+        this("...", null);
     }
     
     public JGradientButton(String text) {
+        this(text, null);
+    }
+    
+    public JGradientButton(String text, Color color) {
         super(text);
+        this.color = color;
         setContentAreaFilled(false);
-//        setFocusPainted(false); // used for demonstration
+        // setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.black));
     }
 
     @Override
@@ -41,6 +45,8 @@ public class JGradientButton extends JButton {
                 new Point(0, getHeight()), 
                 finalColor.darker()));
         g2.fillRect(0, 0, getWidth(), getHeight());
+        g2.setColor(Color.black);
+        g2.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
         g2.dispose();
 
         super.paintComponent(g);

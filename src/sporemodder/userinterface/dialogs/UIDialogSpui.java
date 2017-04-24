@@ -1,12 +1,6 @@
 package sporemodder.userinterface.dialogs;
 
-import java.awt.Component;
-import java.awt.FlowLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 

@@ -70,7 +70,6 @@ WinXHTML	0x04D04553
 // not sure about these ones
 Window	0x4EC1B8D8
 Image	0x01BE6B15
-AnimatedIconDrawable	0x0106F14B
 #endgroup
 
 #group SPUI_CHANNEL
@@ -84,13 +83,6 @@ AnimatedIconDrawable	0x0106F14B
 resource	0x01BE0001
 uvCoords	0x01BE0002
 dimensions	0x01BE0003
-#end
-
-// AnimatedIconDrawable
-#if SPUI_BLOCK_STRUCT == 0x0106F14B
-isAnimated	0xEEC1D005
-tileWidth	0xEEC1D006
-tileHeight	0xEEC1D007
 #end
 
 // WinText

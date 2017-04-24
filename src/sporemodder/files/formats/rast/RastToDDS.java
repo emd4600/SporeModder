@@ -4,12 +4,15 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.swing.JPanel;
+
 import sporemodder.files.ActionCommand;
 import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.files.formats.FileFormatStructure;
+import sporemodder.files.formats.ResourceKey;
 import sporemodder.files.formats.dds.DDSTexture;
 import sporemodder.userinterface.dialogs.UIErrorsDialog;
 import sporemodder.utilities.InputOutputPaths.InputOutputPair;
@@ -49,8 +52,8 @@ public class RastToDDS implements ConvertAction {
 	}
 
 	@Override
-	public boolean isValid(int extension) {
-		return extension == 0x2F4E681C;
+	public boolean isValid(ResourceKey key) {
+		return key.getTypeID() == 0x2F4E681C;
 	}
 
 	@Override
@@ -69,14 +72,8 @@ public class RastToDDS implements ConvertAction {
 	}
 
 	@Override
-	public String getOutputName(String name) {
-		String result = name;
-		int index = name.indexOf(".");
-		if (index != -1) {
-			result = name.substring(0, index);
-		}
-		result += ".raster.dds";
-		return result;
+	public File getOutputFile(File file) {
+		return ActionCommand.replaceFileExtension(file, ".raster.dds");
 	}
 
 	@Override
@@ -90,6 +87,11 @@ public class RastToDDS implements ConvertAction {
 			RASTMain main = new RASTMain();
 			return main.read(in);
 		}
+	}
+	
+	@Override
+	public JPanel createOptionsPanel() {
+		return null;
 	}
 	
 	public static boolean processCommand(String[] args) {

@@ -900,6 +900,7 @@ public class ParticleEffect extends EffectComponent {
 			dir[2] = emitDirectionBBMax[2] - vary[2];
 			ArgScriptOption o = new ArgScriptOption("dir", ArgScript.createFloatList(dir));
 			if (vary[0] != 0 || vary[1] != 0 || vary[2] != 0) o.addArgument(ArgScript.createFloatList(vary));
+			block.putOption(o);
 		}
 		
 		if ((flags & EMIT_BASE) == EMIT_BASE) {

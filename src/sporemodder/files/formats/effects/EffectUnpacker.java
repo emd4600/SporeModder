@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import sporemodder.MainApp;
 import sporemodder.files.ActionCommand;
@@ -14,6 +15,7 @@ import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.files.formats.FileFormatStructure;
+import sporemodder.files.formats.ResourceKey;
 import sporemodder.userinterface.dialogs.UIErrorsDialog;
 
 public class EffectUnpacker implements ConvertAction {
@@ -47,8 +49,8 @@ public class EffectUnpacker implements ConvertAction {
 	}
 
 	@Override
-	public boolean isValid(int extension) {
-		return extension == 0xEA5118B0;
+	public boolean isValid(ResourceKey key) {
+		return key.getTypeID() == 0xEA5118B0;
 	}
 
 	@Override
@@ -67,14 +69,8 @@ public class EffectUnpacker implements ConvertAction {
 	}
 
 	@Override
-	public String getOutputName(String name) {
-		String result = name;
-		int index = name.indexOf(".");
-		if (index != -1) {
-			result = name.substring(0, index);
-		}
-		result += ".effdir.unpacked";
-		return result;
+	public File getOutputFile(File file) {
+		return ActionCommand.replaceFileExtension(file, ".effdir.unpacked");
 	}
 
 	@Override
@@ -89,6 +85,11 @@ public class EffectUnpacker implements ConvertAction {
 			effdir.read(in);
 			return effdir;
 		}
+	}
+	
+	@Override
+	public JPanel createOptionsPanel() {
+		return null;
 	}
 	
 	public static boolean processCommand(String[] args) {

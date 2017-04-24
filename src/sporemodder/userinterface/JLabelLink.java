@@ -19,6 +19,7 @@ public class JLabelLink extends JLabel {
 	private static final String HTML = "<html>";
 	private static final String HTML_END = "</html>";
 	
+	private boolean isActionActive;
 	private Action linkAction;
 	private MouseListener mouseListener;
 	
@@ -26,6 +27,7 @@ public class JLabelLink extends JLabel {
 	    super(text);
 	    linkAction = action;
 	    mouseListener = new LinkMouseListener();
+	    addMouseListener(mouseListener);
 	    if (action != null) {
 	        makeLinkable();
 	    }
@@ -34,32 +36,36 @@ public class JLabelLink extends JLabel {
 	private void makeLinkable() {
 		super.setText(htmlIfy(linkIfy(getText())));
 	    setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-	    addMouseListener(mouseListener);
 	}
 	
 	private void makeLinkable(String text) {
 		super.setText(htmlIfy(linkIfy(text)));
 	    setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-	    addMouseListener(mouseListener);
 	}
 	
 	private void removeLinkable(String text) {
+		if (text.startsWith(HTML + A_HREF)) {
+			text = text.substring((HTML + A_HREF).length(), text.lastIndexOf(HREF_END + HTML_END));
+		}
 	    super.setText(text);
 	    setCursor(null);
-	    removeMouseListener(mouseListener);
 	}
 	
 	private void removeLinkable() {
-		super.setText(getText());
+		String text = getText();
+		if (text.startsWith(HTML + A_HREF)) {
+			text = text.substring((HTML + A_HREF).length(), text.lastIndexOf(HREF_END + HTML_END));
+		}
+		
+		super.setText(text);
 	    setCursor(null);
-	    removeMouseListener(mouseListener);
 	}
 	
 	private class LinkMouseListener extends MouseAdapter {
 	
 	    @Override
 	    public void mouseClicked(java.awt.event.MouseEvent evt) {
-	    	if (linkAction != null) {
+	    	if (linkAction != null && isActionActive) {
 	    		linkAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
 	    	}
 	    }
@@ -82,7 +88,7 @@ public class JLabelLink extends JLabel {
 	
 	@Override
 	public void setText(String text) {
-		if (linkAction != null) {
+		if (linkAction != null && isActionActive) {
 			makeLinkable(text);
 		}
 		else {
@@ -92,8 +98,24 @@ public class JLabelLink extends JLabel {
 	
 	public void setLinkAction(Action action) {
 		this.linkAction = action;
-		if (linkAction == null) {
+		if (linkAction != null && isActionActive) {
+			makeLinkable();
+		} else {
 			removeLinkable();
 		}
 	}
+
+	public boolean isActionActive() {
+		return isActionActive;
+	}
+
+	public void setActionActive(boolean isActionActive) {
+		this.isActionActive = isActionActive;
+		if (!isActionActive) {
+			removeLinkable();
+		} else {
+			makeLinkable();
+		}
+	}
+	
 }

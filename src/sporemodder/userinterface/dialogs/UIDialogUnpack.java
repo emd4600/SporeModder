@@ -1,7 +1,6 @@
 package sporemodder.userinterface.dialogs;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -29,20 +28,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 
 import sporemodder.MainApp;
-import sporemodder.files.ByteArrayStreamAccessor;
-import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
-import sporemodder.files.formats.FileStructureError;
-import sporemodder.files.formats.dbpf.DBPFIndex;
-import sporemodder.files.formats.dbpf.DBPFItem;
-import sporemodder.files.formats.dbpf.DBPFMain;
 import sporemodder.files.formats.dbpf.DBPFUnpacker;
 import sporemodder.files.formats.dbpf.DBPFUnpackingTask;
 import sporemodder.files.formats.effects.EffectUnpacker;
@@ -52,9 +44,9 @@ import sporemodder.files.formats.rast.RastToDDS;
 import sporemodder.files.formats.renderWare4.Rw4ToDDS;
 import sporemodder.files.formats.spui.SpuiToTxt;
 import sporemodder.files.formats.tlsa.TlsaToTxt;
-import sporemodder.userinterface.dialogs.AdvancedFileChooser.FieldFileDrop;
 import sporemodder.userinterface.dialogs.AdvancedFileChooser.ChooserType;
-import sporemodder.utilities.Hasher;
+import sporemodder.userinterface.dialogs.AdvancedFileChooser.FieldFileDrop;
+import sporemodder.userinterface.settings.project.UIProjectSettings;
 import sporemodder.utilities.Project;
 
 public class UIDialogUnpack extends JDialog {
@@ -99,6 +91,16 @@ public class UIDialogUnpack extends JDialog {
 	
 	private Project project = new Project();
 	
+	private static final ConvertAction[] availableConverters = new ConvertAction[] {
+			new PropToXml(),
+			new Rw4ToDDS(),
+			new TlsaToTxt(),
+			new PctpToTxt(),
+			new SpuiToTxt(),
+			new RastToDDS(),
+			new EffectUnpacker()
+	};
+	
 	public UIDialogUnpack() {
 		super(MainApp.getUserInterface());
 		
@@ -139,7 +141,7 @@ public class UIDialogUnpack extends JDialog {
 		JPanel projectPanel = new JPanel();
 		projectPanel.setLayout(new BorderLayout());
 		projectPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		projectPanel.setBorder(BorderFactory.createTitledBorder(""));
+		projectPanel.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
 		
 		lblProject = new JLabel("Project: ");
 		comboBoxProject = new JComboBox<String>(getProjectNames());
@@ -242,14 +244,13 @@ public class UIDialogUnpack extends JDialog {
 		panelPROP.setVisible(cbConvertPROP.isSelected());
 		cbConvertPROP.addItemListener(new ILConverterCheckBox(panelPROP));
 		
-//		panelSPUI = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//		panelSPUI.setBorder(BorderFactory.createTitledBorder("Advanced options - SPUI"));
-//		panelSPUI.setAlignmentX(Component.LEFT_ALIGNMENT);
-//		cbSPUIFlipBlocks = new JCheckBox("Reverse block order");
-//		cbSPUIFlipBlocks.setAlignmentX(Component.LEFT_ALIGNMENT);
-//		panelSPUI.add(cbSPUIFlipBlocks);
-//		panelSPUI.setVisible(cbConvertSPUI.isSelected());
-//		cbConvertSPUI.addItemListener(new ILConverterCheckBox(panelSPUI));
+		for (int i = 0; i < availableConverters.length; i++) {
+			JPanel panel = availableConverters[i].createOptionsPanel();
+			if (panel != null) {
+				
+			}
+		}
+
 		
 		////////////////////////////////////
 		
@@ -259,8 +260,13 @@ public class UIDialogUnpack extends JDialog {
 		mainPanel.add(Box.createVerticalStrut(10));
 		mainPanel.add(optionsPanel);
 		
-		mainPanel.add(panelPROP);
-//		mainPanel.add(panelSPUI);
+		addOptionsPanel(mainPanel, cbConvertPROP, getConverterByClass(PropToXml.class), "Advanced Options - PROP");
+		addOptionsPanel(mainPanel, cbConvertRW4, getConverterByClass(Rw4ToDDS.class), "Advanced Options - RW4");
+		addOptionsPanel(mainPanel, cbConvertTLSA, getConverterByClass(TlsaToTxt.class), "Advanced Options - TLSA");
+		addOptionsPanel(mainPanel, cbConvertPCTP, getConverterByClass(PctpToTxt.class), "Advanced Options - PCTP");
+		addOptionsPanel(mainPanel, cbConvertSPUI, getConverterByClass(SpuiToTxt.class), "Advanced Options - SPUI");
+		addOptionsPanel(mainPanel, cbConvertRAST, getConverterByClass(RastToDDS.class), "Advanced Options - RAST");
+		addOptionsPanel(mainPanel, cbConvertEffects, getConverterByClass(EffectUnpacker.class), "Advanced Options - Effects");
 		
 		///////// BUTTONS PANEL /////////
 		
@@ -285,6 +291,20 @@ public class UIDialogUnpack extends JDialog {
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
+	}
+	
+	private void addOptionsPanel(JPanel parentPanel, JCheckBox checkBox, ConvertAction action, String title) {
+		JPanel panel = action.createOptionsPanel();
+		
+		if (panel != null) {
+			panel.setBorder(BorderFactory.createTitledBorder(title));
+			panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+			panel.setVisible(checkBox.isSelected());
+			checkBox.addItemListener(new ILConverterCheckBox(panel));
+			
+			parentPanel.add(panel);
+		}
 	}
 	
 	private class DLTextFieldInput implements DocumentListener {
@@ -339,7 +359,7 @@ public class UIDialogUnpack extends JDialog {
 			Project tempProject = MainApp.getProjectByName(name);
 			if (tempProject != null) {
 				project = tempProject;
-				new UIProjectSettings(project, UIProjectSettings.Mode.NONE);
+				new UIProjectSettings(project, UIProjectSettings.SettingsMode.NONE);
 			}
 			else {
 				if (!MainApp.projectExists(project)) {
@@ -347,7 +367,7 @@ public class UIDialogUnpack extends JDialog {
 				} else {
 					project = new Project(name);
 				}
-				new UIProjectSettings(project, UIProjectSettings.Mode.UNPACK);
+				new UIProjectSettings(project, UIProjectSettings.SettingsMode.UNPACK);
 			}
 			
 			comboBoxProject.setSelectedItem(project.getProjectName());
@@ -385,14 +405,15 @@ public class UIDialogUnpack extends JDialog {
 				
 				List<ConvertAction> converters = new ArrayList<ConvertAction>();
 				
-				if (cbConvertPROP.isSelected()) converters.add(new PropToXml(cbPROPDebugMode));
-				if (cbConvertRW4.isSelected()) converters.add(new Rw4ToDDS());
-				if (cbConvertTLSA.isSelected()) converters.add(new TlsaToTxt());
-				if (cbConvertPCTP.isSelected()) converters.add(new PctpToTxt());
-				if (cbConvertSPUI.isSelected()) converters.add(new SpuiToTxt());
-				if (cbConvertRAST.isSelected()) converters.add(new RastToDDS());
-				if (cbConvertEffects.isSelected()) converters.add(new EffectUnpacker());
+				if (cbConvertPROP.isSelected()) converters.add(getConverterByClass(PropToXml.class));
+				if (cbConvertRW4.isSelected()) converters.add(getConverterByClass(Rw4ToDDS.class));
+				if (cbConvertTLSA.isSelected()) converters.add(getConverterByClass(TlsaToTxt.class));
+				if (cbConvertPCTP.isSelected()) converters.add(getConverterByClass(PctpToTxt.class));
+				if (cbConvertSPUI.isSelected()) converters.add(getConverterByClass(SpuiToTxt.class));
+				if (cbConvertRAST.isSelected()) converters.add(getConverterByClass(RastToDDS.class));
+				if (cbConvertEffects.isSelected()) converters.add(getConverterByClass(EffectUnpacker.class));
 				//TODO GAIT
+				
 				
 				new UnpackDialog(converters);
 				
@@ -404,6 +425,16 @@ public class UIDialogUnpack extends JDialog {
 			}
 		}
 		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T extends ConvertAction> T getConverterByClass(Class<T> clazz) {
+		for (ConvertAction converter : availableConverters) {
+			if (clazz.isInstance(converter)) {
+				return (T) converter;
+			}
+		}
+		return null;
 	}
 	
 	private class ALCancel implements ActionListener {

@@ -104,6 +104,7 @@ public class HashNames extends JPanel {
 	
 	private final HashMap<String, String> hashResults = new HashMap<String, String>();
 	private String hashResultReg = null;
+	private boolean isNamesReg;
 	
 	private final HashMap<String, Integer> nameResults = new HashMap<String, Integer>();
 	private String nameResultReg = null;
@@ -240,6 +241,7 @@ public class HashNames extends JPanel {
 			String name = null;
 			hashResultReg = null;
 			hashResults.clear();
+			isNamesReg = false;
 			
 			name = MainApp.getRegistry(NameRegistry.NAME_SPUI).getName(hash);
 			if (name != null) {
@@ -265,9 +267,18 @@ public class HashNames extends JPanel {
 				hashResultReg = NameRegistry.NAME_FILE;
 			}
 			
+			if (Hasher.UsedNames != null) {
+				name = Hasher.UsedNames.getName(hash);
+				if (name != null) {
+					hashResults.put("names.txt", name);
+					hashResultReg = "names.txt";
+					isNamesReg = true;
+				}
+			}
+			
 			if (hashResultReg != null) {
 				lblHashResult.setText(hashResults.get(hashResultReg));
-				lblHashInfo.setToolTipText("Found in reg_" + hashResultReg.toLowerCase());
+				lblHashInfo.setToolTipText(isNamesReg ? ("Found in " + hashResultReg) : ("Found in reg_" + hashResultReg.toLowerCase()));
 				lblHashInfo.setEnabled(true);
 			}
 			else {
@@ -378,7 +389,7 @@ public class HashNames extends JPanel {
 					public void actionPerformed(ActionEvent arg0) {
 						hashResultReg = reg;
 						lblHashResult.setText(hashResults.get(reg));
-						lblHashInfo.setToolTipText("Found in reg_" + reg.toLowerCase());
+						lblHashInfo.setToolTipText(nameResultReg == null ? "Real hash" : "Found in reg_" + nameResultReg.toLowerCase());
 					}
 				});
 				

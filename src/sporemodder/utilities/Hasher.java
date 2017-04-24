@@ -1,7 +1,5 @@
 package sporemodder.utilities;
 
-import java.io.IOException;
-
 import sporemodder.MainApp;
 import sporemodder.utilities.names.NameRegistry;
 import sporemodder.utilities.names.SimpleNameRegistry;
@@ -70,6 +68,10 @@ public class Hasher {
 	public static int decodeInt(String str) {
 		int result = 0;
 		
+		if (str == null || str.length() == 0) {
+			return 0;
+		}
+		
 		if (str.startsWith("0x")) {
 			result = Integer.parseUnsignedInt(str.substring(2), 16);
 		}
@@ -88,6 +90,30 @@ public class Hasher {
 		}
 		
 		return result;
+	}
+	
+	public static String validateIntString(String text, int offset, String str) {
+		if (str.length() == 0) {
+			return str;
+		}
+		
+		StringBuffer sb = new StringBuffer(text);
+		sb.insert(offset, str);
+		
+		String result = sb.toString();
+		
+		if (result.equals("0x") || result.equals("#")) {
+			// we need to be able to write this
+			return str;
+		}
+		
+		try {
+			decodeInt(sb.toString());
+			return str;
+		}
+		catch (NumberFormatException e) {
+			return "";
+		}
 	}
 	
 	public static long decodeUInt(String str) {
@@ -169,9 +195,18 @@ public class Hasher {
 	
 	
 	public static int getFileHash(String name) {
+		if (name == null) {
+			return -1;
+		}
 		if (name.startsWith("#")) {
+			if (name.length() == 1) {
+				return -1;
+			}
 			return Integer.parseUnsignedInt(name.substring(1), 16);
 		} else if (name.startsWith("0x")) {
+			if (name.length() == 2) {
+				return -1;
+			}
 			return Integer.parseUnsignedInt(name.substring(2), 16);
 		} else {
 			if (!name.endsWith("~")) {
@@ -219,6 +254,14 @@ public class Hasher {
 		}
 	}
 	
+	public static String getSPUIName(int hash) {
+		String str = MainApp.getRegistry(NameRegistry.NAME_SPUI).getName(hash);
+		if (str != null) {
+			return str;
+		} else {
+			return "#" + fillZeroInHexString(hash).toUpperCase();
+		}
+	}
 	
 	public static String getGlobalName(int hash) {
 		String str = MainApp.getRegistry(NameRegistry.NAME_FILE).getName(hash);
@@ -234,7 +277,7 @@ public class Hasher {
 		return str;
 	}
 	
-	public static int getGlobalHash(String name) throws IOException {
+	public static int getGlobalHash(String name) {
 		if (name.startsWith("#")) {
 			return (int) Integer.parseUnsignedInt(name.substring(1), 16);
 		} else if (name.startsWith("0x")) {
@@ -274,7 +317,7 @@ public class Hasher {
 	}
 	
 	
-	public static int getHash(String name, NameRegistry registry) throws IOException {
+	public static int getHash(String name, NameRegistry registry) {
 		if (name.startsWith("#")) {
 			return (int) Integer.parseUnsignedInt(name.substring(1), 16);
 		} else if (name.startsWith("0x")) {
@@ -288,80 +331,4 @@ public class Hasher {
 		}
 	}
 	
-//	/**
-//	  * It  checks if the property id has an equivalent string and returns the string.
-//	  *
-//	  * @param propID The property id int.
-//	  * @return The generated string (Hex hash or String hash)
-//	  */
-//	public static String getPropIDString (int hash, HashMap<Integer, String> registry) {
-//		try {
-////			Set<Entry<String, Integer>> values = registry.entrySet();
-////			for (Entry<String, Integer> entry : values) {
-////				if (entry.getValue().equals(hash)) {
-////					return entry.getKey();
-////				}
-////			}
-////			return "#" + Endiannes.fillZeroInHexString(Integer.toHexString(hash).toUpperCase());
-//			return registry.getOrDefault(hash, "#" + Endiannes.fillZeroInHexString(Integer.toHexString(hash).toUpperCase()));
-//		} catch (NullPointerException e){
-//			return "ERROR";
-//		}
-//	}
-//	public static String getPropertyIDString2 (int hash) {
-//		return "#" + Endiannes.fillZeroInHexString(Integer.toHexString(hash).toUpperCase());
-//	}
-//	/**
-//	  * It checks if the property id has an equivalent string and returns the string.
-//	  *
-//	  * @param propID The property id string.
-//	  * @return The generated int 
-//	  */
-//	public static int getPropertyIDInt (String str) {
-//		if (str.startsWith("#")) {
-//			return (int) Integer.parseUnsignedInt(str.substring(1), 16);
-//		} else if (str.startsWith("0x")) {
-//			return (int) Integer.parseUnsignedInt(str.substring(2), 16);
-//		} else {
-//			return stringToFNVHash(str);
-//		}
-//	}
-//	public static int getFileIDInt (String str) {
-//		if (str.startsWith("#")) {
-//			return (int) Integer.parseUnsignedInt(str.substring(1), 16);
-//		} else if (str.startsWith("0x")) {
-//			return (int) Integer.parseUnsignedInt(str.substring(2), 16);
-//		} else {
-//			return stringToFNVHash(str);
-//		}
-//	}
-//	/**
-//	  * It checks if the string number value starts with 0x (so if it is a hash) or not.
-//	  *
-//	  * @param InputString The property id string.
-//	  * @return Radix 10 if it's number or 16 if it's hash.
-//	  */
-//	public static int radixChecking0x (String inputString) {
-//		if (inputString.startsWith("#")) {
-//			return 16;
-//		} else {
-//			return 10;
-//		}
-//	}
-//	public static String getIDString (int propID) {
-//		String PropertyIDStr = "0x" + Endiannes.fillZeroInHexString(Integer.toHexString(propID).toUpperCase());
-//		return PropertyIDStr;
-//	}
-//	public static void main(String[] args) throws IOException {  
-//		NameRegistry_old.read();
-//		
-//		long time1 = System.nanoTime();
-//		String name1 = getFileName(0x3D43362A); //be_wood_03__diffuse
-//		System.out.println(name1 + " -- " + (System.nanoTime() - time1) / 1000f);
-//		
-//		
-//		long time3 = System.nanoTime();
-//		int hash1 = getFileHash("be_wood_03__diffuse"); //#3D43362A
-//		System.out.println(hash1 + "-- " + (System.nanoTime() - time3) / 1000f);
-//	} 
 }

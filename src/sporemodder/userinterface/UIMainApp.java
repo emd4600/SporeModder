@@ -4,21 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -26,18 +19,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 
 import sporemodder.MainApp;
-import sporemodder.extras.spuiviewer.SpuiViewer;
-import sporemodder.extras.spuiviewer.SpuiViewerDialog;
-import sporemodder.userinterface.dialogs.UIDialogEffects;
-import sporemodder.userinterface.dialogs.UIDialogGait;
-import sporemodder.userinterface.dialogs.UIDialogPctp;
-import sporemodder.userinterface.dialogs.UIDialogProp;
-import sporemodder.userinterface.dialogs.UIDialogRast;
-import sporemodder.userinterface.dialogs.UIDialogRw4;
-import sporemodder.userinterface.dialogs.UIDialogSpui;
-import sporemodder.userinterface.dialogs.UIDialogTlsa;
 import sporemodder.userinterface.fileview.FileView;
-import sporemodder.userinterface.fileview.TextFileView;
 
 public class UIMainApp extends JFrame {
 	
@@ -83,17 +65,7 @@ public class UIMainApp extends JFrame {
 	
 	private UIProjectMenu mnProject;
 	
-	private JMenu mnConvert;
-	private JMenuItem mntmProp;
-	private JMenuItem mntmRw4;
-	private JMenuItem mntmTlsa;
-	private JMenuItem mntmRast;
-	private JMenuItem mntmEffects;
-	private JMenuItem mntmSpui;
-	private JMenuItem mntmPctp;
-	private JMenuItem mntmGait;
-	private JMenuItem mntmTexturePatcher;
-	private JMenuItem mntmSpuiImageEditor;
+	private UIConvertMenu mnConvert;
 	
 	public UIProjectPanel getProjectPanel() {
 		return projectPanel;
@@ -131,136 +103,9 @@ public class UIMainApp extends JFrame {
 		mnProject.setMnemonic(KeyEvent.VK_P);
 		menuBar.add(mnProject);
 		
-		mnConvert = new JMenu("Convert");
+		mnConvert = new UIConvertMenu("Convert");
 		mnConvert.setMnemonic(KeyEvent.VK_C);
 		menuBar.add(mnConvert);
-		
-		///////////////////////////////////////////////////
-		mntmProp = new JMenuItem("Spore Property List (PROP)");
-		mntmProp.setMnemonic(KeyEvent.VK_P);
-		mntmProp.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogProp();
-			}
-			
-		});
-		mnConvert.add(mntmProp);
-		
-		///////////////////////////////////////////////////
-		mntmRw4 = new JMenuItem("Spore RenderWare4 Texture (RW4)");
-		mntmRw4.setMnemonic(KeyEvent.VK_R);
-		mntmRw4.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogRw4();
-			}
-		});
-		mnConvert.add(mntmRw4);
-
-		///////////////////////////////////////////////////
-		mntmTlsa = new JMenuItem("Spore Animation List (TLSA)");
-		mntmTlsa.setMnemonic(KeyEvent.VK_T);
-		mntmTlsa.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogTlsa();
-			}
-		});
-		mnConvert.add(mntmTlsa);
-		
-		////////////////////////////////////////////////////
-				
-		mntmEffects = new JMenuItem("Spore Effects (EFFDIR/PFX)");
-		mntmEffects.setMnemonic(KeyEvent.VK_E);
-		mntmEffects.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogEffects();
-			}
-		});
-		
-		mnConvert.add(mntmEffects);
-		
-		////////////////////////////////////////////////////
-		
-		mntmSpui = new JMenuItem("Spore User Interface (SPUI)");
-		mntmSpui.setMnemonic(KeyEvent.VK_S);
-		mntmSpui.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogSpui();
-			}
-		});
-		
-		mnConvert.add(mntmSpui);
-		
-		////////////////////////////////////////////////////
-				
-		mntmPctp = new JMenuItem("Spore Capability List (PCTP)");
-		mntmPctp.setMnemonic(KeyEvent.VK_C);
-		mntmPctp.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogPctp();
-			}
-		});
-		
-		mnConvert.add(mntmPctp);
-		
-		////////////////////////////////////////////////////
-		
-		mntmGait = new JMenuItem("Spore Gait (GAIT)");
-		mntmGait.setMnemonic(KeyEvent.VK_G);
-		mntmGait.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogGait();
-			}
-		});
-		
-		mnConvert.add(mntmGait);
-		
-		////////////////////////////////////////////////////
-				
-		mntmRast = new JMenuItem("Spore RAST Texture (RAST)");
-		mntmRast.setMnemonic(KeyEvent.VK_A);
-		mntmRast.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogRast();
-			}
-		});
-		
-		mnConvert.add(mntmRast);
-		
-		
-		mnConvert.add(new JSeparator());
-		///////////////////////////////////////////////////
-		
-		mntmTexturePatcher = new JMenuItem("Texture patcher");
-		mntmTexturePatcher.setMnemonic(KeyEvent.VK_X);
-		mntmTexturePatcher.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				UITexturePatcher.findFile();
-			}
-		});
-		mnConvert.add(mntmTexturePatcher);
-		
-		mntmSpuiImageEditor = new JMenuItem("SPUI Image Editor");
-		mntmSpuiImageEditor.setEnabled(false);
-		//mntmSpuiImageEditor.setMnemonic(KeyEvent.VK_X);
-		mntmSpuiImageEditor.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new SpuiViewerDialog(UIMainApp.this, MainApp.getActiveFile());
-				// update file viewer
-				MainApp.setActiveFile(MainApp.getActiveFilePath());
-			}
-		});
-		mnConvert.add(mntmSpuiImageEditor);
 		
 	}
 	
@@ -386,7 +231,8 @@ public class UIMainApp extends JFrame {
 		mnFile.update();
 		mnProject.update(fileView);
 		mnEdit.update(fileView);
-		mntmSpuiImageEditor.setEnabled(activeFilePath != null && (activeFilePath.endsWith(".spui") || activeFilePath.endsWith(".spui_t")));
+		mnConvert.update();
+		//mntmSpuiEditor.setEnabled(activeFilePath != null && (activeFilePath.endsWith(".spui") || activeFilePath.endsWith(".spui_t")));
 		toolBar.update();
 		displayPanel.update(fileView);
 		buttonsBar.update(fileView);

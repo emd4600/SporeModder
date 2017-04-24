@@ -7,7 +7,8 @@ import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.argscript.ArgScriptCommand;
 import sporemodder.files.formats.argscript.ArgScriptException;
 
-public interface SPUIResource {
+public interface SPUIResource extends SPUIObject {
+	
 	public void parse(ArgScriptCommand c) throws ArgScriptException, IOException;
 	public void parse(String str) throws IOException;
 	public ArgScriptCommand toCommand();

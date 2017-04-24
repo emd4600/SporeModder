@@ -1,12 +1,6 @@
 package sporemodder.userinterface.dialogs;
 
-import java.awt.Component;
-import java.awt.FlowLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -34,16 +28,9 @@ public class UIDialogProp extends JDialog {
 		setResizable(false);
 		
 		tabbedPane = new JTabbedPane();
-		{
-			JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			panel.setBorder(BorderFactory.createTitledBorder("Advanced options"));
-			JCheckBox cbDebugMode = new JCheckBox("Debug mode");
-			cbDebugMode.setAlignmentX(Component.LEFT_ALIGNMENT);
-			panel.add(cbDebugMode);
-			tabbedPane.addTab(".prop to .xml", 
-					new UIConvertDialog(this, FILEFILTER_PROP, FILEFILTER_XML, "prop", "xml", false, new PropToXml(cbDebugMode), panel));
-		}
-		tabbedPane.addTab(".xml to .prop", new UIConvertDialog(this, FILEFILTER_XML, FILEFILTER_PROP, "xml", "prop", true, new XmlToProp()));
+		
+		UIConvertDialog.addConvertTab(this, tabbedPane, new PropToXml(), ".prop to .xml", FILEFILTER_PROP, FILEFILTER_XML, "prop", "xml", false);
+		UIConvertDialog.addConvertTab(this, tabbedPane, new XmlToProp(), ".xml to .prop", FILEFILTER_XML, FILEFILTER_PROP, "xml", "prop", true);
 		
 		getContentPane().add(tabbedPane);
 		

@@ -2,6 +2,7 @@ package sporemodder.utilities.names;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
@@ -32,6 +33,15 @@ public class SimpleNameRegistry {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public SimpleNameRegistry(File file) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		try {
+			read(in);
+		} finally {
+			in.close();
+		}
+	}
+
 	public int getCount() {
 		return names.size();
 	}
@@ -72,11 +82,23 @@ public class SimpleNameRegistry {
 	}
 	
 	public void write(BufferedWriter out) throws IOException {
-		for (Map.Entry<String, Integer> entry : hashes.entrySet()) {
-			String name = entry.getKey();
+//		for (Map.Entry<String, Integer> entry : hashes.entrySet()) {
+//			String name = entry.getKey();
+//			int hash = Hasher.stringToFNVHash(name);
+//			if (hash != entry.getValue()) {
+//				out.write(name + "\t0x" + Integer.toHexString(entry.getValue()));
+//				out.newLine();
+//			} else {
+//				out.write(name);
+//				out.newLine();
+//			}
+//		}
+		
+		for (Map.Entry<Integer, String> entry : names.entrySet()) {
+			String name = entry.getValue();
 			int hash = Hasher.stringToFNVHash(name);
-			if (hash != entry.getValue()) {
-				out.write(name + "\t0x" + Integer.toHexString(entry.getValue()));
+			if (hash != entry.getKey()) {
+				out.write(name + "\t0x" + Integer.toHexString(entry.getKey()));
 				out.newLine();
 			} else {
 				out.write(name);
@@ -84,6 +106,7 @@ public class SimpleNameRegistry {
 			}
 		}
 	}
+	
 	
 	public boolean addName(String name) {	
 		names.put(Hasher.stringToFNVHash(name), name);

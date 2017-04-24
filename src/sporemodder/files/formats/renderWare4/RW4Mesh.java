@@ -9,15 +9,21 @@ import sporemodder.files.OutputStreamAccessor;
 public class RW4Mesh extends RW4Section {
 	public static final int type_code = 0x20009;
 	public static final int alignment = 4;
-	public RW4TriangleArray triangleArray;
-	public RW4VertexArray vertexArray;
-	public int tri_count, vertex_count;
-	public int first_tri, first_vertex;
-	public int tri_secNum, vertex_secNum;
+	
+	private RW4TriangleArray triangleArray;
+	private RW4VertexArray vertexArray;
+	private int primitiveType = 4;
+	private int tri_count;
+	private int vertex_count;
+	private int first_tri;
+	private int first_vertex;
+	private int tri_secNum;
+	private int vertex_secNum;
+	
 	@Override
 	public void read(InputStreamAccessor in, List<RW4Section> sections) throws IOException {
 		expect(in.readLEInt(), 40, "RW4-ME001", in.getFilePointer());
-		expect(in.readLEInt(), 4, "RW4-ME002", in.getFilePointer());
+		expect(primitiveType = in.readLEInt(), 4, "RW4-ME002", in.getFilePointer());
 		tri_secNum = in.readLEInt();
 		tri_count = in.readLEInt();
 		expect(in.readLEInt(), 1, "RW4-ME003", in.getFilePointer());
@@ -39,7 +45,7 @@ public class RW4Mesh extends RW4Section {
 	public void write(OutputStreamAccessor out, List<RW4Section> sections) throws IOException {
 		tri_secNum = sections.indexOf(triangleArray);
 		vertex_secNum = sections.indexOf(vertexArray);
-		out.writeLEInts(40, 4, tri_secNum, tri_count, 1, first_tri, tri_count*3, first_vertex, vertex_count, vertex_secNum);
+		out.writeLEInts(40, primitiveType, tri_secNum, tri_count, 1, first_tri, tri_count*3, first_vertex, vertex_count, vertex_secNum);
 	}
 	
 	@Override

@@ -273,7 +273,8 @@ public class TextFileView extends FileView {
 	}
 	
 	public void save() {
-		if (file != null && file.isFile() && isAscii) {
+		// no need to save if no changes were made
+		if (file != null && file.isFile() && isAscii && !isSaved) {
 			write();
 			isSaved = true;
 			updateTitle();

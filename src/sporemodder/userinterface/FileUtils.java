@@ -1,6 +1,7 @@
 package sporemodder.userinterface;
 
 import java.awt.Desktop;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,9 +18,10 @@ import javax.swing.tree.TreePath;
 import sporemodder.MainApp;
 import sporemodder.userinterface.dialogs.AdvancedFileChooser;
 import sporemodder.userinterface.dialogs.AdvancedFileChooser.ChooserType;
-import sporemodder.utilities.FilteredTreeModel;
+import sporemodder.utilities.ProjectTreeModel;
 import sporemodder.utilities.Project;
 import sporemodder.utilities.ProjectTreeNode;
+import sporemodder.utilities.SearchSpec;
 
 public class FileUtils {
 	
@@ -106,7 +108,7 @@ public class FileUtils {
 		treeNode.isSource = project.hasSource(filePath);
 		// This file's source has been deleted; there's no need to keep the node
 		if (!treeNode.isSource) {
-			FilteredTreeModel treeModel = projectPanel.getTreeModel();
+			ProjectTreeModel treeModel = projectPanel.getTreeModel();
 			TreeNode parentNode = treeNode.getParent();
 			treeModel.removeNodeFromParent(treeNode);
 			if (parentNode.getChildCount() == 0) {
@@ -283,7 +285,7 @@ public class FileUtils {
 				}
 				
 				// does this new name match the search?
-				finalNode.searchInName();
+				finalNode.searchInName(SearchSpec.generateSearchSpecs(MainApp.getSearchStrings()));
 				
 				if (finalNode.getChildCount() > 0) {
 					UIProjectPanel.refresh(finalNode);
@@ -392,7 +394,7 @@ public class FileUtils {
 				
 				node.isMod = true;
 				node.isSource = MainApp.getCurrentProject().hasSource(newPath);
-				node.searchInName();
+				node.searchInName(SearchSpec.generateSearchSpecs(MainApp.getSearchStrings()));
 				
 				if (i == resultingFiles.length - 1 && !isNewNode) {
 					panel.getTree().setSelectionPath(new TreePath(node.getPath()));
@@ -403,5 +405,57 @@ public class FileUtils {
 		}
 	}
 	
+	public static ProjectTreeNode getParentNode() {
+		ProjectTreeNode activeNode = MainApp.getUserInterface().getProjectPanel().getNodeForPath(MainApp.getActiveFilePath());
+		File folder = MainApp.getCurrentProject().getModFile(Project.getRelativePath(activeNode.getPath()));
+		ProjectTreeNode parentNode = null;
+		if (folder.isDirectory()) {
+			// using node.getChildCount() > 0 is incorrect, since empty folders don't have children neither
+			parentNode = activeNode;
+		}
+		else {
+			if (activeNode.getParent() != null) {
+				parentNode = (ProjectTreeNode) activeNode.getParent();
+			}
+			else {
+				// what??? if it isn't a directory, how do you create a file here?
+				parentNode = activeNode;
+			}
+		}
+		return parentNode;
+	}
 	
+	public static void createNewFile(String name, ProjectTreeNode parentNode) {
+		File parentFolder = MainApp.getCurrentProject().getModFile(Project.getRelativePath(parentNode.getPath()));
+		
+		if (parentFolder == null || !parentFolder.exists() || parentFolder.isFile()) {
+			JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Couldn't create new file.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		String path = parentFolder.getAbsolutePath();
+		File newFile = new File(path, name);
+		try {
+			if (!newFile.createNewFile()) {
+				JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Couldn't create new file.", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+		} catch (HeadlessException | IOException e) {
+			JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Couldn't create new file.\n" + ErrorManager.getStackTraceString(e), "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		String newPath = getChildPath(parentNode, name);
+		ProjectTreeNode node = new ProjectTreeNode();
+		node.name = name;
+		node.isMod = true;
+		node.isSource = MainApp.getCurrentProject().hasSource(newPath);
+		
+		UIProjectPanel panel = MainApp.getUserInterface().getProjectPanel();
+		panel.getTreeModel().insertNode(node, parentNode);
+		
+		panel.getTree().setSelectionPath(new TreePath(node.getPath()));
+		
+		panel.repaintTree();
+	}
 }

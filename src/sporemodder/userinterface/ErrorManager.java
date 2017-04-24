@@ -18,7 +18,7 @@ public class ErrorManager {
 
 	    StackTraceElement[] stack = e.getStackTrace();
 	    if (stack != null) {
-	        for (int i = 0; i < MAX_STACKTRACE; i++) {
+	        for (int i = 0; i < MAX_STACKTRACE && i < stack.length; i++) {
 	        	StackTraceElement stackTraceElement = stack[i];
 	            sb.append(indent);
 	            sb.append("\tat ");

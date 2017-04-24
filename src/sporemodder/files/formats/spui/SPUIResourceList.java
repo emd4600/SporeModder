@@ -12,7 +12,7 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 	
 	private final List<SPUIFileResource> fileResources = new ArrayList<SPUIFileResource>();
 	private final List<SPUIFileResource> atlasResources = new ArrayList<SPUIFileResource>();
-	private final List<SPUIResourceType3> type3Resources = new ArrayList<SPUIResourceType3>();
+	private final List<SPUIHitMaskResource> hitmaskResources = new ArrayList<SPUIHitMaskResource>();
 	private final List<SPUIStructResource> structResources = new ArrayList<SPUIStructResource>();
 	
 	@Override
@@ -47,9 +47,9 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 			return atlasResources.get(index);
 		}
 		index -= size;
-		size = type3Resources.size();
+		size = hitmaskResources.size();
 		if (index < size) {
-			return type3Resources.get(index);
+			return hitmaskResources.get(index);
 		}
 		index -= size;
 		size = structResources.size();
@@ -80,8 +80,8 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 				fileResources.add(res);
 			}
 		}
-		else if (resource instanceof SPUIResourceType3) {
-			type3Resources.add((SPUIResourceType3) resource);
+		else if (resource instanceof SPUIHitMaskResource) {
+			hitmaskResources.add((SPUIHitMaskResource) resource);
 		}
 		else if (resource instanceof SPUIStructResource) {
 			structResources.add((SPUIStructResource) resource);
@@ -99,26 +99,26 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 			fileResources.add(resource);
 		}
 	}
-	public void add(SPUIResourceType3 resource) {
-		type3Resources.add(resource);
+	public void add(SPUIHitMaskResource resource) {
+		hitmaskResources.add(resource);
 	}
 	public void add(SPUIStructResource resource) {
 		structResources.add(resource);
 	}
 
 	public int getResourceCount() {
-		return fileResources.size() + atlasResources.size() + type3Resources.size() + structResources.size();
+		return fileResources.size() + atlasResources.size() + hitmaskResources.size() + structResources.size();
 	}
 	
 	public void clear() {
 		fileResources.clear();
 		atlasResources.clear();
-		type3Resources.clear();
+		hitmaskResources.clear();
 		structResources.clear();
 	}
 	
 	
-	public void read(InputStreamAccessor in, int version) throws IOException {
+	public void read(InputStreamAccessor in, int version, SPUIMain parent) throws IOException {
 		int resCount1 = in.readLEShort();
 		int resCount2 = in.readLEShort();
 		int resCount3 = in.readLEShort();
@@ -131,6 +131,7 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 		
 		for (int i = 0; i < resCount1; i++) {
 			SPUIFileResource resource = new SPUIFileResource();
+			resource.setParent(parent);
 			resource.read(in, version);
 			fileResources.add(resource);
 		}
@@ -138,19 +139,22 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 		for (int i = 0; i < resCount2; i++) {
 			SPUIFileResource resource = new SPUIFileResource();
 			resource.read(in, version);
+			resource.setParent(parent);
 			resource.isAtlas = true;
 			atlasResources.add(resource);
 		}
 		
 		for (int i = 0; i < resCount3; i++) {
-			SPUIResourceType3 resource = new SPUIResourceType3();
+			SPUIHitMaskResource resource = new SPUIHitMaskResource();
 			resource.read(in, version);
-			type3Resources.add(resource);
+			resource.setParent(parent);
+			hitmaskResources.add(resource);
 		}
 		
 		for (int i = 0; i < resCount4; i++) {
 			SPUIStructResource resource = new SPUIStructResource();
 			resource.read(in, version);
+			resource.setParent(parent);
 			structResources.add(resource);
 		}
 	}
@@ -158,7 +162,7 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 	public void write(OutputStreamAccessor out, int version) throws IOException {
 		out.writeLEShort(fileResources.size());
 		out.writeLEShort(atlasResources.size());
-		out.writeLEShort(type3Resources.size());
+		out.writeLEShort(hitmaskResources.size());
 		out.writeLEShort(structResources.size());
 		for (SPUIResource res : this) {
 			res.write(out, version);
@@ -176,11 +180,11 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 			return indexOf + size;
 		}
 		size += atlasResources.size();
-		indexOf = type3Resources.indexOf(resource);
+		indexOf = hitmaskResources.indexOf(resource);
 		if (indexOf != -1) {
 			return indexOf + size;
 		}
-		size += type3Resources.size();
+		size += hitmaskResources.size();
 		indexOf = structResources.indexOf(resource);
 		if (indexOf != -1) {
 			return indexOf + size;
@@ -196,8 +200,8 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 		return atlasResources;
 	}
 
-	public List<SPUIResourceType3> getType3Resources() {
-		return type3Resources;
+	public List<SPUIHitMaskResource> getHitMaskResources() {
+		return hitmaskResources;
 	}
 
 	public List<SPUIStructResource> getStructResources() {
@@ -206,7 +210,7 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 	
 	// Returns the number of resources that can be used in 'short' sections
 	public int getValidResourcesCount() {
-		return fileResources.size() + atlasResources.size() + type3Resources.size();
+		return fileResources.size() + atlasResources.size() + hitmaskResources.size();
 	}
 	
 	
@@ -218,11 +222,11 @@ public class SPUIResourceList implements Iterable<SPUIResource> {
 		return fileResources.size() + atlasResources.size();
 	}
 	
-	public int getNextType3Index() {
-		return fileResources.size() + atlasResources.size() + type3Resources.size();
+	public int getNextHitMaskIndex() {
+		return fileResources.size() + atlasResources.size() + hitmaskResources.size();
 	}
 	
 	public int getNextStructIndex() {
-		return fileResources.size() + atlasResources.size() + type3Resources.size() + structResources.size();
+		return fileResources.size() + atlasResources.size() + hitmaskResources.size() + structResources.size();
 	}
 }

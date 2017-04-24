@@ -3,66 +3,106 @@ package sporemodder.files.formats.spui;
 import java.io.IOException;
 import java.util.List;
 
+import javax.swing.tree.TreePath;
+
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.ResourceKey;
 import sporemodder.files.formats.argscript.ArgScriptCommand;
 import sporemodder.files.formats.argscript.ArgScriptException;
 import sporemodder.utilities.Hasher;
+import sporemodder.files.formats.spui.SPUIObject.SPUIDefaultObject;
 
-public class SPUIFileResource implements SPUIResource {
-	private int fileID;
-	private int typeID;
-	private int groupID;
+public class SPUIFileResource extends SPUIDefaultObject implements SPUIResource {
+	
+	public static final int TYPE = 0x10D1FBEB;  // Hasher.stringToFNVHash("FileResource");
+	
+	private final ResourceKey resourceKey = new ResourceKey();
 	// is it the first or the second resource type? 
 	protected boolean isAtlas;
+	
+	// to use when parsing .spui.spui_t
+	private String realPath;
 	
 	public SPUIFileResource(ResourceKey key, boolean isAtlas) {
 		this.isAtlas = isAtlas;
 		if (key != null) {
-			groupID = key.getGroupID();
-			fileID = key.getInstanceID();
-			typeID = key.getTypeID();
+			resourceKey.copy(key);
 		}
 	}
 
 	public SPUIFileResource() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	public SPUIFileResource(SPUIFileResource other) {
+		this.resourceKey.copy(other.resourceKey);
+		this.isAtlas = other.isAtlas;
+		this.realPath = other.realPath;
+	}
+	
+	public TreePath toTreePath(Object rootNode) {
+		
+		if (realPath == null) {
+			return new TreePath(new Object[] {rootNode, 
+					Hasher.getFileName(resourceKey.getGroupID()), Hasher.getFileName(resourceKey.getInstanceID()) + "." + Hasher.getTypeName(resourceKey.getTypeID())});
+		}
+		else {
+			String[] splits = realPath.split("!", 2);
+			return new TreePath(new Object[] {rootNode, splits[0], splits[1]});
+		}
+		
+	}
+	
+	@Override
+	public int getObjectType() {
+		return TYPE;
+	}
+	
+	@Override
+	public String getTypeString() {
+		return "FileResource";
+	}
 
 	@Override
 	public void read(InputStreamAccessor in, int version) throws IOException {
-		fileID = in.readLEInt();
-		typeID = in.readLEInt();
-		groupID = in.readLEInt();
+		resourceKey.setInstanceID(in.readLEInt());
+		resourceKey.setTypeID(in.readLEInt());
+		resourceKey.setGroupID(in.readLEInt());
 	}
 	
 	@Override
 	public void write(OutputStreamAccessor out, int version) throws IOException {
-		out.writeLEInt(fileID);
-		out.writeLEInt(typeID);
-		out.writeLEInt(groupID);
+		out.writeLEInt(resourceKey.getInstanceID());
+		out.writeLEInt(resourceKey.getTypeID());
+		out.writeLEInt(resourceKey.getGroupID());
+	}
+	
+	@Override
+	public String toString() {
+		return realPath != null ? realPath : (Hasher.getFileName(resourceKey.getGroupID()) + "!" + Hasher.getFileName(resourceKey.getInstanceID()) + 
+				"." + Hasher.getTypeName(resourceKey.getTypeID()));
 	}
 	
 	@Override
 	public String getString() {
-		return "FileResource " + (isAtlas ? "atlas " : "") + Hasher.getFileName(groupID) + "!" + Hasher.getFileName(fileID) + 
-				"." + Hasher.getTypeName(typeID);
+		return "FileResource " + (isAtlas ? "atlas " : "") + (realPath != null ? realPath : Hasher.getFileName(resourceKey.getGroupID()) + "!" + Hasher.getFileName(resourceKey.getInstanceID()) + 
+				"." + Hasher.getTypeName(resourceKey.getTypeID()));
 	}
 	
 	// Gets string without resource data (resource name and isAtlas)
 	public String getStringSimple() {
-		return Hasher.getFileName(groupID) + "!" + Hasher.getFileName(fileID) + 
-				"." + Hasher.getTypeName(typeID);
+		return Hasher.getFileName(resourceKey.getGroupID()) + "!" + Hasher.getFileName(resourceKey.getInstanceID()) + 
+				"." + Hasher.getTypeName(resourceKey.getTypeID());
 	}
 	
 	// group!file.type
 	protected void parseSimple(String str) throws IOException {
 		String[] spl = str.split("\\.");
 		String[] groupFile = spl[0].split("!");
-		groupID = Hasher.getFileHash(groupFile[0]);
-		fileID = Hasher.getFileHash(groupFile[1]);
-		typeID = Hasher.getTypeHash(spl[1]);
+		resourceKey.setGroupID(Hasher.getFileHash(groupFile[0]));
+		resourceKey.setInstanceID(Hasher.getFileHash(groupFile[1]));
+		resourceKey.setTypeID(Hasher.getTypeHash(spl[1]));
 	}
 	
 	@Override
@@ -91,68 +131,84 @@ public class SPUIFileResource implements SPUIResource {
 		else return SPUIResource.RESOURCE_TYPE.IMAGE;
 	}
 
-	public int getFileID() {
-		return fileID;
+	public int getInstanceID() {
+		return resourceKey.getInstanceID();
 	}
 
 	public void setFileID(int fileID) {
-		this.fileID = fileID;
+		resourceKey.setInstanceID(fileID);
 	}
 
 	public int getTypeID() {
-		return typeID;
+		return resourceKey.getTypeID();
 	}
 
 	public void setTypeID(int typeID) {
-		this.typeID = typeID;
+		resourceKey.setTypeID(typeID);
 	}
 
 	public int getGroupID() {
-		return groupID;
+		return resourceKey.getGroupID();
 	}
 
 	public void setGroupID(int groupID) {
-		this.groupID = groupID;
+		resourceKey.setGroupID(groupID);
+	}
+	
+	public ResourceKey getResourceKey() {
+		return resourceKey;
+	}
+	
+	public void setResourceKey(ResourceKey key) {
+		resourceKey.copy(key);
 	}
 
 	public boolean isAtlas() {
 		return isAtlas;
 	}
 
-	public void setAtlas(boolean isAtlas) {
+	public void setIsAtlas(boolean isAtlas) {
 		this.isAtlas = isAtlas;
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + fileID;
-		result = prime * result + groupID;
-		result = prime * result + (isAtlas ? 1231 : 1237);
-		result = prime * result + typeID;
-		return result;
+	
+	public String getRealPath() {
+		return realPath;
+	}
+	
+	public void setRealPath(String realPath) {
+		this.realPath = realPath;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SPUIFileResource other = (SPUIFileResource) obj;
-		if (fileID != other.fileID)
-			return false;
-		if (groupID != other.groupID)
-			return false;
-		if (isAtlas != other.isAtlas)
-			return false;
-		if (typeID != other.typeID)
-			return false;
-		return true;
-	}
+//	@Override
+//	public int hashCode() {
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + fileID;
+//		result = prime * result + groupID;
+//		result = prime * result + (isAtlas ? 1231 : 1237);
+//		result = prime * result + typeID;
+//		return result;
+//	}
+//
+//	@Override
+//	public boolean equals(Object obj) {
+//		if (this == obj)
+//			return true;
+//		if (obj == null)
+//			return false;
+//		if (getClass() != obj.getClass())
+//			return false;
+//		SPUIFileResource other = (SPUIFileResource) obj;
+//		if (fileID != other.fileID)
+//			return false;
+//		if (groupID != other.groupID)
+//			return false;
+//		if (isAtlas != other.isAtlas)
+//			return false;
+//		if (typeID != other.typeID)
+//			return false;
+//		return true;
+//	}
 
 	@Override
 	public void parse(ArgScriptCommand c) throws ArgScriptException {
@@ -163,27 +219,26 @@ public class SPUIFileResource implements SPUIResource {
 				isAtlas = true;
 			}
 		}
-		ResourceKey key = new ResourceKey();
-		key.parse(args.get(index));
-		groupID = key.getGroupID();
-		fileID = key.getInstanceID();
-		typeID = key.getTypeID();
+		
+		realPath = args.get(index);
+		resourceKey.parse(realPath);
 	}
 
 	@Override
 	public ArgScriptCommand toCommand() {
 		if (isAtlas) {
-			return new ArgScriptCommand("FileResource", "atlas", new ResourceKey(groupID, fileID, typeID).toString());
+			return new ArgScriptCommand("FileResource", "atlas", realPath != null ? realPath : resourceKey.toString());
 		} else {
-			return new ArgScriptCommand("FileResource", new ResourceKey(groupID, fileID, typeID).toString());
+			return new ArgScriptCommand("FileResource", realPath != null ? realPath : resourceKey.toString());
 		}
 	}
-	
-	
-//	public static void main(String[] args) {
-//		String test = "block asd // comment test";
-//		String test2 = "block test";
-//		System.out.println(test.split("//")[0]);
-//		System.out.println(test2.split("//")[0]);
-//	}
+
+	@Override
+	public int getBlockIndex() {
+		if (parent == null || parent.getResources() == null) {
+			return -1;
+		}
+		return parent.getResources().indexOf(this);
+	}
+
 }

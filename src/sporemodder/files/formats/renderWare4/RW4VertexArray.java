@@ -14,16 +14,19 @@ public class RW4VertexArray extends RW4Section {
 	public RW4VertexFormat vertexFormat;
 	public RW4Buffer vertexBuffer;
 	
-	public int unk1;
-	public int vertexCount, vertexSize;
-	public int vertSection;
-	public int vertFormatSection;
+	private int unk1;
+	private int baseVertexIndex;
+	private int vertexCount, vertexSize;
+	private int vertSection;
+	private int vertFormatSection;
+	
 	@Override
 	public void read(InputStreamAccessor in, List<RW4Section> sections) throws IOException {
 		vertFormatSection = in.readLEInt();
 		vertexFormat = (RW4VertexFormat)sections.get(vertFormatSection);
+		
 		unk1 = in.readLEInt();
-		expect(in.readInt(), 0, "RW4-VA001", in.getFilePointer());
+		expect(baseVertexIndex = in.readLEInt(), 0, "RW4-VA001", in.getFilePointer());
 		vertexCount = in.readLEInt();
 //		System.out.println("vertex count: " + vertexCount);
 		expect(in.readLEInt(), 8, "RW4-VA002", in.getFilePointer());
@@ -39,7 +42,7 @@ public class RW4VertexArray extends RW4Section {
 		vertSection = sections.indexOf(vertexBuffer);
 		out.writeLEInt(vertFormatSection);
 		out.writeLEInt(unk1);
-		out.writeInt(0);
+		out.writeLEInt(baseVertexIndex);
 		out.writeLEInt(vertexCount);
 		out.writeLEInt(8);
 		out.writeLEInt(vertexSize);

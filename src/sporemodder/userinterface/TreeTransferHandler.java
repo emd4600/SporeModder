@@ -14,7 +14,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import sporemodder.utilities.FilteredTreeModel;
+import sporemodder.utilities.ProjectTreeModel;
 import sporemodder.utilities.ProjectTreeNode;
 
 public class TreeTransferHandler extends TransferHandler {
@@ -168,7 +168,7 @@ public class TreeTransferHandler extends TransferHandler {
     protected void exportDone(JComponent source, Transferable data, int action) {
         if((action & MOVE) == MOVE) {
             JTree tree = (JTree)source;
-            FilteredTreeModel model = (FilteredTreeModel)tree.getModel();
+            ProjectTreeModel model = (ProjectTreeModel)tree.getModel();
             // Remove nodes saved in nodesToRemove in createTransferable.
             for(int i = 0; i < nodesToRemove.length; i++) {
                 model.removeNodeFromParent(nodesToRemove[i]);
@@ -202,7 +202,7 @@ public class TreeTransferHandler extends TransferHandler {
         ProjectTreeNode parent =
             (ProjectTreeNode)dest.getLastPathComponent();
         JTree tree = (JTree)support.getComponent();
-        FilteredTreeModel model = (FilteredTreeModel)tree.getModel();
+        ProjectTreeModel model = (ProjectTreeModel)tree.getModel();
         // Configure for drop mode.
         int index = childIndex;    // DropMode.INSERT
         if(childIndex == -1) {     // DropMode.ON

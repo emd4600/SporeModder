@@ -52,8 +52,8 @@ public class DBPFIndex extends FileStructure {
 		for (int i = 0; i < itemCount; i++) {
 			in.seek(itemsPos + (i * itemSize));
 			DBPFItem item = new DBPFItem();
-			item.group = group;
-			item.type = type;
+			item.key.setGroupID(group);
+			item.key.setTypeID(type);
 			item.readInfo(in, type);
 			items.add(item);
 		}

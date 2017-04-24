@@ -24,6 +24,9 @@ public class RW4TexMetadata extends RW4Section {
 	public static final int MINERALPAINT = 0xF;
 	public static final int type_code = 0x2000b;
 	public static final int alignment = 16;
+	
+	public static boolean READ_COMPILED_STATE = true;
+	
     public int sn1, sn2;
     public int size;
     public float[] colorMultiplier = new float[4];
@@ -38,6 +41,10 @@ public class RW4TexMetadata extends RW4Section {
     public List<TextureSlot> textureSlots = new ArrayList<TextureSlot>();
     
 	public void read(InputStreamAccessor in, List<RW4Section> sections) throws IOException {
+		if (!READ_COMPILED_STATE) {
+			return;
+		}
+		
 		//TODO ALL THIS!!!
 		size = in.readLEInt();
 		expect(in.readLEInt(), 4, "RW4-TXM000", in.getFilePointer());

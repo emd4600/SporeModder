@@ -29,8 +29,8 @@ import javax.swing.tree.TreePath;
 import sporemodder.MainApp;
 import sporemodder.userinterface.dialogs.AdvancedFileChooser;
 import sporemodder.userinterface.dialogs.AdvancedFileChooser.ChooserType;
-import sporemodder.userinterface.dialogs.UIProjectSettings;
 import sporemodder.userinterface.fileview.FileView;
+import sporemodder.userinterface.settings.project.UIProjectSettings;
 import sporemodder.utilities.Project;
 import sporemodder.utilities.ProjectTreeNode;
 
@@ -169,7 +169,7 @@ public class UIProjectMenu extends JMenu {
 		mntmProjectSettings.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new UIProjectSettings(MainApp.getCurrentProject(), UIProjectSettings.Mode.NONE);
+				new UIProjectSettings(MainApp.getCurrentProject(), UIProjectSettings.SettingsMode.NONE);
 			}
 		});
 		
@@ -367,71 +367,19 @@ public class UIProjectMenu extends JMenu {
 	}
 	
 	
-	private static ProjectTreeNode getParentNode() {
-		ProjectTreeNode activeNode = MainApp.getUserInterface().getProjectPanel().getNodeForPath(MainApp.getActiveFilePath());
-		File folder = MainApp.getCurrentProject().getModFile(Project.getRelativePath(activeNode.getPath()));
-		ProjectTreeNode parentNode = null;
-		if (folder.isDirectory()) {
-			// using node.getChildCount() > 0 is incorrect, since empty folders don't have children neither
-			parentNode = activeNode;
-		}
-		else {
-			if (activeNode.getParent() != null) {
-				parentNode = (ProjectTreeNode) activeNode.getParent();
-			}
-			else {
-				// what??? if it isn't a directory, how do you create a file here?
-				parentNode = activeNode;
-			}
-		}
-		return parentNode;
-	}
-	
 	private void newFileAction() {
-		ProjectTreeNode parentNode = getParentNode();
+		ProjectTreeNode parentNode = FileUtils.getParentNode();
 		
 		String newName = (String) JOptionPane.showInputDialog(MainApp.getUserInterface(), "Insert new file name: ", "Create new file", JOptionPane.PLAIN_MESSAGE,
 				null, null, "untitled.prop.xml");
 		
 		if (newName != null) {
-			File parentFolder = MainApp.getCurrentProject().getModFile(Project.getRelativePath(parentNode.getPath()));
-			
-			if (parentFolder == null || !parentFolder.exists() || parentFolder.isFile()) {
-				JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Couldn't create new file.", "Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			
-			String path = parentFolder.getAbsolutePath();
-			File newFile = new File(path, newName);
-			try {
-				if (!newFile.createNewFile()) {
-					JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Couldn't create new file.", "Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-			} catch (HeadlessException | IOException e) {
-				JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Couldn't create new file.\n" + ErrorManager.getStackTraceString(e), "Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			
-			String newPath = getChildPath(parentNode, newName);
-			ProjectTreeNode node = new ProjectTreeNode();
-			node.name = newName;
-			node.isMod = true;
-			node.isSource = MainApp.getCurrentProject().hasSource(newPath);
-			
-			UIProjectPanel panel = MainApp.getUserInterface().getProjectPanel();
-			panel.getTreeModel().insertNode(node, parentNode);
-			
-			panel.getTree().setSelectionPath(new TreePath(node.getPath()));
-			
-			panel.repaintTree();
-			
-			// MainApp.setActiveFile(newPath);
+			FileUtils.createNewFile(newName, parentNode);
 		}
 	}
 	
 	private void newFolderAction() {
-		ProjectTreeNode parentNode = getParentNode();
+		ProjectTreeNode parentNode = FileUtils.getParentNode();
 		
 		String newName = (String) JOptionPane.showInputDialog(MainApp.getUserInterface(), "Insert new folder name: ", "Create new folder", JOptionPane.PLAIN_MESSAGE,
 				null, null, "untitled_folder");
@@ -478,7 +426,7 @@ public class UIProjectMenu extends JMenu {
 		String result = chooser.launch();
 		if (result != null) {
 			String[] files = result.split("\\|");
-			ProjectTreeNode parentNode = getParentNode();
+			ProjectTreeNode parentNode = FileUtils.getParentNode();
 			File parentFolder = MainApp.getCurrentProject().getModFile(Project.getRelativePath(parentNode.getPath()));
 			UIProjectPanel panel = MainApp.getUserInterface().getProjectPanel();
 			

@@ -39,7 +39,7 @@ public class DBPFUnpacker {
 			if (s.equals("-convert_spui")) {
 				converters.add(new SpuiToTxt());
 			} else if (s.equals("-convert_prop")) {
-				converters.add(new PropToXml(null));
+				converters.add(new PropToXml());
 			} else if (s.equals("-convert_tlsa")) {
 				converters.add(new TlsaToTxt());
 			} else if (s.equals("-convert_pctp")) {

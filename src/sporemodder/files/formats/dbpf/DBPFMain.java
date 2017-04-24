@@ -257,7 +257,7 @@ public class DBPFMain implements AutoCloseable {
 	public DBPFItem getFile(int group, int name, int type) throws IOException {
 		if (index.items == null) throw new IOException("DBPF Items' metadata isn't initialized");
 		for (DBPFItem item : index.items) {
-			if (item.group == group && item.name == name && item.type == type) {
+			if (item.key.getGroupID() == group && item.key.getInstanceID() == name && item.key.getTypeID() == type) {
 				return item;
 			}
 		}
@@ -276,69 +276,12 @@ public class DBPFMain implements AutoCloseable {
 		
 		List<DBPFItem> items = new ArrayList<DBPFItem>();
 		for (DBPFItem item : index.items) {
-			if (item.type == type) {
+			if (item.key.getTypeID() == type) {
 				items.add(item);
 			}
 		}
 		
 		return items;
-	}
-	
-//	private void write() throws IOException {
-//		int originalBasePos = source.getBaseOffset();
-//		source.setBaseOffset(basePos);
-//		
-//		header.write(source);
-//		
-//		for (DBPFItem item : index.items) {
-//			item.chunkOffset = source.getFilePointer();
-//			
-//		}
-//		
-//		source.setBaseOffset(originalBasePos);
-//	}
-	
-	private void readPackageProperties(File f) throws IOException, DOMException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, InstantiationException, ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException, SAXException {
-		hasPackageProperties = true;
-		
-		InputStream in = new FileInputStream(f);
-		try {
-			packageProperties = new PROPMain();
-			packageProperties.readXML(in);
-		} finally {
-			in.close();
-		}
-	}
-	
-	
-	
-	public void writeProject(String outPath, boolean merge, boolean keepOld) throws IOException {
-		String newOutPath = outPath + (outPath.endsWith("\\") ? "" : "\\");
-		File projectDir = new File(newOutPath);
-		projectDir.mkdir();
-		
-		for (DBPFItem item : index.items) {
-			File outDir = new File(newOutPath + Hasher.getFileName(item.group));
-			outDir.mkdir();
-			
-			if (merge) {
-				File outFile = new File(newOutPath + Hasher.getFileName(item.group) + "\\" + 
-						Hasher.getFileName(item.name) + "." + Hasher.getTypeName(item.type));
-				if (keepOld) {
-					if (outFile.exists()) {
-						continue;
-					}
-				} else {
-					if (outFile.exists()) {
-						outFile.delete();
-						//TODO add decompress properties for this
-						item.processNormalFile(source, outPath);
-					}
-				}
-			} else {
-				item.processNormalFile(source, outPath);
-			}
-		}
 	}
 	
 	public static void parseArgs(String[] args) throws IOException {

@@ -60,13 +60,12 @@ public class ProjectTreeNode extends DefaultMutableTreeNode {
 		}
 	}
 	
-	public boolean searchInName() {
+	public boolean searchInName(List<SearchSpec> searchSpecs) {
 		isMatch = true;
-		List<String> searchStrings = MainApp.getSearchStrings();
 		String lowercaseName = name.toLowerCase();
-		if (searchStrings != null) {
-			for (String s : searchStrings) {
-				if (!lowercaseName.contains(s)) {
+		if (searchSpecs != null) {
+			for (SearchSpec s : searchSpecs) {
+				if (!lowercaseName.contains(s.getLowercaseString())) {
 					isMatch = false;
 					break;
 				}
@@ -257,7 +256,7 @@ public class ProjectTreeNode extends DefaultMutableTreeNode {
  	    }
  	    return randomStrings;
  	}
- 	private static void insertOld(FilteredTreeModel treeModel, ProjectTreeNode rootNode, ProjectTreeNode newNodeObject) {
+ 	private static void insertOld(ProjectTreeModel treeModel, ProjectTreeNode rootNode, ProjectTreeNode newNodeObject) {
 		int ind = 0;
 		@SuppressWarnings("rawtypes")
 		Enumeration e = rootNode.children();
@@ -280,7 +279,7 @@ public class ProjectTreeNode extends DefaultMutableTreeNode {
  	private static final List<Long> TIMES_NEW = new ArrayList<Long>();
  	private static void test() {
  		ProjectTreeNode root = new ProjectTreeNode("rootNode", true);
- 		FilteredTreeModel model = new FilteredTreeModel(root);
+ 		ProjectTreeModel model = new ProjectTreeModel(root);
  		String[] words = generateRandomWords(WORD_COUNT);
  		
  		long time1 = System.currentTimeMillis();
@@ -414,8 +413,10 @@ public class ProjectTreeNode extends DefaultMutableTreeNode {
 //
 	@Override
 	public String toString() {
-		return "ProjectTreeNode [name=" + name + ", isSource=" + isSource
-				+ ", isMod=" + isMod + ", isRoot=" + isRoot + "]";
+//		return "ProjectTreeNode [name=" + name + ", isSource=" + isSource
+//				+ ", isMod=" + isMod + ", isRoot=" + isRoot + "]";
+		
+		return name;
 	}
 // 	
 // 	public boolean checkCriteria(String text, boolean modOnly) {
@@ -672,35 +673,26 @@ public class ProjectTreeNode extends DefaultMutableTreeNode {
  		return false;
  	}
  	
- 	public void searchFast(List<SearchSpec> specs) {
+ 	public void searchFast(List<SearchSpec> specs, boolean searchInFile) {
  		
  		isMatch = false;
  		
  		// we don't want the Project root node to be searched
  		if (isRoot()) {
- 		// search children nodes
+ 			// search children nodes
 			int childCount = super.getChildCount();
 			for (int i = 0; i < childCount; i++) {
 				ProjectTreeNode node = (ProjectTreeNode) super.getChildAt(i);
-				node.searchFast(specs);
+				node.searchFast(specs, searchInFile);
 			}
 			return;
  		}
  		
- 		searchInName();
- 		
-// 		isMatch = true;
-//		String lowercaseName = name.toLowerCase();
-//		for (SearchSpec text : specs) {
-//			if (!lowercaseName.contains(text.getLowercaseString())) {
-//				isMatch = false;
-//				break;
-//			}
-//		}
+ 		searchInName(specs);
  		
  		if (!isMatch) {
  			// name doesn't match, keep searching
- 			if (isLeaf()) {
+ 			if (searchInFile && isLeaf()) {
 				String extension = name.substring(name.lastIndexOf(".") + 1, name.length());
 	 			
 	 			if (MainApp.getSearchableExtensions().contains(extension)) {
@@ -730,7 +722,7 @@ public class ProjectTreeNode extends DefaultMutableTreeNode {
  				int childCount = super.getChildCount();
  				for (int i = 0; i < childCount; i++) {
  					ProjectTreeNode node = (ProjectTreeNode) super.getChildAt(i);
- 					node.searchFast(specs);
+ 					node.searchFast(specs, searchInFile);
  				}
  			}
  		}

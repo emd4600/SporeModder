@@ -20,6 +20,10 @@ public class SporeGame {
 		String regPath = "SOFTWARE\\" + (is64bit ? "Wow6432Node\\" : "") + "Electronic Arts\\" + path;
 		
 		String str = WinRegistry.valueForKey(WinRegistry.HKEY_LOCAL_MACHINE, regPath, "InstallLoc");
+		if (str == null) {
+			// the recent patch changed InstallLoc to Install Dir. I don't know if the information it has is the same
+			str = WinRegistry.valueForKey(WinRegistry.HKEY_LOCAL_MACHINE, regPath, "Install Dir");
+		}
 		installLoc = str.substring(1, str.length() - 1);
 		this.sporebinFolder = sporebinFolder;
 	}
@@ -101,19 +105,19 @@ public class SporeGame {
 		
 		try {
 			SPORE = new SporeGame("SPORE", "Sporebin");
-		} catch (IllegalArgumentException | IllegalAccessException
-				| InvocationTargetException | IOException e) {
+		} catch (Exception e) {
 			System.err.println("Couldn't find Spore!");
 			e.printStackTrace();
+			SPORE = null;
 		}
 		
 		try {
 			GALACTIC_ADVENTURES = new SporeGame("SPORE_EP1", "SporebinEP1");
-		} catch (IllegalArgumentException | IllegalAccessException
-				| InvocationTargetException | IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.err.println("Couldn't find Galactic Adventures!");
 			e.printStackTrace();
+			GALACTIC_ADVENTURES = null;
 		}
 	}
 }

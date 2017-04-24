@@ -53,6 +53,9 @@ public class DBPFUnpackingTask extends SwingWorker<Void, Void> {
 		this.inputPath = inputPath;
 		this.converters = converters;
 		this.outputPath = project.getProjectPath().getAbsolutePath();
+		if (!this.outputPath.endsWith("\\")) {
+			this.outputPath += "\\";
+		}
 		this.parent = parent;
 	}
 	
@@ -60,7 +63,7 @@ public class DBPFUnpackingTask extends SwingWorker<Void, Void> {
 		int group = Hasher.getFileHash("sporemaster");
 		int name = Hasher.getFileHash("names");
 		for (DBPFItem item : items) {
-			if (item.group == group && item.name == name) {
+			if (item.key.getGroupID() == group && item.key.getInstanceID() == name) {
 				//TODO this forces it to be always uncompressed
 				byte[] arr = new byte[item.memSize];
 				in.seek(item.chunkOffset);
@@ -95,15 +98,15 @@ public class DBPFUnpackingTask extends SwingWorker<Void, Void> {
 			
 			for (DBPFItem item : index.items) 
 			{
-				String fileName = Hasher.getFileName(item.name) ;
+				String fileName = Hasher.getFileName(item.key.getInstanceID()) ;
 				
 				// skip autolocale files
-				if (item.group == 0x02FABF01 && fileName.startsWith("auto_")) {
+				if (item.key.getGroupID() == 0x02FABF01 && fileName.startsWith("auto_")) {
 					continue;
 				}
 				
-				String extension = Hasher.getTypeName(item.type);
-				String folderPath = outputPath + Hasher.getFileName(item.group) + "\\";
+				String extension = Hasher.getTypeName(item.key.getTypeID());
+				String folderPath = outputPath + Hasher.getFileName(item.key.getGroupID()) + "\\";
 				String path = folderPath + fileName + 
 						"." + extension;
 				
@@ -118,7 +121,7 @@ public class DBPFUnpackingTask extends SwingWorker<Void, Void> {
 //					long time2 = System.currentTimeMillis();
 					boolean convert = false;
 					for (ConvertAction converter : converters) {
-						if (converter.isValid(item.type)) 
+						if (converter.isValid(item.key)) 
 						{
 //							FileStreamAccessor out = new FileStreamAccessor(path + "." + converter.getOutputExtension(extension), "rw");
 							String outputExtension = converter.getOutputExtension(extension);

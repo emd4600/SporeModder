@@ -9,11 +9,21 @@ import sporemodder.files.formats.argscript.ArgScriptCommand;
 import sporemodder.files.formats.argscript.ArgScriptException;
 import sporemodder.utilities.Hasher;
 import sporemodder.utilities.names.NameRegistry;
+import sporemodder.files.formats.spui.SPUIObject.SPUIDefaultObject;
 
-public class SPUIStructResource implements SPUIResource {
+public class SPUIStructResource extends SPUIDefaultObject implements SPUIResource {
 	// this resource probably points to the structure/class that will be used for a determined block
 	
 	protected int hash;
+	
+	@Override
+	public String getTypeString() {
+		return getHashString();
+	}
+	
+	public int getObjectType() {
+		return hash;
+	}
 	
 	@Override
 	public void read(InputStreamAccessor in, int version) throws IOException {
@@ -65,5 +75,11 @@ public class SPUIStructResource implements SPUIResource {
 		return new ArgScriptCommand("StructResource", Hasher.getName(hash, MainApp.getRegistry(NameRegistry.NAME_SPUI)));
 	}
 	
-	
+	@Override
+	public int getBlockIndex() {
+		if (parent == null || parent.getResources() == null) {
+			return -1;
+		}
+		return parent.getResources().indexOf(this);
+	}
 }

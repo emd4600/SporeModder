@@ -9,7 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import sporemodder.files.FileStreamAccessor;
@@ -45,7 +44,7 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 	private final SPUIResourceList resources = new SPUIResourceList();
 	private final List<SPUIBlock> blocks = new ArrayList<SPUIBlock>();
 	
-	public Object get(short index) {
+	public SPUIObject get(short index) {
 		int count = resources.getValidResourcesCount();
 		if (index >= count) {
 			return blocks.get(index - count);
@@ -54,23 +53,26 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 		}
 	}
 	
-	public void read(InputStreamAccessor in) throws IOException {
+	public void readResources(InputStreamAccessor in) throws IOException {
 		int magic = in.readLEInt();
 		expect(magic, MAGIC, "SPUI-H001", in.getFilePointer());
 		
 		version = in.readLEShort();
 		expect(version, LAST_SUPPORTED_VERSION, CompareFunc.LESS_EQUAL, "SPUI-H002", in.getFilePointer());
 
-		resources.read(in, version);
+		resources.read(in, version, this);
+	}
+	
+	public boolean read(InputStreamAccessor in) throws IOException {
+		if (in.length() == 0) {
+			return false;
+		}
+		readResources(in);
 		int resourcesCount = resources.getResourceCount();
 		
-		int validResourcesCount = resources.getValidResourcesCount();
-		
-		int secNum = 0;
 		int var = in.readLEShort();
 		while(true)
 		{
-			int blockPos = in.getFilePointer() - 2;
 			expect(var, 0x5FF5, "SPUI-B001", in.getFilePointer());
 			// this can't be bigger than resourcesCount
 			int resourceIndex = in.readLEUShort();
@@ -81,7 +83,6 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 			expect(resourceIndex, resourcesCount, CompareFunc.LESS, "SPUI-B003", in.getFilePointer());
 			
 			SPUIBlock block = new SPUIBlock(this);
-			block.blockIndex = validResourcesCount + secNum++;
 			block.read(in, resourceIndex);
 			
 			blocks.add(block);
@@ -92,6 +93,8 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 			
 			var = in.readLEShort();
 		}
+		
+		return true;
 	}
 	
 	public void write(OutputStreamAccessor out) throws IOException {
@@ -129,11 +132,13 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 			
 			if (keyword.equals("FileResource")) {
 				SPUIFileResource res = new SPUIFileResource();
+				res.setParent(this);
 				res.parse(c);
 				resources.add(res);
 			}
 			else if (keyword.equals("ResourceType3")) {
-				SPUIResourceType3 res = new SPUIResourceType3();
+				SPUIHitMaskResource res = new SPUIHitMaskResource();
+				res.setParent(this);
 				res.parse(c);
 				resources.add(res);
 			}
@@ -143,6 +148,7 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 		for (ArgScriptBlock b : blocks) {
 			SPUIBlock block = new SPUIBlock(this);
 			block.parse(b);
+			block.setParent(this);
 			this.blocks.add(block);
 		}
 	}
@@ -162,6 +168,9 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 		as.addBlankLine();
 		
 		for (SPUIBlock block : blocks) {
+			if (index++ == 893) {
+				System.out.println("BREAK");
+			}
 			as.putBlock(block.toBlock());
 			as.addBlankLine();
 		}
@@ -172,14 +181,10 @@ public class SPUIMain extends FileStructure implements FileFormatStructure {
 	public void printAllErrors() {
 		printErrors();
 		
-		// Resources don't use the FileStructure class
-		for (SPUIBlock block : blocks) block.printErrors();
 	}
 	
 	public List<FileStructureError> getAllErrors() {
 		List<FileStructureError> errors = new ArrayList<FileStructureError>(getErrors());
-		
-		for (SPUIBlock block : blocks) errors.addAll(block.getErrors());
 		
 		return errors;
 	}
