@@ -24,8 +24,8 @@ public class cSPUITooltipWinProc extends SPUIDefaultWinProc {
 		super(block);
 		
 		addUnassignedText(block, 0x03754D73, new LocalizedText("Tooltips"));
-		addUnassignedInt(block, 0x03754D74, 0);
-		addUnassignedInt(block, 0x04EBD284, 0);
+		addUnassignedIntName(block, 0x03754D74, null);
+		addUnassignedIntName(block, 0x04EBD284, null);
 		
 		tooltipText = SectionText.getValues(block.getSection(0x03754D75, SectionText.class), new LocalizedText[] {null}, 1)[0];
 		
@@ -42,8 +42,8 @@ public class cSPUITooltipWinProc extends SPUIDefaultWinProc {
 		super(viewer);
 		
 		unassignedProperties.put(0x03754D73, new LocalizedText("Tooltips"));
-		unassignedProperties.put(0x03754D74, (int) 0);
-		unassignedProperties.put(0x04EBD284, (int) 0);
+		unassignedProperties.put(0x03754D74, null);
+		unassignedProperties.put(0x04EBD284, null);
 		unassignedProperties.put(0x04DD1A0D, (int) 0);
 	}
 	
@@ -52,8 +52,8 @@ public class cSPUITooltipWinProc extends SPUIDefaultWinProc {
 		SPUIBlock block = (SPUIBlock) super.saveComponent(builder);
 		
 		saveText(builder, block, 0x03754D73);
-		saveInt(builder, block, 0x03754D74);
-		saveInt(builder, block, 0x04EBD284);
+		saveIntName(builder, block, 0x03754D74);
+		saveIntName(builder, block, 0x04EBD284);
 		
 		if (tooltipText != null) {
 			builder.addText(block, 0x03754D75, new LocalizedText[] {tooltipText});

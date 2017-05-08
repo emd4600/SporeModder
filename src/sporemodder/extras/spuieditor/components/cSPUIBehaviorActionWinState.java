@@ -10,6 +10,8 @@ public class cSPUIBehaviorActionWinState extends SPUIDefaultComponent {
 
 	public static final int TYPE = 0x033F7AD6;
 	
+	// private static final int[] PROPERTIES = new int[] {0x03335C12, 0x03335C13, 0x03335C14, 0x03335C15};
+	
 	public cSPUIBehaviorActionWinState(SPUIBlock block) throws InvalidBlockException {
 		super(block);
 		//24B5C98
@@ -18,8 +20,8 @@ public class cSPUIBehaviorActionWinState extends SPUIDefaultComponent {
 		addUnassignedShort(block, 0x03335C14, null);
 		addUnassignedShort(block, 0x03335C15, null);
 		addUnassignedInt(block, 0x033F7F81, 0);
-		addUnassignedInt(block, 0x033F7F8C, 0);
-		addUnassignedInt(block, 0x033F7F89, 0);
+		addUnassignedIntName(block, 0x033F7F8C, null);
+		addUnassignedIntName(block, 0x033F7F89, null);
 		addUnassignedInt(block, 0x0341F297, 0);
 	}
 	
@@ -31,8 +33,8 @@ public class cSPUIBehaviorActionWinState extends SPUIDefaultComponent {
 		unassignedProperties.put(0x03335C14, null);
 		unassignedProperties.put(0x03335C15, null);
 		unassignedProperties.put(0x033F7F81, (int) 0);
-		unassignedProperties.put(0x033F7F8C, (int) 0);
-		unassignedProperties.put(0x033F7F89, (int) 0);
+		unassignedProperties.put(0x033F7F8C, null);
+		unassignedProperties.put(0x033F7F89, null);
 		unassignedProperties.put(0x0341F297, (int) 0);
 	}
 	
@@ -46,8 +48,8 @@ public class cSPUIBehaviorActionWinState extends SPUIDefaultComponent {
 		saveReference(builder, block, 0x03335C14);
 		saveReference(builder, block, 0x03335C15);
 		saveInt(builder, block, 0x033F7F81);
-		saveInt(builder, block, 0x033F7F8C);
-		saveInt(builder, block, 0x033F7F89);
+		saveIntName(builder, block, 0x033F7F8C);
+		saveIntName(builder, block, 0x033F7F89);
 		saveInt(builder, block, 0x0341F297);
 		
 		return block;
@@ -64,4 +66,18 @@ public class cSPUIBehaviorActionWinState extends SPUIDefaultComponent {
 		return other;
 	}
 	
+//	@Override
+//	public MutableTreeNode fillHierarchyTree(DefaultTreeModel model, MutableTreeNode parent, int index) {
+//		super.fillHierarchyTree(model, parent, index);
+//		
+//		int ind = 0;
+//		for (int i = 0; i < PROPERTIES.length; i++) {
+//			Object obj = unassignedProperties.get(PROPERTIES[i]);
+//			if (obj != null) {
+//				((SPUIComponent) obj).fillHierarchyTree(model, node, ind++);
+//			}
+//		}
+//		
+//		return node;
+//	}
 }

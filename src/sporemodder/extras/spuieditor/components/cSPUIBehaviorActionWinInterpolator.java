@@ -10,6 +10,7 @@ public class cSPUIBehaviorActionWinInterpolator extends SPUIDefaultComponent {
 
 	public static final int TYPE = 0x0254CB67;
 	
+	// private static final int[] PROPERTIES = new int[] {0x0254CDFB, 0x0254CDFC, 0x03335C12, 0x03335C13, 0x03335C14, 0x03335C15};
 	
 	public cSPUIBehaviorActionWinInterpolator(SPUIBlock block) throws InvalidBlockException {
 		super(block);
@@ -62,5 +63,20 @@ public class cSPUIBehaviorActionWinInterpolator extends SPUIDefaultComponent {
 		copyComponent(other, propagate);
 		return other;
 	}
+	
+//	@Override
+//	public MutableTreeNode fillHierarchyTree(DefaultTreeModel model, MutableTreeNode parent, int index) {
+//		super.fillHierarchyTree(model, parent, index);
+//		
+//		int ind = 0;
+//		for (int i = 0; i < PROPERTIES.length; i++) {
+//			Object obj = unassignedProperties.get(PROPERTIES[i]);
+//			if (obj != null) {
+//				((SPUIComponent) obj).fillHierarchyTree(model, node, ind++);
+//			}
+//		}
+//		
+//		return node;
+//	}
 	
 }

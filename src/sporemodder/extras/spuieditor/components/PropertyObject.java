@@ -26,6 +26,7 @@ import sporemodder.files.formats.spui.SPUINumberSections.SectionByte2;
 import sporemodder.files.formats.spui.SPUINumberSections.SectionFloat;
 import sporemodder.files.formats.spui.SPUINumberSections.SectionInt;
 import sporemodder.files.formats.spui.SPUINumberSections.SectionInt2;
+import sporemodder.files.formats.spui.SPUINumberSections.SectionIntName;
 import sporemodder.files.formats.spui.SPUINumberSections.SectionShort;
 import sporemodder.files.formats.spui.SPUIObject;
 import sporemodder.files.formats.spui.SPUISectionContainer;
@@ -87,6 +88,20 @@ public abstract class PropertyObject {
 		unassignedProperties.put(property, SectionInt.getValues(block, property, new int[] {defaultValue}, 1)[0]);
 	}
 	
+	public void addUnassignedIntName(SPUISectionContainer block, int property, String defaultValue) throws InvalidBlockException {
+		String value = SectionIntName.getValues(block, property, new String[] {defaultValue}, 1)[0];
+		if (value != null) {
+			if (value.equals("0") || value.length() == 0) {
+				// no text looks better
+				value = null;
+			}
+			else if (value.startsWith("$")) {
+				value = value.substring(1);
+			}
+		}
+		unassignedProperties.put(property, value);
+	}
+	
 	public void addUnassignedFloat(SPUISectionContainer block, int property, float defaultValue) throws InvalidBlockException {
 		unassignedProperties.put(property, SectionFloat.getValues(block.getSection(property, SectionFloat.class), new float[] {defaultValue}, 1)[0]);
 	}
@@ -136,6 +151,12 @@ public abstract class PropertyObject {
 		Object value = unassignedProperties.get(property);
 		
 		builder.addInt(block, property, new int[] {value != null ? (int) value : 0});
+	}
+	
+	public void saveIntName(SPUIBuilder builder, SPUISectionContainer block, int property) {
+		Object value = unassignedProperties.get(property);
+		
+		builder.addIntName(block, property, new String[] {value != null ? (String) value : null});
 	}
 	
 	public void saveInt2(SPUIBuilder builder, SPUISectionContainer block, int property) {
@@ -344,7 +365,8 @@ public abstract class PropertyObject {
 				value = unassignedProperties.get(property.getProxyID());
 				
 				if (value != null && property.getType().equals("uint32") && property.getValuesEnum() == null && "hex".equals(property.getFormat())) {
-					return "0x" + Integer.toHexString((int) value);
+					// return "0x" + Integer.toHexString((int) value);
+					return (String) value;
 				}
 				return value;
 			}

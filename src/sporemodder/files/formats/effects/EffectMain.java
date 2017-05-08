@@ -939,6 +939,12 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 				ArgScriptBlock block = effect.toBlock();
 				out.write(block.toString(0));
 				out.newLine();
+				
+				if (effect instanceof EffectComponent)
+				{
+					out.write("# " + Integer.toString(((EffectComponent) effect).position));
+					out.newLine();
+				}
 			} else {
 				if (effect instanceof MapResource) {
 					out.write(effect.toCommand().toString());
@@ -1224,7 +1230,8 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 //		String file = "base.effdir";
 		
 //		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Planet\\planet.effdir\\";
-		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Games\\games.effdir\\";
+//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Games\\games.effdir\\";
+		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Games\\games2.effdir\\";
 //		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Editors\\editors.effdir\\";
 //		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_CSA\\csa.effdir\\";
 //		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Base\\base.effdir\\";

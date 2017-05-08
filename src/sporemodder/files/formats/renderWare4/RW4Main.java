@@ -579,13 +579,13 @@ public class RW4Main extends FileStructure implements FileFormatStructure {
 		
 		//String inputPath = "E:\\Eric\\SporeModder\\Projects\\CreaturePartTest\\editor_rigblocks~\\TEST-ce_mouths_chameleorex.rw4\\TEST-ce_mouths_chameleorex.rw4";
 		
-		//String inputPath = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\editor_rigblocks~\\be_classic_01.rw4\\raw.rw4";
+		//String inputPath = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\editor_rigblocks~\\ce_grasper_radial_01-symmetric.rw4\\raw.rw4";
 		
-		//String inputPath = "C:\\Users\\Eric\\Desktop\\untitled.rw4";
+		String inputPath = "C:\\Users\\Eric\\Desktop\\ce_detail_supernatural_02.rw4";
 		
 		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\Horn.rw4";
 		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\StaticModel_Cube.rw4";
-		String inputPath = "E:\\Eric\\SporeModder\\Projects\\SporeModder Models Test\\ModAPITestModels\\StaticModel_Cube.rw4";
+		//String inputPath = "E:\\Eric\\SporeModder\\Projects\\SporeModder Models Test\\ModAPITestModels\\StaticModel_Cube.rw4";
 		
 		//String inputPath = "C:\\Users\\Eric\\Desktop\\Working_StaticModel_Cube.rw4";
 		

@@ -45,6 +45,10 @@ public class StyleChooser extends JDialog {
 	}
 	
 	private static final String PREVIEW_TEXT = "AaBbCcDdEeFfGg\r\n1234567890\r\n!@#%^&*()";
+	private static final String NO_PREVIEW_TEXT = "NO PREVIEW\r\nThe specified style does not exist.";
+	
+	private static final Color DEFAULT_COLOR = Color.black;
+	private static final Color NO_PREVIEW_COLOR = Color.red;
 
 	private final JPanel contentPanel = new JPanel();
 	private JTextField tfManualEntry;
@@ -60,22 +64,22 @@ public class StyleChooser extends JDialog {
 	private StyleValueAction action;
 	
 	private boolean wasCancelled;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		
-		try {
-			SPUIEditor.loadStyleSheet();
-			
-			StyleChooser dialog = new StyleChooser(null, "Choose a style");
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	
+//	/**
+//	 * Launch the application.
+//	 */
+//	public static void main(String[] args) {
+//		
+//		try {
+//			SPUIEditor.loadStyleSheet();
+//			
+//			StyleChooser dialog = new StyleChooser(null, "Choose a style");
+//			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+//			dialog.setVisible(true);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	/**
 	 * Create the dialog.
@@ -122,7 +126,7 @@ public class StyleChooser extends JDialog {
 							private void action() {
 								previewPanel.repaint();
 								if (action != null) {
-									action.styleChanged(tfManualEntry.getText());
+									action.styleChanged(getManualStyleName(tfManualEntry.getText()));
 								}
 							}
 							@Override
@@ -218,11 +222,20 @@ public class StyleChooser extends JDialog {
 					
 					Graphics2D g2d = (Graphics2D) g.create();
 					
+					String previewText = PREVIEW_TEXT;
+					Color previewColor = DEFAULT_COLOR;
+					
+					StyleSheetInstance instance = getSelectedStyleSheetInstance();
+					if (instance == null) {
+						previewText = NO_PREVIEW_TEXT;
+						previewColor = NO_PREVIEW_COLOR;
+					}
+					
 					StyleSheetInstance.paintText(
 							/* graphics */	g2d, 
-							/* style */		getSelectedStyleSheetInstance(), 
-							/* text */		PREVIEW_TEXT, 
-							/* fontColor */	Color.black, 
+							/* style */		instance, 
+							/* text */		previewText, 
+							/* fontColor */	previewColor, 
 							/* realBounds*/	new Rectangle(0, 0, previewPanel.getWidth(), previewPanel.getHeight()), 
 							/* margins*/	new float[] {15, 15, 15, 15});
 				}
@@ -312,7 +325,17 @@ public class StyleChooser extends JDialog {
 	
 	public StyleSheetInstance getSelectedStyleSheetInstance() {
 		if (rdbtnManualEntry.isSelected()) {
-			return StyleSheet.getActiveStyleSheet().getStyleInstance(tfManualEntry.getText());
+			String text = tfManualEntry.getText();
+			StyleSheetInstance instance = StyleSheet.getActiveStyleSheet().getStyleInstance(text);
+			
+			if (instance == null) {
+				// users might use a hash without 0x and #, consider this case
+				try {
+					instance = StyleSheet.getActiveStyleSheet().getStyleInstance("0x" + text);
+				} catch (Exception e) {};
+			}
+			
+			return instance;
 		}
 		else {
 			if (stylesList.isSelectionEmpty()) {
@@ -323,9 +346,24 @@ public class StyleChooser extends JDialog {
 		}
 	}
 	
+	private String getManualStyleName(String value) {
+		try {
+			StyleSheetInstance style = StyleSheet.getActiveStyleSheet().getStyleInstance(value);
+			if (style == null) {
+				// users might use a hash without 0x and #, consider this case
+				style = StyleSheet.getActiveStyleSheet().getStyleInstance("0x" + value);
+				if (style != null) {
+					value = "0x" + value;
+				}
+			}
+		} catch (Exception e) {};
+		
+		return value;
+	}
+	
 	public String getSelectedStyleName() {
 		if (rdbtnManualEntry.isSelected()) {
-			return tfManualEntry.getText();
+			return getManualStyleName(tfManualEntry.getText());
 		}
 		else {
 			if (stylesList.isSelectionEmpty()) {
@@ -338,6 +376,7 @@ public class StyleChooser extends JDialog {
 	
 	public void setSelectedStyle(String styleName) {
 		StyleSheetInstance instance = StyleSheet.getActiveStyleSheet().getStyleInstance(styleName);
+
 		
 		if (instance != null) {
 			stylesList.setSelectedValue(instance, true);

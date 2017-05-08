@@ -314,11 +314,11 @@ public class RibbonEffect extends EffectComponent {
 		if ((c = block.getCommand("material")) != null) {
 			texture.parse(c);
 			texture.setDrawMode(TextureSlot.DRAWMODE_NONE);
-			flags &= FLAG_TEXTURE;
+			flags |= FLAG_TEXTURE;
 		}
 		if ((c = block.getCommand("texture")) != null) {
 			texture.parse(c);
-			flags &= FLAG_TEXTURE;
+			flags |= FLAG_TEXTURE;
 			
 			if (c.hasFlag("acceptComposite")) flags |= FLAG_ACCEPTCOMPOSITE;
 			else flags &= ~FLAG_ACCEPTCOMPOSITE;
@@ -390,6 +390,11 @@ public class RibbonEffect extends EffectComponent {
 			if (c.hasFlag("killOutsideMap")) {
 				flags |= FLAG_KILLOUTSIDEMAP;
 			}
+		}
+		
+		String flagsArg = block.getOptionArg("flags");
+		if (flagsArg != null) {
+			flags = Hasher.decodeInt(flagsArg);
 		}
 		
 		return true;

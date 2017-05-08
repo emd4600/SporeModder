@@ -116,7 +116,9 @@ public class CellFormat extends PropertyObject {
 					if (styleName == null || styleName.isEmpty()) {
 						styleName = "DefaultStyle";
 					}
+					
 					style = StyleSheet.getActiveStyleSheet().getStyleInstance(styleName);
+					
 					break;
 					
 				case 0x00000002:

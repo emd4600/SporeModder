@@ -16,8 +16,8 @@ public class cSPUIBehaviorPredicateWinState extends SPUIDefaultComponent {
 		addUnassignedBoolean(block, 0x02521AFB, false);
 		addUnassignedInt(block, 0x02521AFA, 0);
 		addUnassignedInt(block, 0x033CDC1B, 0);
-		addUnassignedInt(block, 0x033CDCF4, 0);
-		addUnassignedInt(block, 0x033CDC22, 0);
+		addUnassignedIntName(block, 0x033CDCF4, null);
+		addUnassignedIntName(block, 0x033CDC22, null);
 		addUnassignedInt(block, 0x0341EF60, 0);
 	}
 	
@@ -27,8 +27,8 @@ public class cSPUIBehaviorPredicateWinState extends SPUIDefaultComponent {
 		unassignedProperties.put(0x02521AFB, (boolean) false);
 		unassignedProperties.put(0x02521AFA, (int) 0);
 		unassignedProperties.put(0x033CDC1B, (int) 0);
-		unassignedProperties.put(0x033CDCF4, (int) 0);
-		unassignedProperties.put(0x033CDC22, (int) 0);
+		unassignedProperties.put(0x033CDCF4, null);
+		unassignedProperties.put(0x033CDC22, null);
 		unassignedProperties.put(0x0341EF60, (int) 0);
 	}
 	
@@ -40,8 +40,8 @@ public class cSPUIBehaviorPredicateWinState extends SPUIDefaultComponent {
 		saveBoolean(builder, block, 0x02521AFB);
 		saveInt(builder, block, 0x02521AFA);
 		saveInt(builder, block, 0x033CDC1B);
-		saveInt(builder, block, 0x033CDCF4);
-		saveInt(builder, block, 0x033CDC22);
+		saveIntName(builder, block, 0x033CDCF4);
+		saveIntName(builder, block, 0x033CDC22);
 		saveInt(builder, block, 0x0341EF60);
 		
 		return block;

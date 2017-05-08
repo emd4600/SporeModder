@@ -341,7 +341,9 @@ public class WinDialog extends Window {
 					if (titleStyleName == null || titleStyleName.isEmpty()) {
 						titleStyleName = "DefaultStyle";
 					}
+					
 					titleStyle = StyleSheet.getActiveStyleSheet().getStyleInstance(titleStyleName);
+					
 					break;
 				case 0xEEC2A007: titleColor = (Color) value; break;
 				case 0xEEC2A008: System.arraycopy((float[]) value, 0, titleMargins, 0, titleMargins.length); break;

@@ -132,7 +132,7 @@ public class Window extends SPUIDefaultComponent implements WinComponent {
 			}
 		}
 		
-		addUnassignedInt(block, 0xEEC1B002, 0);
+		addUnassignedIntName(block, 0xEEC1B002, null);
 		addUnassignedInt(block, 0xEEC1B003);
 		addUnassignedInt(block, 0xEEC1B009);
 	}
@@ -190,7 +190,7 @@ public class Window extends SPUIDefaultComponent implements WinComponent {
 		//builder.addInt(block, 0xEEC1B001, new int[] {name == null ? 0 : Hasher.getFileHash(name)});
 		builder.addIntName(block, 0xEEC1B001, new String[] {name});
 		
-		saveInt(builder, block, 0xEEC1B002);
+		saveIntName(builder, block, 0xEEC1B002);
 		if (unassignedProperties.containsKey(0xEEC1B003)) {
 			saveInt(builder, block, 0xEEC1B003);
 		}
@@ -952,6 +952,7 @@ public class Window extends SPUIDefaultComponent implements WinComponent {
 				break;
 				
 			case 0xEEC1B00E:
+				
 				styleName = (String) value;
 				if (styleName == null || styleName.isEmpty()) {
 					styleName = "DefaultStyle";

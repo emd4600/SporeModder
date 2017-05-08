@@ -14,7 +14,7 @@ public class cSPUIBehaviorWinEventBase extends cSPUIBehaviorEventBase {
 
 		addUnassignedInt(block, 0x0255EAF8, 0);
 		addUnassignedBoolean(block, 0x0255EAF9, false);
-		addUnassignedInt(block, 0x0255EAFA, 0);
+		addUnassignedIntName(block, 0x0255EAFA, null);
 	}
 	
 	public cSPUIBehaviorWinEventBase(SPUIViewer viewer) {
@@ -22,7 +22,7 @@ public class cSPUIBehaviorWinEventBase extends cSPUIBehaviorEventBase {
 		
 		unassignedProperties.put(0x0255EAF8, (int) 0);
 		unassignedProperties.put(0x0255EAF9, (boolean) false);
-		unassignedProperties.put(0x0255EAFA, (int) 0);
+		unassignedProperties.put(0x0255EAFA, null);
 	}
 	
 	@Override
@@ -32,7 +32,7 @@ public class cSPUIBehaviorWinEventBase extends cSPUIBehaviorEventBase {
 				
 		saveInt(builder, block, 0x0255EAF8);
 		saveBoolean(builder, block, 0x0255EAF9);
-		saveInt(builder, block, 0x0255EAFA);
+		saveIntName(builder, block, 0x0255EAFA);
 		
 		return block;
 	}

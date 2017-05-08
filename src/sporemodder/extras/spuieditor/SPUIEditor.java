@@ -180,7 +180,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 				MainApp.setCurrentProject(MainApp.loadProject("SPUI"));
 				
 //				String path = "layouts_atlas~/custom.spui";
-//				String path = "layouts_atlas~/custom.spui.spui_t";
+				String path = "layouts_atlas~/custom.spui.spui_t";
 //				String path = "layouts_atlas~/#1E01396F.spui";
 //				String path = "layouts_atlas~/#8DC0DB97.spui";
 //				String path = "layouts_atlas~/#834B03AF.spui";
@@ -211,7 +211,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 //				String path = "layouts_atlas~/gamesettingscamera.spui";
 //				String path = "layouts_atlas~/DebugConsole.spui";
 				
-				MainApp.setCurrentProject(MainApp.loadProject("Spore_Layouts"));
+//				MainApp.setCurrentProject(MainApp.loadProject("Spore_Layouts"));
 //				
 //				String path = "layouts_atlas_2~/#BA5EE251.spui";
 //				String path = "layouts_atlas~/#6C4E59FB.spui";
@@ -224,7 +224,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 //				String path = "layouts_atlas~/#3D96118D.spui";
 //				String path = "layouts_atlas~/#5ED10964.spui";
 //				String path = "layouts_atlas~/#5B168EB1.spui";
-				String path = "layouts_atlas~/GGENewGameFlowUIv1-EP1.spui";
+//				String path = "layouts_atlas~/GGENewGameFlowUIv1-EP1.spui";
 				
 //				MainApp.setCurrentProject(MainApp.loadProject("REborn - Multiplayer Editor"));
 				
@@ -1087,48 +1087,59 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 	public void windowOpened(WindowEvent e) {
 	}
 	
-	private void save(File file, boolean isText) {
-		SPUIBuilder builder = new SPUIBuilder();
-		
-		for (SPUIWinProc modifier : viewer.getLayoutWindow().getModifiers()) {
-			builder.addComponent(modifier);
+	private boolean save(File file, boolean isText) {
+		try {
+			SPUIBuilder builder = new SPUIBuilder();
+			
+			for (SPUIWinProc modifier : viewer.getLayoutWindow().getModifiers()) {
+				builder.addComponent(modifier);
+			}
+			for (WinComponent window : viewer.getLayoutWindow().getChildren()) {
+				builder.addComponent(window);
+			}
+			
+			return save(file, isText, builder);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(SPUIEditor.this, "The SPUI couldn't be saved:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			return false;
 		}
-		for (WinComponent window : viewer.getLayoutWindow().getChildren()) {
-			builder.addComponent(window);
-		}
-		
-		save(file, isText, builder);
 	}
 	
-	private void save(File file, boolean isText, SPUIBuilder builder) {
+	private boolean save(File file, boolean isText, SPUIBuilder builder) {
 		if (isText) {
 			try (BufferedWriter out = new BufferedWriter(new FileWriter(file))) {
 				builder.generateSPUI().toArgScript().write(out);
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(SPUIEditor.this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				return true;
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(SPUIEditor.this, "The SPUI couldn't be saved:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				return false;
 			}
 		}
 		else {
 			try (FileStreamAccessor out = new FileStreamAccessor(file, "rw", true)) {
 				builder.generateSPUI().write(out);
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(SPUIEditor.this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				return true;
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(SPUIEditor.this, "The SPUI couldn't be saved:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				return false;
 			}
 		}
 	}
 	
 	private void save() {
-		savedActionIndex = currentAction;
-		updateIsSaved();
 		
-		save(originalFile == null ? MainApp.getActiveFile() : originalFile, isTextSPUI);
-		
-		if (saveAction != null) {
-			saveAction.actionPerformed(new ActionEvent(SPUIEditor.this, 0, null));
+		if (save(originalFile == null ? MainApp.getActiveFile() : originalFile, isTextSPUI)) {
+			savedActionIndex = currentAction;
+			updateIsSaved();
+			
+			if (saveAction != null) {
+				saveAction.actionPerformed(new ActionEvent(SPUIEditor.this, 0, null));
+			}
+			
+			fillHierarchyTree();
+			setSelectedComponent(viewer.getActiveComponent());
 		}
 		
-		fillHierarchyTree();
-		setSelectedComponent(viewer.getActiveComponent());
 	}
 	
 	private void saveAs() {
