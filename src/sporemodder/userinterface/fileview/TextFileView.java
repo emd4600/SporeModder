@@ -158,7 +158,7 @@ public class TextFileView extends FileView {
 			textPane.setEditorKit(new PfxEditorKit(this));
 		}
 		else {
-			textPane.setContentType("text/txt");
+			// textPane.setContentType("text/txt");  // this causes an annoying bug when debugging, just remove this
 			textPane.setEditorKit(new TxtEditorKit(this));
 		}
 		

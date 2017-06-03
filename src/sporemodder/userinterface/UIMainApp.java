@@ -67,6 +67,8 @@ public class UIMainApp extends JFrame {
 	
 	private UIConvertMenu mnConvert;
 	
+	private ConsoleDialog consoleDialog;
+	
 	public UIProjectPanel getProjectPanel() {
 		return projectPanel;
 	}
@@ -216,6 +218,8 @@ public class UIMainApp extends JFrame {
         pane.add(barPanel, BorderLayout.NORTH);
         
         addMenu();
+        
+        consoleDialog = ConsoleDialog.redirectConsole();
 		
 		//// ------------ ////
 		
@@ -244,5 +248,9 @@ public class UIMainApp extends JFrame {
 	
 	public void updateProjectName() {
 		projectPanel.updateProjectName();
+	}
+	
+	public ConsoleDialog getConsoleDialog() {
+		return consoleDialog;
 	}
 }

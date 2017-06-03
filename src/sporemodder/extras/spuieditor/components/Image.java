@@ -241,7 +241,12 @@ public class Image extends SPUIDefaultComponent {
 	
 	@Override
 	public boolean isUnique() {
-		return object == null || !(object instanceof SPUIResource);
+		if (resource == null || resource.isAtlas()) {
+			return object == null || !(object instanceof SPUIResource);
+		}
+		else {
+			return false;  // FileResources are not unique!
+		}
 	}
 	
 	public static boolean isValid(Image image) {

@@ -58,6 +58,7 @@ public interface SPUIComponent extends ComponentContainer {
 	 */
 	public void setSPUIViewer(SPUIViewer viewer);
 	
+	// Can this component only be added once?
 	public boolean isUnique();
 	
 	public boolean usesComponent(SPUIComponent component);

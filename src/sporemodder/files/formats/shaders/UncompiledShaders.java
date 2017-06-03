@@ -30,8 +30,11 @@ public class UncompiledShaders {
 
 	public static void main(String[] args) throws IOException {
 		
-		String inputPath = "E:\\Eric\\SporeMaster AG\\spore.unpacked\\#40212002\\#00000003.cpp";
-		String outputPath = "E:\\Eric\\Spore DLL Injection\\Shaders\\#40212002\\";
+//		String inputPath = "E:\\Eric\\SporeMaster AG\\spore.unpacked\\#40212002\\#00000003.cpp";
+//		String outputPath = "E:\\Eric\\Spore DLL Injection\\Shaders\\#40212002\\";
+		
+		String inputPath = "E:\\Downloads\\CompiledMaterials.package.unpacked\\#40212002\\#00000003.#0469A3F7";
+		String outputPath = "E:\\Eric\\Spore DLL Injection\\Shaders\\Darkspore #40212002\\";
 		
 		try (InputStreamAccessor in = new FileStreamAccessor(inputPath, "r")) {
 			

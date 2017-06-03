@@ -148,7 +148,7 @@ public class Window extends SPUIDefaultComponent implements WinComponent {
 		styleName = "DefaultStyle";
 		style = StyleSheet.getActiveStyleSheet().getInstance(styleName);
 		
-		unassignedProperties.put(0xEEC1B002, 0);
+		unassignedProperties.put(0xEEC1B002, null);
 		unassignedProperties.put(0xEEC1B003, 0);
 		unassignedProperties.put(0xEEC1B009, 0);
 	}

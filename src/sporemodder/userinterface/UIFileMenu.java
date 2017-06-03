@@ -131,6 +131,18 @@ public class UIFileMenu extends JMenu {
 		});
 		add(mntmSettings);
 		
+		JMenuItem mntmConsoleDialog = new JMenuItem("Show Console");
+		mntmConsoleDialog.setMnemonic(KeyEvent.VK_S);
+		mntmConsoleDialog.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				MainApp.getUserInterface().getConsoleDialog().toggleDialog();
+			}
+			
+		});
+		add(mntmConsoleDialog);
+		
 		add(new JSeparator());
 		
 		///////////////////////////////////////////////////////

@@ -1,6 +1,7 @@
 package sporemodder.files.formats.renderWare4;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import sporemodder.files.InputStreamAccessor;
@@ -69,6 +70,11 @@ public class RW4ModelHandle extends RW4Section {
 				+ ", " + Integer.toHexString(Float.floatToRawIntBits(unk4)) + ", " + Integer.toHexString(Float.floatToRawIntBits(unk6)) + ")");
 		System.out.println("\t[" + unk9 + ", " + unk11 + ", " + unk13 + "]\t(" + Integer.toHexString(Float.floatToRawIntBits(unk8)) 
 				+ ", " + Integer.toHexString(Float.floatToRawIntBits(unk10)) + ", " + Integer.toHexString(Float.floatToRawIntBits(unk12)) + ")");
+		System.out.println();
+		System.out.println("\t" + Arrays.toString(new float[] {unk2, unk3, unk4}));
+		System.out.println("\t" + Arrays.toString(new float[] {unk5, unk6, unk7}));
+		System.out.println("\t" + Arrays.toString(new float[] {unk8, unk9, unk10}));
+		System.out.println("\t" + Arrays.toString(new float[] {unk11, unk12, unk13}));
 	}
 	
 	@Override
