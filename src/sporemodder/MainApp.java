@@ -36,6 +36,7 @@ import sporemodder.files.formats.tlsa.TxtToTlsa;
 import sporemodder.userinterface.ErrorManager;
 import sporemodder.userinterface.ProjectTreeCellRenderer;
 import sporemodder.userinterface.UIMainApp;
+import sporemodder.userinterface.UIShaderManager;
 import sporemodder.userinterface.fileview.FileView;
 import sporemodder.userinterface.fileview.ImageFileView;
 import sporemodder.userinterface.fileview.TextFileView;
@@ -119,7 +120,7 @@ public class MainApp {
 		}
 	}
 	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 1, 2, VersionInfo.BETA);
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 2, 0, VersionInfo.BETA);
 	
 	private static final String PROPERTY_SAVE_MODE = "saveMode";
 	private static final String PROPERTY_SEARCHABLE_EXT = "searchableExtensions";
@@ -133,9 +134,13 @@ public class MainApp {
 	private static final String PROPERTY_COLOR_SOURCEMOD = "colorSourceMod";
 	private static final String PROPERTY_COLOR_MOD = "colorMod";
 	private static final String PROPERTY_SPUIEDITOR_ANIMATED = "spuiEditorRenderAnimated";
+	private static final String PROPERTY_FXC_PATH = "fxcPath";
 	private static final String SETTINGS_FILE = "settings.properties";
 	
 	private static final int MAX_PRESETS = 10;
+	
+	// for debugging purposes only
+	public static boolean redirectConsole = true;
 	
 	//TODO disable when compiling
 //	public static boolean DEBUG = false;
@@ -678,6 +683,10 @@ public class MainApp {
 		
 		settings.setProperty(PROPERTY_SPUIEDITOR_ANIMATED, Boolean.toString(SPUIViewer.RENDER_ANIMATED_ICONS));
 		
+		if (UIShaderManager.FXC_PATH != null) {
+			settings.setProperty(PROPERTY_FXC_PATH, UIShaderManager.FXC_PATH);
+		}
+		
 		try {
 			try (FileOutputStream out = new FileOutputStream(SETTINGS_FILE)) {
 				settings.store(out, null);
@@ -755,6 +764,8 @@ public class MainApp {
 		if (colorMod != null) ProjectTreeCellRenderer.COLOR_MOD = ProjectTreeCellRenderer.hex2Rgb(colorMod);
 		
 		SPUIViewer.RENDER_ANIMATED_ICONS = Boolean.parseBoolean(settings.getProperty(PROPERTY_SPUIEDITOR_ANIMATED, Boolean.toString(SPUIViewer.RENDER_ANIMATED_ICONS)));
+		
+		UIShaderManager.FXC_PATH = settings.getProperty(PROPERTY_FXC_PATH);
 	}
 	
 	private static Properties getDefaultSettings() {

@@ -219,7 +219,9 @@ public class UIMainApp extends JFrame {
         
         addMenu();
         
-        consoleDialog = ConsoleDialog.redirectConsole();
+        if (MainApp.redirectConsole) {
+        	consoleDialog = ConsoleDialog.redirectConsole();
+        }
 		
 		//// ------------ ////
 		

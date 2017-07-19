@@ -2,7 +2,6 @@ package sporemodder.userinterface.fileview;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelEvent;
@@ -39,7 +38,9 @@ import sporemodder.userinterface.syntaxpane.TxtView.TxtEditorKit;
 import sporemodder.userinterface.syntaxpane.PfxView.PfxEditorKit;
 import sporemodder.userinterface.syntaxpane.TextLineNumber;
 import sporemodder.userinterface.syntaxpane.TlsaView.TlsaEditorKit;
-import sporemodder.userinterface.syntaxpane.XmlView.XmlEditorKit;;
+import sporemodder.userinterface.syntaxpane.XmlView.XmlEditorKit;
+import sporemodder.userinterface.syntaxpane.MtlView.MtlEditorKit;
+import sporemodder.userinterface.syntaxpane.HlslView.HlslEditorKit;
 
 public class TextFileView extends FileView {
 	
@@ -142,20 +143,28 @@ public class TextFileView extends FileView {
 		scrollPane.setRowHeaderView(textLineNumber);
 		
 		if (path.endsWith(".xml")) {
-			textPane.setContentType("text/xml");
+			// textPane.setContentType("text/xml");
 			textPane.setEditorKit(new XmlEditorKit(this));
 		}
 		else if (path.endsWith(".spui_t")) {
-			textPane.setContentType("text/spui_t");
+			// textPane.setContentType("text/spui_t");
 			textPane.setEditorKit(new SpuiEditorKit(this));
 		}
 		else if (path.endsWith(".tlsa_t")) {
-			textPane.setContentType("text/tlsa_t");
+			// textPane.setContentType("text/tlsa_t");
 			textPane.setEditorKit(new TlsaEditorKit(this));
 		}
 		else if (path.endsWith(".pfx")) {
-			textPane.setContentType("text/pfx");
+			// textPane.setContentType("text/pfx");
 			textPane.setEditorKit(new PfxEditorKit(this));
+		}
+		else if (path.endsWith(".mtl")) {
+			// textPane.setContentType("text/pfx");
+			textPane.setEditorKit(new MtlEditorKit(this));
+		}
+		else if (path.endsWith(".hlsl") || path.endsWith(".fx")) {
+			// textPane.setContentType("text/pfx");
+			textPane.setEditorKit(new HlslEditorKit(this));
 		}
 		else {
 			// textPane.setContentType("text/txt");  // this causes an annoying bug when debugging, just remove this

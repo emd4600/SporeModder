@@ -13,6 +13,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -69,7 +70,7 @@ public class UIGeneralSettings extends SettingsCategory {
 	}
 	
 	@Override
-	public JPanel createPanel() {
+	public JPanel createPanel(JDialog parent) {
 		
 		defaultPackageName = project.useDefaultPackageName();
 		

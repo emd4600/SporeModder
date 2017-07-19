@@ -71,7 +71,7 @@ public class UIProjectSettings extends JDialog {
 			
 			JPanel containerPanel = new JPanel();
 			containerPanel.setLayout(new BorderLayout());
-			containerPanel.add(category.createPanel(), BorderLayout.NORTH);
+			containerPanel.add(category.createPanel(this), BorderLayout.NORTH);
 			containerPanel.add(buttonsPanel, BorderLayout.SOUTH);
 			
 			tabbedPane.addTab(category.getName(), containerPanel);

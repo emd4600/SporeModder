@@ -31,6 +31,7 @@ public class RW4Main extends FileStructure implements FileFormatStructure {
 	private final RW4Header header = new RW4Header();
 	private final List<RW4Section> sections = new ArrayList<RW4Section>();
 	
+	
 	public void read(InputStreamAccessor in) throws IOException, InstantiationException, IllegalAccessException {
 		header.read(in);
 		in.seek(header.section_index_begin);
@@ -46,6 +47,17 @@ public class RW4Main extends FileStructure implements FileFormatStructure {
 	        	in.seek(s.sectionInfo.pos);
 	        	s.read(in, sections); 
         	}
+        }
+	}
+	
+	public void readSections(InputStreamAccessor in) throws IOException, InstantiationException, IllegalAccessException {
+		in.seek(header.section_index_begin);
+        for (int i = 0; i < header.section_count; i++) {
+        	RW4Section.SectionInfo si = new RW4Section.SectionInfo();
+        	si.read(in, header.section_index_end1, i);
+        	RW4Section section = RW4Section.getType(si.type_code).newInstance();
+        	section.sectionInfo = si;
+        	sections.add(section);
         }
 	}
 	
@@ -233,9 +245,27 @@ public class RW4Main extends FileStructure implements FileFormatStructure {
 		for (RW4Section s : sections) {
 			s.printInfo();
 		}
+		
 		System.out.println();
+		
 		for (RW4Section s : sections) {
 			s.print();
+		}
+	}
+	
+	public void print(boolean printInfo, boolean printData) {
+		if (printInfo) {
+			for (RW4Section s : sections) {
+				s.printInfo();
+			}
+		}
+		
+		System.out.println();
+		
+		if (printData) {
+			for (RW4Section s : sections) {
+				s.print();
+			}
 		}
 	}
 	

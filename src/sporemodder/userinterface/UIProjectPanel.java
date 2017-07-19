@@ -548,7 +548,7 @@ public class UIProjectPanel extends JPanel {
 		if (project == null || node == null) {
 			return;
 		}
-		if (node.isLeaf())
+		if (node.isLeaf() && node.getParent() != null)
 		{
 			node = (ProjectTreeNode) node.getParent();
 		}

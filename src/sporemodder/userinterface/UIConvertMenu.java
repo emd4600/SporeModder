@@ -30,6 +30,7 @@ import sporemodder.userinterface.dialogs.UIDialogRast;
 import sporemodder.userinterface.dialogs.UIDialogRw4;
 import sporemodder.userinterface.dialogs.UIDialogSpui;
 import sporemodder.userinterface.dialogs.UIDialogTlsa;
+import sporemodder.userinterface.dialogs.UIDialogUncompiledShaders;
 import sporemodder.utilities.Hasher;
 import sporemodder.utilities.names.SimpleNameRegistry;
 
@@ -43,8 +44,13 @@ public class UIConvertMenu extends JMenu {
 	private JMenuItem mntmSpui;
 	private JMenuItem mntmPctp;
 	private JMenuItem mntmGait;
+	
 	private JMenuItem mntmTexturePatcher;
 	private JMenuItem mntmSpuiEditor;
+	
+	private JMenuItem mntmUncompiledShadersUnpacker;
+	private JMenuItem mntmCompiledShadersViewer;
+	private JMenuItem mntmMaterialsViewer;
 
 	public UIConvertMenu(String name) {
 		super(name);
@@ -243,6 +249,46 @@ public class UIConvertMenu extends JMenu {
 			}
 		});
 		add(mntmSpuiEditor);
+		
+		
+		add(new JSeparator());
+		///////////////////////////////////////////////////
+		/// MATERIAL RELATED DIALGOS ///
+		
+		mntmUncompiledShadersUnpacker = new JMenuItem("Uncompiled Shaders Unpacker");
+		mntmUncompiledShadersUnpacker.setMnemonic(KeyEvent.VK_X);
+		mntmUncompiledShadersUnpacker.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new UIDialogUncompiledShaders();
+			}
+		});
+		add(mntmUncompiledShadersUnpacker);
+		
+		mntmCompiledShadersViewer = new JMenuItem("Compiled Shaders Viewer");
+		mntmCompiledShadersViewer.setMnemonic(KeyEvent.VK_X);
+		mntmCompiledShadersViewer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				UIShaderManager.findFile();
+			}
+		});
+		add(mntmCompiledShadersViewer);
+		
+		mntmMaterialsViewer = new JMenuItem("Materials Viewer");
+		mntmMaterialsViewer.setMnemonic(KeyEvent.VK_X);
+		mntmMaterialsViewer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					UIMaterialManager.showChooserDialog();
+				} catch (InstantiationException | IllegalAccessException | IOException e1) {
+					JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Error: the material viewer could not be opened.", "Error", JOptionPane.ERROR_MESSAGE);
+					e1.printStackTrace();
+				}
+			}
+		});
+		add(mntmMaterialsViewer);
 	}
 
 	public void update() {

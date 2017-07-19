@@ -27,7 +27,19 @@ public class D3DStateTypes {
 
 		return null;
 	}
-	static enum D3DBOOLEAN implements D3DStateEnum {
+	public static enum D3DPRIMITIVETYPE implements D3DStateEnum {
+		D3DPT_POINTLIST(1),
+		D3DPT_LINELIST(2),
+		D3DPT_LINESTRIP(3),
+		D3DPT_TRIANGLELIST(4),
+		D3DPT_TRIANGLESTRIP(5),
+		D3DPT_TRIANGLEFAN(6);
+		int id;
+		private D3DPRIMITIVETYPE(int id) { this.id = id; }
+		public static D3DPRIMITIVETYPE getById(int id) { for (D3DPRIMITIVETYPE state : values())  if (state.id == id) return state; return null; }
+		public int getId() { return id; }
+	}
+	public static enum D3DBOOLEAN implements D3DStateEnum {
 		FALSE(0),
 		TRUE(1);
 		int id;
@@ -35,7 +47,7 @@ public class D3DStateTypes {
 		public static D3DBOOLEAN getById(int id) { for (D3DBOOLEAN state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DZBUFFERTYPE implements D3DStateEnum {
+	public static enum D3DZBUFFERTYPE implements D3DStateEnum {
 		D3DZB_FALSE(0),
 		D3DZB_TRUE(1),
 		D3DZB_USEW(2),
@@ -45,7 +57,7 @@ public class D3DStateTypes {
 		public static D3DZBUFFERTYPE getById(int id) { for (D3DZBUFFERTYPE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DFILLMODE implements D3DStateEnum {
+	public static enum D3DFILLMODE implements D3DStateEnum {
 		D3DFILL_POINT(1),
 		D3DFILL_WIREFRAME(2),
 		D3DFILL_SOLID(3),
@@ -55,7 +67,7 @@ public class D3DStateTypes {
 		public static D3DFILLMODE getById(int id) { for (D3DFILLMODE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DSHADEMODE implements D3DStateEnum {
+	public static enum D3DSHADEMODE implements D3DStateEnum {
 		D3DSHADE_FLAT(1),
 		D3DSHADE_GOURAUD(2),
 		D3DSHADE_PHONG(3),
@@ -65,7 +77,7 @@ public class D3DStateTypes {
 		public static D3DSHADEMODE getById(int id) { for (D3DSHADEMODE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DBLEND implements D3DStateEnum {
+	public static enum D3DBLEND implements D3DStateEnum {
 		D3DBLEND_ZERO(1),
 		D3DBLEND_ONE(2),
 		D3DBLEND_SRCCOLOR(3),
@@ -89,7 +101,7 @@ public class D3DStateTypes {
 		public static D3DBLEND getById(int id) { for (D3DBLEND state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DCULL implements D3DStateEnum {
+	public static enum D3DCULL implements D3DStateEnum {
 		D3DCULL_NONE         (1),
 		D3DCULL_CW           (2),
 		D3DCULL_CCW          (3),
@@ -99,7 +111,7 @@ public class D3DStateTypes {
 		public static D3DCULL getById(int id) { for (D3DCULL state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DCMPFUNC implements D3DStateEnum {
+	public static enum D3DCMPFUNC implements D3DStateEnum {
 		D3DCMP_NEVER(1),
 		D3DCMP_LESS(2),
 		D3DCMP_EQUAL(3),
@@ -114,7 +126,7 @@ public class D3DStateTypes {
 		public static D3DCMPFUNC getById(int id) { for (D3DCMPFUNC state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DFOGMODE implements D3DStateEnum {
+	public static enum D3DFOGMODE implements D3DStateEnum {
 		D3DFOG_NONE         (0),
 		D3DFOG_EXP          (1),
 		D3DFOG_EXP2         (2),
@@ -125,7 +137,7 @@ public class D3DStateTypes {
 		public static D3DFOGMODE getById(int id) { for (D3DFOGMODE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DSTENCILOP implements D3DStateEnum {
+	public static enum D3DSTENCILOP implements D3DStateEnum {
 		D3DSTENCILOP_KEEP         (1),
 		D3DSTENCILOP_ZERO         (2),
 		D3DSTENCILOP_REPLACE      (3),
@@ -140,7 +152,7 @@ public class D3DStateTypes {
 		public static D3DSTENCILOP getById(int id) { for (D3DSTENCILOP state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DWRAPCOORD implements D3DStateEnum {
+	public static enum D3DWRAPCOORD implements D3DStateEnum {
 		NONE(0),
 		D3DWRAPCOORD_0(1),
 		D3DWRAPCOORD_1(2),
@@ -151,7 +163,7 @@ public class D3DStateTypes {
 		public static D3DWRAPCOORD getById(int id) { for (D3DWRAPCOORD state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DMATERIALCOLORSOURCE implements D3DStateEnum {
+	public static enum D3DMATERIALCOLORSOURCE implements D3DStateEnum {
 		D3DMCS_MATERIAL     (0),
 		D3DMCS_COLOR1       (1),
 		D3DMCS_COLOR2       (2),
@@ -161,7 +173,7 @@ public class D3DStateTypes {
 		public static D3DMATERIALCOLORSOURCE getById(int id) { for (D3DMATERIALCOLORSOURCE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DVERTEXBLENDFLAGS implements D3DStateEnum {
+	public static enum D3DVERTEXBLENDFLAGS implements D3DStateEnum {
 		D3DVBF_DISABLE   (0),
 		D3DVBF_1WEIGHTS  (1),
 		D3DVBF_2WEIGHTS  (2),
@@ -173,7 +185,7 @@ public class D3DStateTypes {
 		public static D3DVERTEXBLENDFLAGS getById(int id) { for (D3DVERTEXBLENDFLAGS state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DPATCHEDGESTYLE implements D3DStateEnum {
+	public static enum D3DPATCHEDGESTYLE implements D3DStateEnum {
 		D3DPATCHEDGE_DISCRETE     (0),
 		D3DPATCHEDGE_CONTINUOUS   (1),
 		D3DPATCHEDGE_FORCE_DWORD  (0x7fffffff);
@@ -182,7 +194,7 @@ public class D3DStateTypes {
 		public static D3DPATCHEDGESTYLE getById(int id) { for (D3DPATCHEDGESTYLE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DDEBUGMONITORTOKENS implements D3DStateEnum {
+	public static enum D3DDEBUGMONITORTOKENS implements D3DStateEnum {
 		D3DDMT_ENABLE       (0),
 		D3DDMT_DISABLE      (1),
 		D3DDMT_FORCE_DWORD  (0x7fffffff);
@@ -191,7 +203,7 @@ public class D3DStateTypes {
 		public static D3DDEBUGMONITORTOKENS getById(int id) { for (D3DDEBUGMONITORTOKENS state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DBLENDOP implements D3DStateEnum {
+	public static enum D3DBLENDOP implements D3DStateEnum {
 		D3DBLENDOP_ADD          (1),
 		D3DBLENDOP_SUBTRACT     (2),
 		D3DBLENDOP_REVSUBTRACT  (3),
@@ -203,7 +215,7 @@ public class D3DStateTypes {
 		public static D3DBLENDOP getById(int id) { for (D3DBLENDOP state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DDEGREETYPE implements D3DStateEnum {
+	public static enum D3DDEGREETYPE implements D3DStateEnum {
 		D3DDEGREE_LINEAR     (1),
 		D3DDEGREE_QUADRATIC  (2),
 		D3DDEGREE_CUBIC      (3),
@@ -214,7 +226,7 @@ public class D3DStateTypes {
 		public static D3DDEGREETYPE getById(int id) { for (D3DDEGREETYPE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	protected static enum D3DRenderStateType {
+	public static enum D3DRenderStateType {
 		D3DRS_ZENABLE                     (7, D3DZBUFFERTYPE.class),
 		D3DRS_FILLMODE                    (8, D3DFILLMODE.class),
 		D3DRS_SHADEMODE                   (9, D3DSHADEMODE.class),
@@ -320,8 +332,8 @@ public class D3DStateTypes {
 		D3DRS_BLENDOPALPHA                (209, D3DBLENDOP.class),
 		D3DRS_FORCE_DWORD                 (0x7fffffff);
 
-		int id;
-		int value;
+		public int id;
+		public int value;
 		Class<? extends Enum<? extends D3DStateEnum>> enumClass;
 		private D3DRenderStateType(int id) {
 			this.id = id;
@@ -350,7 +362,7 @@ public class D3DStateTypes {
 
 	//TextureStage
 	
-	static enum D3DTEXTUREOP implements D3DStateEnum {
+	public static enum D3DTEXTUREOP implements D3DStateEnum {
 		D3DTOP_DISABLE                    (1),
 		D3DTOP_SELECTARG1                 (2),
 		D3DTOP_SELECTARG2                 (3),
@@ -384,7 +396,7 @@ public class D3DStateTypes {
 		public int getId() { return id; }
 	}
 	
-	static enum D3DTA implements D3DStateEnum {
+	public static enum D3DTA implements D3DStateEnum {
 		D3DTA_SELECTMASK        (0x0000000f),  // mask for arg selector
 		D3DTA_DIFFUSE           (0x00000000),  // select diffuse color (read only)
 		D3DTA_CURRENT           (0x00000001),  // select stage destination register (read/write)
@@ -402,7 +414,7 @@ public class D3DStateTypes {
 		public int getId() { return id; }
 	}
 	//We won't use it, as we would lose the index
-	static enum D3DTSS_TCI implements D3DStateEnum {
+	public static enum D3DTSS_TCI implements D3DStateEnum {
 		D3DTSS_TCI_PASSTHRU						(0x00000000),
 		D3DTSS_TCI_CAMERASPACENORMAL			(0x00010000),
 		D3DTSS_TCI_CAMERASPACEPOSITION 			(0x00020000),
@@ -413,7 +425,7 @@ public class D3DStateTypes {
 		public static D3DTSS_TCI getById(int id) { for (D3DTSS_TCI state : values())  if (state.id  == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DTEXTURETRANSFORMFLAGS implements D3DStateEnum {
+	public static enum D3DTEXTURETRANSFORMFLAGS implements D3DStateEnum {
 		D3DTTFF_DISABLE      (0),
 		D3DTTFF_COUNT1       (1),
 		D3DTTFF_COUNT2       (2),
@@ -427,7 +439,7 @@ public class D3DStateTypes {
 		public int getId() { return id; }
 	}
 	
-	protected static enum D3DTextureStageStateType {
+	public static enum D3DTextureStageStateType {
 		D3DTSS_COLOROP                (1, D3DTEXTUREOP.class),
 		D3DTSS_COLORARG1              (2, D3DTA.class),
 		D3DTSS_COLORARG2              (3, D3DTA.class),
@@ -448,8 +460,8 @@ public class D3DStateTypes {
 		D3DTSS_CONSTANT               (32, D3DTA.class),
 		D3DTSS_FORCE_DWORD            (0x7fffffff);
 
-		int id;
-		int value;
+		public int id;
+		public int value;
 		Class<? extends Enum<? extends D3DStateEnum>> enumClass;
 		private D3DTextureStageStateType(int id) {
 			this.id = id;
@@ -479,7 +491,7 @@ public class D3DStateTypes {
 	
 	//SamplerState
 	
-	static enum D3DTEXTUREADDRESS implements D3DStateEnum {
+	public static enum D3DTEXTUREADDRESS implements D3DStateEnum {
 		D3DTADDRESS_WRAP         (1),
 		D3DTADDRESS_MIRROR       (2),
 		D3DTADDRESS_CLAMP        (3),
@@ -491,7 +503,7 @@ public class D3DStateTypes {
 		public static D3DTEXTUREADDRESS getById(int id) { for (D3DTEXTUREADDRESS state : values())  if (state.id  == id) return state; return null; }
 		public int getId() { return id; }
 	}
-	static enum D3DTEXTUREFILTERTYPE implements D3DStateEnum {
+	public static enum D3DTEXTUREFILTERTYPE implements D3DStateEnum {
 		D3DTEXF_NONE             (0),
 		D3DTEXF_POINT            (1),
 		D3DTEXF_LINEAR           (2),
@@ -506,7 +518,7 @@ public class D3DStateTypes {
 		public int getId() { return id; }
 	}
 	
-	protected static enum D3DSamplerStateType {
+	public static enum D3DSamplerStateType {
 		D3DSAMP_ADDRESSU       (1, D3DTEXTUREADDRESS.class),
 		D3DSAMP_ADDRESSV       (2, D3DTEXTUREADDRESS.class),
 		D3DSAMP_ADDRESSW       (3, D3DTEXTUREADDRESS.class),
@@ -522,8 +534,8 @@ public class D3DStateTypes {
 		D3DSAMP_DMAPOFFSET     (13), //int
 		D3DSAMP_FORCE_DWORD    (0x7fffffff);
 
-		int id;
-		int value;
+		public int id;
+		public int value;
 		Class<? extends Enum<? extends D3DStateEnum>> enumClass;
 		private D3DSamplerStateType(int id) {
 			this.id = id;

@@ -177,10 +177,10 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 				
 				//String path = "layouts_atlas~/EnhancedColorChooser_PanelUI.spui.spui_t";
 				
-				MainApp.setCurrentProject(MainApp.loadProject("SPUI"));
-				
+//				MainApp.setCurrentProject(MainApp.loadProject("SPUI"));
+//				
 //				String path = "layouts_atlas~/custom.spui";
-				String path = "layouts_atlas~/custom.spui.spui_t";
+//				String path = "layouts_atlas~/custom.spui.spui_t";
 //				String path = "layouts_atlas~/#1E01396F.spui";
 //				String path = "layouts_atlas~/#8DC0DB97.spui";
 //				String path = "layouts_atlas~/#834B03AF.spui";
@@ -212,8 +212,9 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 //				String path = "layouts_atlas~/DebugConsole.spui";
 				
 //				MainApp.setCurrentProject(MainApp.loadProject("Spore_Layouts"));
-//				
+				
 //				String path = "layouts_atlas_2~/#BA5EE251.spui";
+//				String path = "layouts_atlas_2~/AssetView.spui";
 //				String path = "layouts_atlas~/#6C4E59FB.spui";
 //				String path = "layouts_atlas~/#B5ECE17F.spui";
 //				String path = "layouts_atlas~/#3D96118D.spui";
@@ -229,6 +230,10 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 //				MainApp.setCurrentProject(MainApp.loadProject("REborn - Multiplayer Editor"));
 				
 //				String path = "layouts_atlas~/#5B168EB1.spui";
+				
+				MainApp.setCurrentProject(MainApp.loadProject("SPUI Testing 2"));
+				
+				String path = "layouts_atlas_2~/AssetViewLarge.spui";
 				
 				MainApp.setActiveFile(path);
 				

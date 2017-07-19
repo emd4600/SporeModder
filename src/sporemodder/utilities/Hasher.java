@@ -160,7 +160,20 @@ public class Hasher {
 		return prefix + fillZeroInHexString(hash).toUpperCase();
 	}
 	
+	
 	public static String getFileName(int hash) {
+		return getFileName(hash, "#");
+	}
+	
+	public static String getTypeName(int hash) {
+		return getTypeName(hash, "#");
+	}
+	
+	public static String getPropName(int hash) {
+		return getPropName(hash, "#");
+	}
+	
+	public static String getFileName(int hash, String prefix) {
 		String str = MainApp.getRegistry(NameRegistry.NAME_FILE).getName(hash);
 		if (str != null) {
 			return str;
@@ -171,25 +184,25 @@ public class Hasher {
 					return str;
 				}
 			}
-			return "#" + fillZeroInHexString(hash).toUpperCase();
+			return prefix + fillZeroInHexString(hash).toUpperCase();
 		}
 	}
 	
-	public static String getTypeName(int hash) {
+	public static String getTypeName(int hash, String prefix) {
 		String str = MainApp.getRegistry(NameRegistry.NAME_TYPE).getName(hash);
 		if (str != null) {
 			return str;
 		} else {
-			return "#" + fillZeroInHexString(hash).toUpperCase();
+			return prefix + fillZeroInHexString(hash).toUpperCase();
 		}
 	}
 	
-	public static String getPropName(int hash) {
+	public static String getPropName(int hash, String prefix) {
 		String str = MainApp.getRegistry(NameRegistry.NAME_PROP).getName(hash);
 		if (str != null) {
 			return str;
 		} else {
-			return "#" + fillZeroInHexString(hash).toUpperCase();
+			return prefix + fillZeroInHexString(hash).toUpperCase();
 		}
 	}
 	

@@ -1,13 +1,22 @@
 package sporemodder.userinterface;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -15,12 +24,14 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -39,12 +50,15 @@ import sporemodder.files.formats.shaders.ShaderManager;
 import sporemodder.files.formats.shaders.ShaderManager.ManagerEntry;
 import sporemodder.files.formats.shaders.ShaderManager.ManagerEntryShader;
 import sporemodder.files.formats.shaders.SourceManager;
+import sporemodder.userinterface.dialogs.AdvancedFileChooser;
+import sporemodder.userinterface.dialogs.AdvancedFileChooser.ChooserType;
 import sporemodder.utilities.Hasher;
 
 public class UIShaderManager {
 	
 	private static final int MAX_LOADED_SOURCES = 64;
-	private static final String FXC_PATH = "E:\\Eric\\Spore DLL Injection\\Shaders\\#40212004\\Decompiler\\fxc.exe";
+	
+	public static String FXC_PATH = null;
 
 	private JFrame frame;
 	private JTree tree;
@@ -98,6 +112,48 @@ public class UIShaderManager {
 		JScrollPane scrollPane_1 = new JScrollPane(tree);
 		splitPane.setLeftComponent(scrollPane_1);
 		splitPane.setDividerLocation(400);
+		
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+		
+		JMenu mnFile = new JMenu("File");
+		menuBar.add(mnFile);
+		
+		JMenuItem mntmSettings = new JMenuItem("Configure fxc.exe path");
+		mntmSettings.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				JPanel panel = new JPanel();
+				panel.setLayout(new FlowLayout());
+				
+				JTextField textField = new JTextField();
+				textField.setColumns(100);
+				
+				JButton button = new JButton("Find file");
+				button.addActionListener(new AdvancedFileChooser(textField, MainApp.getUserInterface(), JFileChooser.FILES_ONLY, false, AdvancedFileChooser.ChooserType.OPEN, 
+						new FileNameExtensionFilter("Executable (*.exe)", "exe")));
+				
+				panel.add(textField);
+				panel.add(button);
+				
+				
+				JPanel mainPanel = new JPanel();
+				mainPanel.setLayout(new BorderLayout());
+				
+				JLabel label = new JLabel("<html>The DirectX SDK contains a program called fxc.exe that can decompile shaders into shader assembly.<br>"
+						+ " If you specify the path to that program, SporeModder will decompile these shaders automatically.</html>");
+				
+				mainPanel.add(label, BorderLayout.NORTH);
+				mainPanel.add(panel, BorderLayout.CENTER);
+				
+				int result = JOptionPane.showConfirmDialog(UIShaderManager.this.frame, (Object) mainPanel, "Configure fxc.exe path", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+				if (result == JOptionPane.OK_OPTION) {
+					FXC_PATH = textField.getText();
+					MainApp.writeSettings();
+				}
+			}
+		});
+		mnFile.add(mntmSettings);
 	}
 	
 	private void loadTree() {
@@ -423,6 +479,20 @@ public class UIShaderManager {
 			default: return null;
 			}
 		}
+	}
+	
+	public static UIShaderManager findFile() {
+		AdvancedFileChooser fileChooser = new AdvancedFileChooser(null, MainApp.getUserInterface(), JFileChooser.FILES_ONLY, false, ChooserType.OPEN);
+		String path = fileChooser.launch();
+		
+		if (path != null) {
+			UIShaderManager shaderManager = new UIShaderManager();
+			shaderManager.setFile(new File(path));
+			shaderManager.display(JFrame.DISPOSE_ON_CLOSE);
+			
+			return shaderManager;
+		}
+		return null;
 	}
 	
 	public static void main(String[] args) {

@@ -93,7 +93,7 @@ public class PfxView extends HighlightedView {
 	    	String[] blocks = EffectComponent.getBlockTags(clazz);
 	    	for (String s : blocks) {
 	    		//patternColors.put(Pattern.compile("\\s*(" + s + ")\\s+"), COLOR_BLOCKS);
-	    		patternColors.add(new Pair<Pattern, Color>(Pattern.compile("^(" + s + ")\\s+"), COLOR_BLOCKS));
+	    		patternColors.add(new Pair<Pattern, Color>(Pattern.compile("^\\s*(" + s + ")\\s+"), COLOR_BLOCKS));
 	    		// They must be added as commands too
 	    		patternColors.add(new Pair<Pattern, Color>(Pattern.compile("^\\s+(" + s + ")\\s+"), COLOR_COMMANDS));
 	    	}

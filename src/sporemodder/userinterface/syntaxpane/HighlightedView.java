@@ -13,10 +13,13 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.PlainView;
 import javax.swing.text.Segment;
+import javax.swing.text.Utilities;
 
 import sporemodder.userinterface.fileview.TextFileView;
 
@@ -25,11 +28,17 @@ public abstract class HighlightedView extends PlainView {
 	protected static Map<?, ?> desktopHints = null;
 	
 	protected TextFileView textFileView;
-
+	private HashMap<Pattern, Color> patternColors;
+	
 	public HighlightedView(Element arg0, TextFileView textFileView) {
+		this(arg0, textFileView, null);
+	}
+
+	public HighlightedView(Element arg0, TextFileView textFileView, HashMap<Pattern, Color> patternColors) {
 		super(arg0);
 
 		this.textFileView = textFileView;
+		this.patternColors = patternColors;
 		
 		getDocument().putProperty(PlainDocument.tabSizeAttribute, 2);
 		
@@ -71,6 +80,10 @@ public abstract class HighlightedView extends PlainView {
 			SortedMap<Integer, Integer> startMap,
 			SortedMap<Integer, Color> colorMap) {
 		
+		if (textFileView == null) {
+			return;
+		}
+		
 		List<String> searchStrings = textFileView.getSearchTerms();
 		if (searchStrings != null) {
 			for (String str : searchStrings) {
@@ -95,6 +108,10 @@ public abstract class HighlightedView extends PlainView {
 			SortedMap<Integer, Integer> startMap,
 			SortedMap<Integer, Color> colorMap,
 			int commentIndex) {
+		
+		if (textFileView == null) {
+			return;
+		}
 		
 		List<String> searchStrings = textFileView.getSearchTerms();
 		if (searchStrings != null) {
@@ -188,7 +205,12 @@ public abstract class HighlightedView extends PlainView {
 		// match all regexes on this snippet, store positions
 		for (Map.Entry<Pattern, Color> entry : patternColors.entrySet()) {
 			
+			if (entry.getKey().pattern().equals("\\W(mul)\\(")) {
+				System.out.print("BREAKPOINT");
+			}
+			
 			Matcher matcher = entry.getKey().matcher(text);
+			
 			
 			while (matcher.find()) {
 				int start = matcher.start(1);
@@ -198,7 +220,55 @@ public abstract class HighlightedView extends PlainView {
 					startMap.put(start, end);
 					colorMap.put(start, entry.getValue());
 				}
+				
+				// Some regex need to use characters that belong to the previous regex (but that aren't highlighted)
+				// We set the matcher to start at the end of the group instead of at the end of the regex
+				matcher.region(end, matcher.regionEnd());
 			}
 		}
+	}
+	
+	@Override
+	protected int drawUnselectedText(Graphics graphics, int x, int y, int p0, int p1) throws BadLocationException {
+		addRenderingHints(graphics);
+		
+		Document doc = getDocument();
+		String text = doc.getText(p0, p1 - p0);
+		Segment segment = getLineBuffer();
+		
+		SortedMap<Integer, Integer> searchStartMap = new TreeMap<Integer, Integer>();
+		SortedMap<Integer, Integer> startMap = new TreeMap<Integer, Integer>();
+		SortedMap<Integer, Color> colorMap = new TreeMap<Integer, Color>();
+		
+		processText(text, patternColors, searchStartMap, startMap, colorMap);
+		
+		int i = 0;
+		// Colour the parts
+		for (Map.Entry<Integer, Integer> entry : startMap.entrySet()) {
+			
+			int start = entry.getKey();
+			int end = entry.getValue();
+			
+			if (i < start) {
+				graphics.setColor(Color.black);
+				doc.getText(p0 + i, start - i, segment);
+				x = Utilities.drawTabbedText(segment, x, y, graphics, this, i);
+			}
+			
+			graphics.setColor(colorMap.get(start));
+			i = end;
+			doc.getText(p0 + start, i - start, segment);
+			drawHighlightedWord(searchStartMap, segment, start, x, y, graphics);
+			x = Utilities.drawTabbedText(segment, x, y, graphics, this, start);
+		}
+		
+		// Paint possible remaining text black
+		if (i < text.length()) {
+			graphics.setColor(Color.black);
+			doc.getText(p0 + i, text.length() - i, segment);
+			x = Utilities.drawTabbedText(segment, x, y, graphics, this, i);
+		}
+		
+		return x;
 	}
 }

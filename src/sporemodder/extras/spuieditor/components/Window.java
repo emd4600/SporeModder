@@ -728,11 +728,33 @@ public class Window extends SPUIDefaultComponent implements WinComponent {
 			if (index <= modifiers.size()) {
 				index = 0;
 			}
-			else if (index > modifiers.size() + children.size()) {
+			else if (index >= modifiers.size() + children.size()) {
 				index = children.size();
 			}
 			else {
 				index -= modifiers.size();
+				
+				// the 'index' received doesn't care about invisible components; we fix that here
+				int realIndex = index;
+				if (!viewer.getShowInvisibleComponents()) {
+					int visibleIndex = 0;
+					for (int i = 0; i < children.size(); i++) {
+						WinComponent child = children.get(i);
+						if ((child.getFlags() & FLAG_VISIBLE) != 0) {
+							visibleIndex++;
+						}
+						else {
+							realIndex++;
+						}
+						
+						// stop if we have examined all the visible indexes until the one specified
+						if (visibleIndex == index) {
+							break;
+						}
+					}
+					
+					index = realIndex;
+				}
 			}
 			
 			((WinComponent) component).setParent(this);

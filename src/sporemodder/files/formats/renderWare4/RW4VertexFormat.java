@@ -24,6 +24,7 @@ public class RW4VertexFormat extends RW4Section {
 	public Format[] formats;
 	@Override
 	public void read(InputStreamAccessor in, List<RW4Section> sections) throws IOException {
+		
 		expect(in.readInt(), 0, "RW4-VF001", in.getFilePointer());
 		expect(in.readInt(), 0, "RW4-VF002", in.getFilePointer());
 		expect(in.readInt(), 0, "RW4-VF003", in.getFilePointer());
@@ -31,14 +32,18 @@ public class RW4VertexFormat extends RW4Section {
 		vertexSize = in.readUShort();
 		unks[0] = in.readLEInt(); unks[1] = in.readLEInt();
 		formats = new Format[fmtCount];
+		
 		for (int i = 0; i < fmtCount; i++) {
 			expect(in.readShort(), 0, "RW4-VF004", in.getFilePointer());
 			int offset = in.readLEUShort();
 			int[] unks = new int[] {in.readLEUShort(), in.readLEUShort()};
 			int typeCode = in.readLEInt();
 			formats[i] = Format.getByTypeCode(typeCode);
-			formats[i].offset = offset;
-			formats[i].unks = unks;
+			
+			if (formats[i] != null) {
+				formats[i].offset = offset;
+				formats[i].unks = unks;
+			}
 //			System.out.println("\t"+formats[i].toString()+"\t"+formats[i].offset);
 		}
 	}

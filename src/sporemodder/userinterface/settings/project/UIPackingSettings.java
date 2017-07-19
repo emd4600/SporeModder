@@ -10,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -45,7 +46,7 @@ public class UIPackingSettings extends SettingsCategory {
 	}
 
 	@Override
-	public JPanel createPanel() {
+	public JPanel createPanel(JDialog parent) {
 		packingPanel = new JPanel();
 		packingPanel.setLayout(new BoxLayout(packingPanel, BoxLayout.Y_AXIS));
 		packingPanel.setBorder(BorderFactory.createEmptyBorder(4, 10, 3, 10));

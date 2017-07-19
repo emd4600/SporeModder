@@ -1,5 +1,6 @@
 package sporemodder.userinterface.settings.project;
 
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import sporemodder.userinterface.settings.project.UIProjectSettings.SettingsMode;
@@ -32,7 +33,7 @@ public abstract class SettingsCategory {
 	
 	public abstract String getName();
 	
-	public abstract JPanel createPanel();
+	public abstract JPanel createPanel(JDialog parent);
 	
 	public abstract void saveSettings();
 }

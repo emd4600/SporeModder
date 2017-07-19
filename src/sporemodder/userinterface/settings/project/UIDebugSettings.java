@@ -11,6 +11,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -51,7 +52,7 @@ public class UIDebugSettings extends SettingsCategory {
 	}
 
 	@Override
-	public JPanel createPanel() {
+	public JPanel createPanel(JDialog parent) {
 		debugPanel = new JPanel();
 		debugPanel.setLayout(new BoxLayout(debugPanel, BoxLayout.Y_AXIS));
 		debugPanel.setBorder(BorderFactory.createEmptyBorder(4, 10, 3, 10));
@@ -62,7 +63,7 @@ public class UIDebugSettings extends SettingsCategory {
 		tfGamePath.setEnabled(project.getGamePathType() == GamePathType.CUSTOM);
 		btnGamePath = new JButton("Find");
 		btnGamePath.setEnabled(project.getGamePathType() == GamePathType.CUSTOM);
-		btnGamePath.addActionListener(new AdvancedFileChooser(tfGamePath, debugPanel, JFileChooser.FILES_ONLY, false, ChooserType.OPEN, FILEFILTER_EXE));
+		btnGamePath.addActionListener(new AdvancedFileChooser(tfGamePath, parent, JFileChooser.FILES_ONLY, false, ChooserType.OPEN, FILEFILTER_EXE));
 		
 		customGamePathPanel.add(tfGamePath, BorderLayout.CENTER);
 		customGamePathPanel.add(btnGamePath, BorderLayout.EAST);

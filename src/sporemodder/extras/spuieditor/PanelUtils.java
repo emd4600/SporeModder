@@ -5,6 +5,10 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -12,6 +16,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -29,6 +36,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -271,6 +279,15 @@ public class PanelUtils {
 		
 		final JGradientButton btnColor = new JGradientButton("...");
 		btnColor.setColor(value);
+		btnColor.setTransferHandler(new ColorButtonTransferHandler(btnColor, action, editor));
+		btnColor.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                JButton button = (JButton) e.getSource();
+                TransferHandler handle = button.getTransferHandler();
+                handle.exportAsDrag(button, e, TransferHandler.COPY);
+            }
+        });
 		btnColor.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -328,6 +345,121 @@ public class PanelUtils {
 		
 		return pi;
 	}
+	
+	public static class ColorButtonTransferable implements Transferable {
+		public static DataFlavor supportedFlavor;
+		private Color value;
+		
+		static {
+			try {
+				supportedFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + 
+						";class=java.awt.Color");
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public ColorButtonTransferable(Color value) {
+			this.value = value;
+		}
+		
+		@Override
+		public Object getTransferData(DataFlavor arg0) throws UnsupportedFlavorException, IOException {
+			if (arg0.equals(supportedFlavor)) {
+				return value;
+			}
+			return null;
+		}
+
+		@Override
+		public DataFlavor[] getTransferDataFlavors() {
+			return new DataFlavor[] {supportedFlavor};
+		}
+
+		@Override
+		public boolean isDataFlavorSupported(DataFlavor arg0) {
+			return arg0.equals(supportedFlavor);
+		}
+	}
+	
+	// class for getting "drag and drop" color functionality for color buttons
+	public static class ColorButtonTransferHandler extends TransferHandler {
+		
+		private JGradientButton btnColor;
+		private ColorValueAction action;
+		private UndoableEditor editor;
+		
+		public ColorButtonTransferHandler(JGradientButton btnColor, ColorValueAction action, UndoableEditor editor) {
+			this.btnColor = btnColor;
+			this.action = action;
+			this.editor = editor;
+		}
+		
+		public Color getValue() {
+			return btnColor.getColor();
+		}
+		
+		@Override
+		public int getSourceActions(JComponent c) {
+			return DnDConstants.ACTION_COPY;
+		}
+		
+		@Override
+		protected Transferable createTransferable(JComponent c) {
+			ColorButtonTransferable t = new ColorButtonTransferable(getValue());
+			return t;
+		}
+		
+		@Override
+        protected void exportDone(JComponent source, Transferable data, int action) {
+            super.exportDone(source, data, action);
+            // Decide what to do after the drop has been accepted
+        }
+		
+		@Override
+		public boolean canImport(TransferHandler.TransferSupport support) {
+			return support.isDataFlavorSupported(ColorButtonTransferable.supportedFlavor);
+		}
+		
+		@Override
+		public boolean importData(TransferHandler.TransferSupport support) {
+			boolean accept = false;
+			
+			if (canImport(support)) {
+				try {
+					Transferable t = support.getTransferable();
+					Object value = t.getTransferData(ColorButtonTransferable.supportedFlavor);
+					
+					if (value instanceof Color) {
+						Component component = support.getComponent();
+						
+						if (component instanceof JGradientButton) {
+							Color originalColor = ((JGradientButton) component).getColor();
+							((JGradientButton) component).setColor((Color) value);
+							
+							editor.addCommandAction(new ComponentValueAction<Color>(originalColor, (Color) value, new ComponentValueListener<Color>() {
+								@Override
+								public void valueChanged(Color value) {
+									btnColor.setColor(value);
+									btnColor.repaint();
+									if (action != null) {
+										action.valueChanged(value);
+									}
+								}
+							}));
+							accept = true;
+						}
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+			return accept;
+		}
+	}
+	
 	
 	public static interface FloatValueAction {
 		public void valueChanged(float value);

@@ -178,7 +178,8 @@ public class AdvancedFileChooser implements ActionListener {
 				if (selectionMode == JFileChooser.DIRECTORIES_ONLY) {
 					path = dialog.getFolder();
 				} else {
-					path = type == ChooserType.SAVE ? dialog.getSaveFile() : dialog.getFile();
+					path = dialog.getSaveFile();
+					//path = type == ChooserType.SAVE ? dialog.getSaveFile() : dialog.getFile();
 				}
 				if (path == null) {
 					return null;
@@ -286,7 +287,7 @@ public class AdvancedFileChooser implements ActionListener {
 	
 	// returns a boolean if the user didn't accept it
 	private boolean showExtensionError(String name, String extension) {
-		if (!name.endsWith("." + extension)) {
+		if (extension != null && !name.endsWith("." + extension)) {
 			return JOptionPane.showConfirmDialog(parent, "Incorrect file type, ." + extension + " expected. Are you sure you want to select this file?", 
 					"Incorrect file type", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
 		}
@@ -309,7 +310,7 @@ public class AdvancedFileChooser implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		String result = launch();
 //		String result = launchAdvanced();
-		if (result != null) {
+		if (target != null && result != null) {
 			target.setText(result);
 		}
 	}

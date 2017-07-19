@@ -34,6 +34,10 @@ public class SourceManager {
 	}
 	
 	public String loadSource(ShaderSource object, byte[] data) throws IOException, InterruptedException {
+		if (fxcPath == null || !new File(fxcPath).exists()) {
+			return "Shader could not be decompiled. Please specify a correct path to DirectX SDK's fxc.exe";
+		}
+		
 		File dataFile = File.createTempFile("SporeModder-shaders-source", ".vsh.raw.tmp");
 		dataFile.deleteOnExit();
 		
