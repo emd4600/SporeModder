@@ -71,6 +71,7 @@ public class UIMaterialManager extends JDialog {
 	private JTextPane textPane;
 	private JScrollPane viewerScrollPane;
 	
+	private int materialAssignmentsVersion;
 	private List<MaterialAssignment> materialAssignments;
 	private List<RW4TexMetadata> compiledStates;
 	
@@ -332,6 +333,11 @@ public class UIMaterialManager extends JDialog {
 		
 		ArgScript as = new ArgScript();
 		
+		// Add a warning for Darkspore versions
+		if (materialAssignmentsVersion == 1) {
+			as.addLine("# Format version 1 (Darkspore); some data has been skipped");
+		}
+		
 		String[] blockNames = new String[assignment.numCompiledStates];
 		
 		for (int i = 0; i < assignment.numCompiledStates; i++) {
@@ -379,7 +385,11 @@ public class UIMaterialManager extends JDialog {
 		
 		this.compiledStatesInput = compiledStatesInput;
 		
-		materialAssignments = MaterialAssignments.read(assignmentsInput);
+		
+		MaterialAssignments mats = new MaterialAssignments();
+		materialAssignments = mats.read(assignmentsInput);
+		materialAssignmentsVersion = mats.version;
+		
 		if (materialAssignments == null) {
 			JOptionPane.showMessageDialog(this, "Error: The material assignments input could not be read.", "Error", JOptionPane.ERROR_MESSAGE);
 			dispose();
@@ -493,8 +503,12 @@ public class UIMaterialManager extends JDialog {
 		
 		MainApp.init();
 		
-		String inputAssignmentsPath = "E:\\Eric\\Spore DLL Injection\\Shaders\\GA Shaders\\#40212000\\#00000003.rw4";
-		String inputCompiledStatePath = "E:\\Eric\\Spore DLL Injection\\Shaders\\GA Shaders\\#40212001\\#00000003.rw4\\raw.rw4";
+//		String inputAssignmentsPath = "E:\\Eric\\Spore DLL Injection\\Shaders\\GA Shaders\\#40212000\\#00000003.rw4";
+//		String inputCompiledStatePath = "E:\\Eric\\Spore DLL Injection\\Shaders\\GA Shaders\\#40212001\\#00000003.rw4\\raw.rw4";
+		
+		
+		String inputAssignmentsPath = "E:\\Downloads\\Darkspore Materials\\#40212000\\#00000003.rw4";
+		String inputCompiledStatePath = "E:\\Downloads\\Darkspore Materials\\#40212001\\#00000003.rw4";
 		
 		try (InputStreamAccessor assignmentsInput = new FileStreamAccessor(inputAssignmentsPath, "r"); 
 				InputStreamAccessor compiledStatesInput = new FileStreamAccessor(inputCompiledStatePath, "r")) {

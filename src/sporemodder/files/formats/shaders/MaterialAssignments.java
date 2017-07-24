@@ -20,18 +20,25 @@ public class MaterialAssignments {
 		public int[] textureNames;
 		public int[] textureGroups;
 		
+		// Only on Darkspore (version == 1)
+		public int[] textureUnk1;
+		public int[] textureUnk2;
+		
 		@Override
 		public String toString() {
 			return Integer.toString(compiledStateIndex) + " - " + Hasher.getFileName(materialID);
 		}
 	}
 	
-	public static List<MaterialAssignment> read(InputStreamAccessor in) throws IOException {
+	public final List<MaterialAssignment> list = new ArrayList<MaterialAssignment>();
+	public int version;
+	
+	public List<MaterialAssignment> read(InputStreamAccessor in) throws IOException {
 		
 		List<MaterialAssignment> list = new ArrayList<MaterialAssignment>();
 		
-		int version = in.readInt();
-		if (version > 0) {
+		version = in.readInt();
+		if (version > 1) {
 			return null;
 		}
 		
@@ -45,15 +52,51 @@ public class MaterialAssignments {
 			
 			material.materialID = nameID;
 			material.compiledStateIndex = index;
-			material.numCompiledStates = in.readByte();  // num of rw4 compiledStates
-			int textureCount = in.readUByte();
 			
-			material.textureNames = new int[textureCount];
-			material.textureGroups = new int[textureCount];
-			
-			for (int i = 0; i < textureCount; i++) {
-				material.textureNames[i] = in.readInt();
-				material.textureGroups[i] =  in.readInt();
+			if (version == 0) 
+			{
+				material.numCompiledStates = in.readByte();  // num of rw4 compiledStates
+				int textureCount = in.readUByte();
+				
+				material.textureNames = new int[textureCount];
+				material.textureGroups = new int[textureCount];
+				
+				for (int i = 0; i < textureCount; i++) {
+					material.textureNames[i] = in.readInt();
+					material.textureGroups[i] =  in.readInt();
+				}
+			}
+			else if (version == 1) 
+			{
+				int textureCount = in.readShort();
+				
+				material.textureNames = new int[textureCount];
+				material.textureGroups = new int[textureCount];
+				material.textureUnk1 = new int[textureCount];
+				material.textureUnk2 = new int[textureCount];
+				
+				for (int i = 0; i < textureCount; i++) {
+					material.textureNames[i] = in.readInt();
+					material.textureGroups[i] =  in.readInt();
+					
+					material.textureUnk1[i] = in.readShort();
+					material.textureUnk2[i] = in.readShort();
+				}
+				
+				for (int i = 0; i < 16; i++) {
+					in.readByte();
+					in.readByte();
+				}
+				
+				material.numCompiledStates = 0;
+				
+				for (int i = 0; i < 16; i++) {
+					byte b = in.readByte();
+					if (b != 0)
+					{
+						material.numCompiledStates++;
+					}
+				}
 			}
 			
 			

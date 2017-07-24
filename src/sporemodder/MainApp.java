@@ -140,7 +140,7 @@ public class MainApp {
 	private static final int MAX_PRESETS = 10;
 	
 	// for debugging purposes only
-	public static boolean redirectConsole = true;
+	public static boolean redirectConsole = false;
 	
 	//TODO disable when compiling
 //	public static boolean DEBUG = false;
