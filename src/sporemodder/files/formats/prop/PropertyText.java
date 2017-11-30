@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -21,15 +22,13 @@ public class PropertyText extends Property{
 	public static final int PROP_TYPE = 0x0022;
 	public static final int itemSize = 520;
 	
-	public PropertyText(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyText(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyText(String name) throws IOException {
+	public PropertyText(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyText(String name, String text, int tableId, int instanceId) throws IOException {
+	public PropertyText(String name, String text, int tableId, int instanceId) {
 		super(name, PROP_TYPE);
 		this.value = text;
 		this.tableId = tableId;
@@ -37,13 +36,13 @@ public class PropertyText extends Property{
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
+	public String toString(boolean array) {
 		if (array) {
 			return "\t\t<text" + (tableId != 0 ? " tableid=\"" + Hasher.getFileName(tableId) + "\"" : "") 
-					+ (instanceId != 0 ? " instanceid=\"" + Hasher.getFileName(instanceId) + "\"" : "")  + ">" + value + "</text>" + PROPMain.eol;
+					+ (instanceId != 0 ? " instanceid=\"" + Hasher.getFileName(instanceId) + "\"" : "")  + ">" + SpecialCharacters.fixStringLiteral(value) + "</text>" + PROPMain.eol;
 		} else {
 			return "\t<text name=\"" + Hasher.getPropName(this.name) + " tableid=\"" + (tableId != 0 ? " tableid=\"" + Hasher.getFileName(tableId) + "\"" : "") + 
-					(instanceId != 0 ? " instanceid=\"" + Hasher.getFileName(instanceId) + "\"" : "") + ">" + value + "</text>" + PROPMain.eol;
+					(instanceId != 0 ? " instanceid=\"" + Hasher.getFileName(instanceId) + "\"" : "") + ">" + SpecialCharacters.fixStringLiteral(value) + "</text>" + PROPMain.eol;
 		}
 	}
 	@Override
@@ -149,5 +148,36 @@ public class PropertyText extends Property{
 	}
 	public int[] getLocale() {
 		return new int[] {tableId, instanceId};
+	}
+	
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text, List<String> autoLocaleStrings, String autoLocaleName) throws IOException {
+		int instanceID = 0;
+		int tableID = 0;
+		
+		String value = attributes.getValue("tableid");
+		if (value == null) attributes.getValue("tableID");
+		if (value != null && value.length() > 0) tableID = Hasher.getFileHash(value);
+		
+		value = attributes.getValue("instanceid");
+		if (value == null) attributes.getValue("instanceID");
+		if (value != null && value.length() > 0) instanceID = Hasher.getFileHash(value);
+		
+		// add autolocales if necessary
+		if (autoLocaleStrings != null && instanceID == 0 && tableID == 0) {
+			
+			tableID = Hasher.stringToFNVHash(autoLocaleName);
+			instanceID = 1 + autoLocaleStrings.size();
+			
+			autoLocaleStrings.add(text);
+		}
+		
+		stream.writeLEInt(tableID);
+		stream.writeLEInt(instanceID);
+		byte[] arr = text.getBytes("UTF-16LE");
+		stream.write(arr);
+		if (arr.length < 512) {
+			stream.writePadding(512 - arr.length);
+		}
+		
 	}
 }

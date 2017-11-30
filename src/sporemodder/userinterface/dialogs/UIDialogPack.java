@@ -1,17 +1,14 @@
 package sporemodder.userinterface.dialogs;
 
 import java.awt.Frame;
-import java.awt.Dialog.ModalityType;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
 
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
 import sporemodder.MainApp;
-import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.formats.dbpf.DBPFMain;
 import sporemodder.files.formats.dbpf.DBPFPackingTask;
 import sporemodder.userinterface.ErrorManager;
@@ -27,19 +24,17 @@ public class UIDialogPack extends JDialog {
 	private JProgressBar progressBar;
 	private DBPFPackingTask task;
 	private Project project;
-	private DBPFMain dbpf;
 
-	public UIDialogPack() {
-		this(MainApp.getUserInterface());
+	public UIDialogPack(boolean bDebugInformation) {
+		this(MainApp.getUserInterface(), bDebugInformation);
 	}
-	public UIDialogPack(Frame parent) {
+	public UIDialogPack(Frame parent, boolean bDebugInformation) {
 		super(parent);
 		
 		MainApp.processAutoSave();
 		project = MainApp.getCurrentProject();
 		String packageName = project.getPackageName();
 		
-		//TODO check if project packing name doesn't collide with Spore ones
 		for (String s : DBPFMain.BANNED_PACKAGE_NAMES) {
 			if (packageName.equals(s)) {
 				int result = JOptionPane.showConfirmDialog(parent, "The current package name collides with one used by Spore (" + s + 
@@ -66,8 +61,7 @@ public class UIDialogPack extends JDialog {
 		
 		
 		try {
-			dbpf = new DBPFMain(new FileStreamAccessor(project.getPackageFile(), "rw", true), false);
-			task = new DBPFPackingTask(dbpf, project, project.getPackingConverters(), this);
+			task = new DBPFPackingTask(project, this, bDebugInformation);
 			task.addPropertyChangeListener(new TaskProgressListener());
 			task.execute();
 		} catch (Exception e) {
@@ -81,16 +75,6 @@ public class UIDialogPack extends JDialog {
 		setVisible(true);
 	}
 	
-	@Override
-	public void dispose() {
-		if (dbpf != null)
-			try {
-				dbpf.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		super.dispose();
-	}
 	
 	private class TaskProgressListener implements PropertyChangeListener {
 
@@ -102,7 +86,7 @@ public class UIDialogPack extends JDialog {
 	
 	
 	public static boolean createPackDialog() {
-		UIDialogPack dialog = new UIDialogPack();
+		UIDialogPack dialog = new UIDialogPack(false);
 		if (dialog.task == null) return false;
 		return dialog.task.wasSuccessful();
 	}

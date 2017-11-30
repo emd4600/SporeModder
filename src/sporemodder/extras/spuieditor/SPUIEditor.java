@@ -35,6 +35,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -685,7 +686,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 		};
 		
 		cbShowInvisibleComponents = new JCheckBox(invisibleComponentAction);
-		cbShowInvisibleComponents.setText("Show invisible components");
+		cbShowInvisibleComponents.setText("Show all");
 		cbShowInvisibleComponents.setToolTipText("Ctrl + H");
 		cbShowInvisibleComponents.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK), "ctrl_h");
 		cbShowInvisibleComponents.getActionMap().put("ctrl_h", new AbstractAction() {
@@ -695,6 +696,14 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 			}
 		});
 		panel_1.add(cbShowInvisibleComponents);
+//		panel_1.add(new JLabel("test"));
+		
+		// if we don't do this, the check box is too big and it doesn't show
+//		int divider = cbShowInvisibleComponents.getWidth() + tfSearchBar.getWidth();
+//		if (divider < 400) {
+//			divider = 400;
+//		}
+		
 		
 		JSplitPane splitPane = new JSplitPane();
 		panel.add(splitPane);
@@ -718,6 +727,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 				return userObject.nodeIsMovable();
 			}
 
+			
 			@Override
 			public void move(DefaultMutableTreeNode selectedNode, DefaultMutableTreeNode newParent, int childIndex) {
 				
@@ -1105,6 +1115,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 			
 			return save(file, isText, builder);
 		} catch (Exception e) {
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(SPUIEditor.this, "The SPUI couldn't be saved:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}

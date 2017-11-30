@@ -9,32 +9,36 @@ import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.FileStructure;
 
 public class DBPFIndex extends FileStructure {
-	public enum IndexTypes {TYPE, TYPE_GROUP, ALL}
-	public IndexTypes indexType = IndexTypes.ALL;
-	public int group = -1;
-	public int type = -1;
+	public int groupID = -1;
+	public int typeID = -1;
 	public int itemSize = 28;
 	public List<DBPFItem> items;
 	public int itemsPos;
 	
 	public void read(InputStreamAccessor in, int dbpfType) throws IOException {
 		int typeInt = in.readLEInt();
-		if (typeInt == 4) {
-			indexType = IndexTypes.ALL;
-			itemSize = (dbpfType == DBPFHeader.TYPE_DBPF) ? 28 : 32;
-		} else if (typeInt == 5 || typeInt == 6) {
-			indexType = IndexTypes.TYPE;
-			itemSize = 24;
-			type = in.readLEInt();
-		} else if (typeInt == 7) {
-			indexType = IndexTypes.TYPE_GROUP;
-			itemSize = 20;
-			type = in.readLEInt();
-			group = in.readLEInt();
-		} else {
-			addError("DBPF-I001", in.getFilePointer());
+		itemSize = (dbpfType == DBPFHeader.TYPE_DBPF) ? 28 : 32;
+		
+		// type id
+		if ((typeInt & (1 << 0)) == 1 << 0)
+		{
+			itemSize -= 4;
+			typeID = in.readLEInt();
 		}
-		in.skipBytes(4);
+
+		// group id
+		if ((typeInt & (1 << 1)) == 1 << 1)
+		{
+			itemSize -= 4;
+			groupID = in.readLEInt();
+		}
+
+		// unknown value
+		if ((typeInt & (1 << 2)) == 1 << 2)
+		{
+			in.readLEInt();
+		}
+		
 		itemsPos = in.getFilePointer();
 	}
 	
@@ -52,9 +56,9 @@ public class DBPFIndex extends FileStructure {
 		for (int i = 0; i < itemCount; i++) {
 			in.seek(itemsPos + (i * itemSize));
 			DBPFItem item = new DBPFItem();
-			item.key.setGroupID(group);
-			item.key.setTypeID(type);
-			item.readInfo(in, type);
+			item.key.setGroupID(groupID);
+			item.key.setTypeID(typeID);
+			item.readInfo(in, typeID);
 			items.add(item);
 		}
 	}

@@ -60,7 +60,8 @@ public class EffectUnpacker implements ConvertAction {
 
 	@Override
 	public String getOutputExtension(String extension) {
-		return null;
+		// return null;
+		return "unpacked";
 	}
 
 	@Override

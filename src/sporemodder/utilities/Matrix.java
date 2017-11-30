@@ -61,24 +61,6 @@ public class Matrix {
 	 * @return
 	 */
 	public Matrix rotate(double eulerRadiansX, double eulerRaidansY, double eulerRadiansZ) {
-	    // Assuming the angles are in radians.
-//	    double ch = Math.cos(eulerY);
-//	    double sh = Math.sin(eulerY);
-//	    double ca = Math.cos(eulerZ);
-//	    double sa = Math.sin(eulerZ);
-//	    double cb = Math.cos(eulerX);
-//	    double sb = Math.sin(eulerX);
-		
-//	    m[0][0] = (float) (ch * ca);
-//	    m[0][1] = (float) (sh*sb - ch*sa*cb);
-//	    m[0][2] = (float) (ch*sa*sb + sh*cb);
-//	    m[1][0] = (float) sa;
-//	    m[1][1] = (float) (ca*cb);
-//	    m[1][2] = (float) (-ca*sb);
-//	    m[2][0] = (float) (-sh*ca);
-//	    m[2][1] = (float) (sh*sa*cb + ch*sb);
-//	    m[2][2] = (float) (-sh*sa*sb + ch*cb);
-		
 	    
 	    double ci = Math.cos(eulerRadiansX);
 	    double cj = Math.cos(eulerRaidansY);
@@ -91,16 +73,6 @@ public class Matrix {
 	    double cs = ci * sh;
 	    double sc = si * ch;
 		double ss = si * sh;
-
-//	    m[0][0] = (float)(cj * ch);
-//		m[1][0] = (float)(sj * sc - cs);
-//		m[2][0] = (float)(sj * cc + ss);
-//		m[0][1] = (float)(cj * sh);
-//		m[1][1] = (float)(sj * ss + cc);
-//		m[2][1] = (float)(sj * cs - sc);
-//		m[0][2] = (float)-sj;
-//		m[1][2] = (float)(cj * si);
-//		m[2][2] = (float)(cj * ci);
 		
 		m[0][0] = (float)(cj * ch);
 		m[0][1] = (float)(sj * sc - cs);

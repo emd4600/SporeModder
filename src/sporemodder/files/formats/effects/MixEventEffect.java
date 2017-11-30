@@ -77,7 +77,7 @@ public class MixEventEffect extends EffectComponent {
 	
 	@Override
 	public ArgScriptCommand toCommand() {
-		ArgScriptCommand c = new ArgScriptCommand(KEYWORD, Hasher.getFileName(field_8), Float.toString(field_C), Float.toString(field_10));
+		ArgScriptCommand c = new ArgScriptCommand(KEYWORD, Hasher.getFileName(field_8, "0x"), Float.toString(field_C), Float.toString(field_10));
 		
 		return c;
 	}

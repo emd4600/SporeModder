@@ -2,7 +2,6 @@ package sporemodder.files.formats.prop;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,34 +22,32 @@ public class PropertyColorRGBA extends Property {
 	public static final int PROP_TYPE = 0x0034;
 	public static final int itemSize = 16;
 	
-	public PropertyColorRGBA(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyColorRGBA(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyColorRGBA(String name) throws IOException {
+	public PropertyColorRGBA(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyColorRGBA(String name, Color color) throws IOException {
+	public PropertyColorRGBA(String name, Color color) {
 		super(name, PROP_TYPE);
 		setColor(color);
 	}
-	public PropertyColorRGBA(String name, int red, int green, int blue, int alpha) throws IOException {
+	public PropertyColorRGBA(String name, int red, int green, int blue, int alpha) {
 		super(name, PROP_TYPE);
 		setColor(red, green, blue, alpha);
 	}
-	public PropertyColorRGBA(String name, float red, float green, float blue, float alpha) throws IOException {
+	public PropertyColorRGBA(String name, float red, float green, float blue, float alpha) {
 		super(name, PROP_TYPE);
 		setColor(red, green, blue, alpha);
 	}
-	public PropertyColorRGBA(String name, int color) throws IOException {
+	public PropertyColorRGBA(String name, int color) {
 		super(name, PROP_TYPE);
 		setColor(color);
 	}
 
 	@Override
-	public String toString(boolean array) throws IOException {
-		NumberFormat nf = new DecimalFormat("#.#######");
+	public String toString(boolean array) {
+		NumberFormat nf = Hasher.getDecimalFormat("#.#######");
 		if (array) {
 			return "\t\t<colorRGBA>" + PROPMain.eol + 
 					"\t\t\t<r>" + nf.format(value[0]) + "</r>" + PROPMain.eol +

@@ -3,14 +3,12 @@ package sporemodder.files.formats.dbpf;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
-import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.formats.ConvertAction;
 import sporemodder.userinterface.ErrorManager;
 
@@ -23,7 +21,6 @@ public class PackWindow extends JFrame {
 	
 	private JProgressBar progressBar;
 	private DBPFPackingTask task;
-	private DBPFMain dbpf;
 
 	public PackWindow(File input, File output, List<ConvertAction> converters) {
 		
@@ -53,8 +50,7 @@ public class PackWindow extends JFrame {
 		
 		
 		try {
-			dbpf = new DBPFMain(new FileStreamAccessor(output, "rw", true), false);
-			task = new DBPFPackingTask(dbpf, input.getAbsolutePath(), -1, converters, this);
+			task = new DBPFPackingTask(output.getAbsolutePath(), input.getAbsolutePath(), -1, converters, this);
 			task.addPropertyChangeListener(new TaskProgressListener());
 			task.execute();
 		} catch (Exception e) {
@@ -66,17 +62,6 @@ public class PackWindow extends JFrame {
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
-	}
-	
-	@Override
-	public void dispose() {
-		if (dbpf != null)
-			try {
-				dbpf.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		super.dispose();
 	}
 	
 	private class TaskProgressListener implements PropertyChangeListener {

@@ -1,7 +1,6 @@
 package sporemodder.files.formats.prop;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,23 +22,21 @@ public class PropertyVector2 extends Property {
 	public static final int PROP_TYPE = 0x0030;
 	public static final int itemSize = 8;
 	
-	public PropertyVector2(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyVector2(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyVector2(String name) throws IOException {
+	public PropertyVector2(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyVector2(String name, float x, float y) throws IOException {
+	public PropertyVector2(String name, float x, float y) {
 		super(name, PROP_TYPE);
 		values[0] = x;
 		values[1] = y;
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
-		NumberFormat nf = new DecimalFormat("#.#######");
+	public String toString(boolean array) {
+		NumberFormat nf = Hasher.getDecimalFormat("#.#######");
 		if (array) {
 			String str = "\t\t<vector2";
 			if (getDebugMode()) {

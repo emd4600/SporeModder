@@ -68,7 +68,7 @@ public class GameModelAnim {
 		
 		if (curveVary != 0) command.putOption(new ArgScriptOption("vary", Float.toString(curveVary)));
 		if (speedScale != 0) command.putOption(new ArgScriptOption("speedScale", Float.toString(speedScale)));
-		if (channelId != 0) command.putOption(new ArgScriptOption("channel", Hasher.getFileName(channelId)));
+		if (channelId != 0) command.putOption(new ArgScriptOption("channel", Hasher.getFileName(channelId, "0x")));
 		
 		if (lengthRange[0] != 0 || lengthRange[1] != 0) {
 			//TODO Spore does something different here

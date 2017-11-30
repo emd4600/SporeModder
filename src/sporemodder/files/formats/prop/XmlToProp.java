@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,15 +13,19 @@ import javax.swing.JPanel;
 import sporemodder.files.ActionCommand;
 import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.InputStreamAccessor;
+import sporemodder.files.MemoryOutputStream;
 import sporemodder.files.OutputStreamAccessor;
-import sporemodder.files.formats.ConvertAction;
+import sporemodder.files.formats.FastConvertAction;
 import sporemodder.files.formats.FileFormatStructure;
 import sporemodder.files.formats.ResourceKey;
+import sporemodder.files.formats.dbpf.DBPFItem;
+import sporemodder.files.formats.dbpf.DBPFPackingTask;
 import sporemodder.files.formats.spui.SPUIMain;
 import sporemodder.userinterface.dialogs.UIErrorsDialog;
+import sporemodder.utilities.Hasher;
 import sporemodder.utilities.InputOutputPaths.InputOutputPair;
 
-public class XmlToProp implements ConvertAction {
+public class XmlToProp implements FastConvertAction {
 
 	@Override
 	public FileFormatStructure convert(File input, File output)
@@ -126,5 +131,33 @@ public class XmlToProp implements ConvertAction {
 
 
 		return true;
+	}
+
+	@Override
+	public MemoryOutputStream fastConvert(File input, DBPFPackingTask outputDBPF) throws Exception {
+		try (InputStream in = new FileInputStream(input)) {
+			
+			List<String> autoLocaleStrings = new ArrayList<String>();
+			
+			String autoLocaleName = "auto_" + outputDBPF.getCurrentFolderName() + "_" + outputDBPF.getCurrentFileName();
+			
+			MemoryOutputStream out = (MemoryOutputStream) FastPropConverter.xmlToProp(in, null, autoLocaleStrings, autoLocaleName);
+			
+			if (!autoLocaleStrings.isEmpty()) {
+				
+				String autoLocale = PROPMain.createAutolocaleFile(autoLocaleStrings);
+				byte[] data = autoLocale.getBytes("US-ASCII");
+				
+				DBPFItem item = new DBPFItem();
+				item.key.setGroupID(	Hasher.getFileHash("locale~"));
+				item.key.setInstanceID(	Hasher.getFileHash(autoLocaleName));
+				item.key.setTypeID(		Hasher.getTypeHash("locale"));
+				
+				outputDBPF.writeFile(item, data, data.length);
+				outputDBPF.addFile(item);
+			}
+			
+			return out;
+		}
 	}
 }

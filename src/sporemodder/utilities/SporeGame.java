@@ -8,71 +8,191 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class SporeGame {
-	private static boolean is64bit;
 	
+	public static final String[] RegistryValues = { "InstallLoc", "Install Dir" };
+
+    public static final String[] RegistryKeys = { 
+                                         "SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE_EP1",
+                                         "SOFTWARE\\Electronic Arts\\SPORE_EP1"
+                                     };
+
+    public static final String[] SporeRegistryKeys = { 
+                                         "SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE",
+                                         "SOFTWARE\\Electronic Arts\\SPORE"
+                                                };
+
+    public static final String[] CCRegistryKeys = { 
+                                         "SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack",
+                                         "SOFTWARE\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack"
+                                     };
+
+
+    public static final String RegistryDataDir = "DataDir";  // Steam/GoG users don't have InstallLoc nor Install Dir
+    
+    private static enum GameType { SPORE, GA, CC };
+    
 	private static SporeGame SPORE = null;
 	private static SporeGame GALACTIC_ADVENTURES = null;
 	
-	private String installLoc;
-	private String sporebinFolder;
+	private File installLoc;
+	private File dataLoc;
+	private File sporebinLoc;
 	
-	private SporeGame(String path, String sporebinFolder) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
-		String regPath = "SOFTWARE\\" + (is64bit ? "Wow6432Node\\" : "") + "Electronic Arts\\" + path;
+	private SporeGame(GameType type) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
 		
-		String str = WinRegistry.valueForKey(WinRegistry.HKEY_LOCAL_MACHINE, regPath, "InstallLoc");
-		if (str == null) {
-			// the recent patch changed InstallLoc to Install Dir. I don't know if the information it has is the same
-			str = WinRegistry.valueForKey(WinRegistry.HKEY_LOCAL_MACHINE, regPath, "Install Dir");
+		String path = getFromRegistry(type);
+		if (path != null) {
+			sporebinLoc = new File(moveToSporebin(type == GameType.SPORE ? "Sporebin" : "SporebinEP1", path, true));
+			installLoc = sporebinLoc.getParentFile();
+			dataLoc = moveToData(type, installLoc);
 		}
-		installLoc = str.substring(1, str.length() - 1);
-		this.sporebinFolder = sporebinFolder;
 	}
 	
+	private static String getFromRegistry(String[] keys) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException
+    {
+
+        String result = null;
+
+        for (String key : keys)
+        {
+            for (String value : RegistryValues)
+            {
+            	result = getRegistryValue(WinRegistry.HKEY_LOCAL_MACHINE, key, value);
+                if (result != null)
+                {
+
+                    return fixPath(result);
+                }
+            }
+        }
+
+        // not found? try with DataDir; some users only have that one
+        for (String key : RegistryKeys)
+        {
+            result = getRegistryValue(WinRegistry.HKEY_LOCAL_MACHINE, key, RegistryDataDir);
+            if (result != null)
+            {
+
+                return fixPath(result);
+            }
+        }
+
+        return null;
+    }
+	
+	private static String getRegistryValue(int hkey, String key, String value) {
+		try {
+			return WinRegistry.valueForKey(hkey, key, value);
+		}
+		catch (Exception e) {
+			return null;
+		}
+	}
+	
+	private static String getFromRegistry(GameType game) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException
+    {
+        if (game == GameType.GA)
+        {
+            return getFromRegistry(RegistryKeys);
+        }
+        else if (game == GameType.SPORE)
+        {
+            return getFromRegistry(SporeRegistryKeys);
+        }
+        else
+        {
+            return getFromRegistry(CCRegistryKeys);
+        }
+    }
+	
+	// remove "" if necessary
+    private static String fixPath(String path)
+    {
+        if (path.startsWith("\""))
+        {
+            return path.substring(1, path.length() - 1);
+        }
+        else
+        {
+            return path;
+        }
+    }
+    
+    // This method returns the path to the folder that contains the executable
+    public static String moveToSporebin(String folderName, String path, boolean bRecursive)
+    {
+        if (!path.endsWith("\\"))
+        {
+            path += "\\";
+        }
+
+        if (new File(path, "SporeApp.exe").exists())
+        {
+            return path;
+        }
+
+        if (new File(path, folderName).exists())
+        {
+            return path + folderName + "\\";
+        }
+
+        if (bRecursive)
+        {
+            return moveToSporebin(folderName, new File(path).getParent(), false);
+        }
+
+        return null;
+    }
+    
+    public static File moveToData(GameType game, File installLoc)
+    {
+        if (game == GameType.SPORE)
+        {
+            return new File(installLoc, "Data");
+        }
+        else if (game == GameType.GA)
+        {
+            // Steam and GoG uses DataEP1
+        	File outputPath = new File(installLoc, "DataEP1");
+        	if (outputPath.exists()) {
+        		return outputPath;
+        	}
+            else
+            {
+                return new File(installLoc, "Data" );
+            }
+        }
+        else
+        {
+            // Creepy and Cute uses the installation path itself
+            return installLoc;
+        }
+    }
+	
 	public String getInstallLoc() {
-		return installLoc;
+		return installLoc.getAbsolutePath();
 	}
 	
 	public String getDataDir() {
-		return installLoc + "\\Data";
+		return dataLoc.getAbsolutePath();
 	}
 	
 	public String getGamePath() {
-		return installLoc + "\\" + sporebinFolder + "\\SporeApp.exe";
-	}
-	
-	public Process execute() throws IOException {
-		if (installLoc == null) return null;
-		return new ProcessBuilder(installLoc + "\\" + sporebinFolder + "\\SporeApp.exe").start();
-	}
-	
-	public Process execute(String ... args) throws IOException {
-		if (installLoc == null) return null;
-		
-		String[] newArgs = new String[args.length + 1];
-		newArgs[0] = installLoc + "\\" + sporebinFolder + "\\SporeApp.exe";
-		System.arraycopy(args, 0, newArgs, 1, args.length);
-		return new ProcessBuilder(newArgs).start();
+		return new File(sporebinLoc, "SporeApp.exe").getAbsolutePath();
 	}
 	
 	public static Process execute(String path, String ... args) throws IOException, URISyntaxException {
 		if (path == null) return null;
 		
 		String[] newArgs = new String[args.length + 1];
-//		newArgs[0] = path;
-//		newArgs[0] = new File(path).toURI().getPath();
 		System.arraycopy(args, 0, newArgs, 1, args.length);
-		//return new ProcessBuilder(newArgs).start();
-		
-		//return Runtime.getRuntime().exec(newArgs);
-		
+
 		if (new File(path).exists()) {
 			newArgs[0] = path;
-			System.out.println(newArgs[0]);
 			return new ProcessBuilder(newArgs).start();
 		}
 		else {
 			// For Steam URIs
-			System.out.println(path);
 			Desktop.getDesktop().browse(new URI(path));
 			return null;
 		}
@@ -96,15 +216,9 @@ public class SporeGame {
 	}
 	
 	public static void init() {
-		is64bit = false;
-		if (System.getProperty("os.name").contains("Windows")) {
-		    is64bit = (System.getenv("ProgramFiles(x86)") != null);
-		} else {
-		    is64bit = (System.getProperty("os.arch").indexOf("64") != -1);
-		}
-		
 		try {
-			SPORE = new SporeGame("SPORE", "Sporebin");
+			SPORE = new SporeGame(GameType.SPORE);
+			
 		} catch (Exception e) {
 			System.err.println("Couldn't find Spore!");
 			e.printStackTrace();
@@ -112,12 +226,14 @@ public class SporeGame {
 		}
 		
 		try {
-			GALACTIC_ADVENTURES = new SporeGame("SPORE_EP1", "SporebinEP1");
+			GALACTIC_ADVENTURES = new SporeGame(GameType.GA);
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.err.println("Couldn't find Galactic Adventures!");
 			e.printStackTrace();
 			GALACTIC_ADVENTURES = null;
 		}
+		
 	}
 }

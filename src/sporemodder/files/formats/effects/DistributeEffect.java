@@ -567,7 +567,7 @@ public class DistributeEffect extends EffectComponent {
 			block.putCommand(c);
 		}
 		if (messageID != 0) {
-			block.putCommand(new ArgScriptCommand("message", Hasher.getFileName(messageID)));
+			block.putCommand(new ArgScriptCommand("message", Hasher.getFileName(messageID, "0x")));
 		}
 		if (rotate.length > 0) {
 			ArgScriptCommand c = new ArgScriptCommand("rotate", ArgScript.floatsToStrings(rotate));

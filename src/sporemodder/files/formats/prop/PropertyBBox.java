@@ -1,7 +1,6 @@
 package sporemodder.files.formats.prop;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +21,13 @@ public class PropertyBBox extends Property {
 	public static final int itemSize = 24;
 	
 	private float min_x, min_y, min_z, max_x, max_y, max_z;
-	public PropertyBBox(int name, int type, int flags) throws InstantiationException, IllegalAccessException {
+	public PropertyBBox(int name, int type, int flags) {
 		super(name, type, flags);
 	}
-	public PropertyBBox(String name) throws IOException {
+	public PropertyBBox(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyBBox(String name, float[] bbox) throws IOException {
+	public PropertyBBox(String name, float[] bbox) {
 		super(name, PROP_TYPE);
 		min_x = bbox[0];
 		min_y = bbox[1];
@@ -51,15 +50,15 @@ public class PropertyBBox extends Property {
 		}
 	}
 	@Override
-	public String toString(boolean array) throws IOException {
-		NumberFormat nf = new DecimalFormat("#.#######");
+	public String toString(boolean array) {
+		NumberFormat nf = Hasher.getDecimalFormat	("#.#######");
 		if (array) {
 			return "\t\t<bbox>" + PROPMain.eol + 
 					"\t\t\t<min>" + nf.format(min_x) + ", " + nf.format(min_y) + ", " + nf.format(min_z) + "</min>" + PROPMain.eol +
-					"\t\t\t<max>" + nf.format(max_x) + ", " + nf.format(max_y) + ", " + (max_z) + "</max>" + PROPMain.eol +
+					"\t\t\t<max>" + nf.format(max_x) + ", " + nf.format(max_y) + ", " + nf.format(max_z) + "</max>" + PROPMain.eol +
 					"\t\t</bbox>" + PROPMain.eol;
 		} else {
-			throw new IOException("PROP001; Non-array bbox is unimplemented");
+			throw new UnsupportedOperationException("PROP001; Non-array bbox is unimplemented");
 		}
 	}
 	@Override

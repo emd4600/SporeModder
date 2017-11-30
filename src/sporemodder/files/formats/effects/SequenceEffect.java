@@ -88,7 +88,12 @@ public class SequenceEffect extends EffectComponent {
 			if (c.getKeyword().equals("play")) {
 				SequenceInstance ins = new SequenceInstance();
 				
-				ins.effectIndex = EffectMain.getEffectIndex(parent.getEffectMap(), parent.getImports(), VisualEffect.TYPE, c.getSingleArgument());
+				if (c.getArgumentCount() == 0) {
+					ins.effectIndex = -1;
+				}
+				else {
+					ins.effectIndex = EffectMain.getEffectIndex(parent.getEffectMap(), parent.getImports(), VisualEffect.TYPE, c.getSingleArgument());
+				}
 				
 				List<String> args = c.getOptionArgs("range", 1, 2);
 				if (args != null) {

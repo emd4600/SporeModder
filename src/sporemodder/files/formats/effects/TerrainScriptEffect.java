@@ -109,16 +109,16 @@ public class TerrainScriptEffect extends EffectComponent {
 		
 		if (id_0 == 0) {
 			if (id_2 == 0) {
-				c.addArgument(Hasher.getFileName(id_1));
+				c.addArgument(Hasher.getFileName(id_1, "0x"));
 			}
 		}
 		else {
 			if (id_1 == 0) {
 				if (id_2 == 0) {
-					c.addArgument(Hasher.getFileName(id_0));
+					c.addArgument(Hasher.getFileName(id_0, "0x"));
 				}
 				else {
-					c.addArgument(Hasher.getFileName(id_0) + "!" + Hasher.getFileName(id_2));
+					c.addArgument(Hasher.getFileName(id_0, "0x") + "!" + Hasher.getFileName(id_2, "0x"));
 				}
 			}
 		}

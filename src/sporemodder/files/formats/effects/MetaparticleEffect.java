@@ -601,7 +601,9 @@ public class MetaparticleEffect extends EffectComponent {
 		parseInject(block);
 		parseMantain(block);
 		if ((c = block.getCommand("effect")) != null) {
-			effectIndex = parent.getEffectIndex(VisualEffect.TYPE, c.getSingleArgument());
+			if (c.getArgumentCount() > 0) {
+				effectIndex = parent.getEffectIndex(VisualEffect.TYPE, c.getSingleArgument());
+			}
 			String arg = c.getOptionArg("death");
 			if (arg != null) {
 				deathEffectIndex = parent.getEffectIndex(VisualEffect.TYPE, arg);
@@ -1761,14 +1763,21 @@ public class MetaparticleEffect extends EffectComponent {
 				Effect effect = parent.getEffect(VisualEffect.TYPE, effectIndex);
 				c = new ArgScriptCommand("effect", effect == null ? VisualEffect.KEYWORD + "-" + effectIndex : effect.getName());
 			} else {
-				c = new ArgScriptCommand("effect", "-1");
+				//WTF is this??
+				// c = new ArgScriptCommand("effect", "-1");
+				// We need a command for if we have a death effect? Then create it there, and no '-1'
 			}
 			
 			if (deathEffectIndex != -1) {
+				if (c == null) c = new ArgScriptCommand("effect");
+				
 				Effect deathEffect = parent.getEffect(VisualEffect.TYPE, deathEffectIndex);
 				c.putOption(new ArgScriptOption("death", deathEffect == null ? VisualEffect.KEYWORD + "-" + deathEffectIndex : deathEffect.getName()));
 			}
-			block.putCommand(c);
+			
+			if (c != null) {
+				block.putCommand(c);
+			}
 		}
 		if (field_12C != 0) {
 			block.putCommand(new ArgScriptCommand("field_12C", Integer.toString(field_12C)));

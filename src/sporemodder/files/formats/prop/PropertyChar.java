@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -20,22 +21,20 @@ public class PropertyChar extends Property {
 	public static final int PROP_TYPE = 0x0002;
 	public static final int itemSize = 1;
 	
-	public PropertyChar(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyChar(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyChar(String name) throws IOException {
+	public PropertyChar(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyChar(String name, char value) throws IOException {
+	public PropertyChar(String name, char value) {
 		super(name, PROP_TYPE);
 		this.value = value;
 	}
 
 	
 	@Override
-	public String toString(boolean array) throws IOException {
+	public String toString(boolean array) {
 		if (array) {
 			return "\t\t<char>" + Character.toString(value) + "</char>" + PROPMain.eol;
 		} else {
@@ -103,5 +102,10 @@ public class PropertyChar extends Property {
 	
 	public char getValue() {
 		return value;
+	}
+	
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text) throws IOException {
+		stream.writeByte(text.charAt(0));
 	}
 }

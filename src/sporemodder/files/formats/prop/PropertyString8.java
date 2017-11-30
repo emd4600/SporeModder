@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -20,25 +21,23 @@ public class PropertyString8 extends Property {
 	public static final int PROP_TYPE = 0x0012;
 	public static final int itemSize = 8;
 	
-	public PropertyString8(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyString8(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyString8(String name) throws IOException {
+	public PropertyString8(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyString8(String name, String text) throws IOException {
+	public PropertyString8(String name, String text) {
 		super(name, PROP_TYPE);
 		this.value = text;
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
+	public String toString(boolean array) {
 		if (array) {
-			return "\t\t<string8>" + value + "</string8>" + PROPMain.eol;
+			return "\t\t<string8>" + SpecialCharacters.fixStringLiteral(value) + "</string8>" + PROPMain.eol;
 		} else {
-			return "\t<string8 name=\"" + Hasher.getPropName(this.name) + "\">" + value + "</string8>" + PROPMain.eol;
+			return "\t<string8 name=\"" + Hasher.getPropName(this.name) + "\">" + SpecialCharacters.fixStringLiteral(value) + "</string8>" + PROPMain.eol;
 		}
 	}
 	@Override
@@ -107,4 +106,11 @@ public class PropertyString8 extends Property {
 	public String getString() {
 		return value;
 	}
+	
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text) throws IOException {
+		stream.writeInt(text.length());
+		stream.write(text.getBytes("US-ASCII"));
+	}
+
 }

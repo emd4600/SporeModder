@@ -112,10 +112,10 @@ public class UIProjectSettings extends JDialog {
 				}
 				
 				project.writeProperties();
+				
+				//TODO only do this if the sources were updated?
+				MainApp.setCurrentProject(project);
 			}
-			
-			//TODO only do this if the sources were updated?
-			MainApp.setCurrentProject(project);
 			
 			dispose();
 		}

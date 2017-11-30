@@ -2,7 +2,6 @@ package sporemodder.files.formats.prop;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,40 +23,38 @@ public class PropertyVector3 extends Property {
 	public static final int PROP_TYPE = 0x0031;
 	public static final int itemSize = 12;
 	
-	public PropertyVector3(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyVector3(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyVector3(String name) throws IOException {
+	public PropertyVector3(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyVector3(String name, float x, float y, float z) throws IOException {
+	public PropertyVector3(String name, float x, float y, float z) {
 		super(name, PROP_TYPE);
 		values[0] = x;
 		values[1] = y;
 		values[2] = z;
 	}
-	public PropertyVector3(String name, float[] arr) throws IOException {
+	public PropertyVector3(String name, float[] arr) {
 		super(name, PROP_TYPE);
 		values = arr;
 	}
-	public PropertyVector3(String name, int r, int g, int b) throws IOException {
+	public PropertyVector3(String name, int r, int g, int b) {
 		super(name, PROP_TYPE);
 		setColor(r, g, b);
 	}
-	public PropertyVector3(String name, Color color) throws IOException {
+	public PropertyVector3(String name, Color color) {
 		super(name, PROP_TYPE);
 		setColor(color);
 	}
-	public PropertyVector3(String name, int color) throws IOException {
+	public PropertyVector3(String name, int color) {
 		super(name, PROP_TYPE);
 		setColor(color);
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
-		NumberFormat nf = new DecimalFormat("#.#######");
+	public String toString(boolean array) {
+		NumberFormat nf = Hasher.getDecimalFormat("#.#######");
 		if (array) {
 			String str = "\t\t<vector3";
 			if (getDebugMode() && unk1 != 0) str += " unk1=\"" + Hasher.getFileName(unk1) + "\"";

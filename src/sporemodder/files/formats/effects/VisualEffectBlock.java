@@ -161,6 +161,7 @@ public class VisualEffectBlock {
 			TreeMap<Integer, List<Effect>> effectMap = parent.getEffectMap();
 			args = command.getArguments();
 			
+			
 			blockType = EffectMain.getType(command.getKeyword());
 			if (blockType == -1) return;
 			if (blockType == VisualEffect.TYPE && args.size() > 0) {
@@ -168,14 +169,20 @@ public class VisualEffectBlock {
 				if (indexOf != -1) {
 					blockIndex = indexOf | EffectMain.IMPORT_MASK;
 				}
-				effect = EffectMain.getEffect(effectMap, blockType, args.get(0));
-				blockIndex = EffectMain.getEffectIndex(effectMap, blockType, effect);
+				else {
+					effect = EffectMain.getEffect(effectMap, blockType, args.get(0));
+					blockIndex = EffectMain.getEffectIndex(effectMap, blockType, effect);
+				}
 			}
 			
 			// effect isn't imported
 			if (blockIndex == -1) {
 				//check if it's inline
 				Class<? extends EffectComponent> clazz = EffectComponent.SUPPORTED_COMPONENTS.get(blockType);
+				
+				if (clazz == null) {
+					System.out.print("nulL");
+				}
 				EffectComponent effComp = null;
 				try {
 					Constructor<? extends EffectComponent> ctor = clazz.getConstructor(int.class, int.class);

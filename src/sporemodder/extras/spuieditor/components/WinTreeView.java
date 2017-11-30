@@ -53,17 +53,17 @@ public class WinTreeView extends Window {
 			}
 		}
 		
-		addUnassignedInt(block, 0x302A0004, 0);
-		addUnassignedShort(block, 0x302A0005, 0);  // TreeExpanderDrawable
-		addUnassignedInt(block, 0x302A0006, 0);
+		addUnassignedFloat(block, 0x302A0004, 0.0f);
+		addUnassignedShort(block, 0x302A0005, null);  // DefaultIcon
+		addUnassignedShort(block, 0x302A0006, null);  // TreeExpanderDrawable
 		addUnassignedInt(block, 0x302A0007, 0);
 		addUnassignedInt(block, 0x302A0008, 0);
 		addUnassignedInt(block, 0x302A0009, 0);
 		addUnassignedInt(block, 0x302A000A, 0);
 		addUnassignedInt(block, 0x302A000B, 0);
 		addUnassignedInt(block, 0x302A000C, 0);
-		addUnassignedShort(block, 0x302A000D, 0);
-		addUnassignedShort(block, 0x302A000E, 0);
+		addUnassignedShort(block, 0x302A000D, null);
+		addUnassignedShort(block, 0x302A000E, null);
 		
 	}
 	
@@ -71,9 +71,9 @@ public class WinTreeView extends Window {
 		super(viewer);
 		
 		unassignedProperties.put(0x302A0000, (int) 0);
-		unassignedProperties.put(0x302A0004, (int) 0);
+		unassignedProperties.put(0x302A0004, (float) 0);
 		unassignedProperties.put(0x302A0005, null);
-		unassignedProperties.put(0x302A0006, (int) 0);
+		unassignedProperties.put(0x302A0006, null);
 		unassignedProperties.put(0x302A0007, (int) 0);
 		unassignedProperties.put(0x302A0008, (int) 0);
 		unassignedProperties.put(0x302A0009, (int) 0);
@@ -85,6 +85,16 @@ public class WinTreeView extends Window {
 		
 		TreeNode rootNode = new TreeNode(viewer);
 		childrenNodes.add(rootNode);
+		
+		colors[0] = new Color(0xFF000000);
+		colors[1] = new Color(0xFFFFFFFF);
+		colors[2] = new Color(0xFF808080);
+		colors[3] = new Color(0xFFFFFFFF);
+		colors[4] = new Color(0xFF000000);
+		colors[5] = new Color(0xFFC0C0FF);
+		colors[6] = new Color(0xFF0000FF);
+		colors[7] = new Color(0xFFFFFFFF);
+		colors[8] = new Color(0x30000000);
 	}
 	
 	@Override
@@ -111,9 +121,9 @@ public class WinTreeView extends Window {
 			builder.addReference(block, 0x302A0003, objects);
 		}
 		
-		saveInt(builder, block, 0x302A0004);
+		saveFloat(builder, block, 0x302A0004);
 		saveReference(builder, block, 0x302A0005);
-		saveInt(builder, block, 0x302A0006);
+		saveReference(builder, block, 0x302A0006);
 		saveInt(builder, block, 0x302A0007);
 		saveInt(builder, block, 0x302A0008);
 		saveInt(builder, block, 0x302A0009);
@@ -183,7 +193,14 @@ public class WinTreeView extends Window {
 	
 	@Override
 	public void insertComponent(SPUIComponent component, int index) {
-		childrenNodes.add(index == -1 ? children.size() : index, (TreeNode) component);
+		if (component instanceof TreeNode)
+		{
+			childrenNodes.add(index == -1 ? children.size() : index, (TreeNode) component);
+		}
+		else 
+		{
+			super.insertComponent(component, index);
+		}
 	}
 
 	@Override

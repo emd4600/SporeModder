@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
-import sporemodder.files.formats.argscript.ArgScript;
 import sporemodder.files.formats.argscript.ArgScriptBlock;
 import sporemodder.files.formats.argscript.ArgScriptCommand;
 import sporemodder.files.formats.argscript.ArgScriptException;
@@ -124,7 +123,7 @@ public class SoundEffect extends EffectComponent {
 		
 		c.putOption(new ArgScriptOption("name", soundID.toString()));
 		if (flags != 0) c.putOption(new ArgScriptOption("soundFlags", "0x" + Integer.toHexString(flags)));
-		if (field_18 != 0) c.putOption(new ArgScriptOption("field_18", Hasher.getFileName(field_18)));
+		if (field_18 != 0) c.putOption(new ArgScriptOption("field_18", Hasher.getFileName(field_18, "0x")));
 		if (field_1C != 0) c.putOption(new ArgScriptOption("field_1C", Float.toString(field_1C)));
 		if (field_20 != 0) c.putOption(new ArgScriptOption("field_20", Float.toString(field_20)));
 		if (field_24 != 0) c.putOption(new ArgScriptOption("field_24", Float.toString(field_24)));

@@ -24,29 +24,29 @@ public abstract class Property {
 	public static final String singularName = "fixMe";
 	public static final String pluralName = "fixMes";
 	
-	public Property(int name, int type, int flags) throws InstantiationException, IllegalAccessException {
+	public Property(int name, int type, int flags) {
 		this.name = name;
 		nameStr = Hasher.getPropName(name);
 		this.type = type;
 		this.flags = flags;
 	}
-	public Property(int name, Class<? extends Property> type, boolean isArray) throws InstantiationException, IllegalAccessException {
+	public Property(int name, Class<? extends Property> type, boolean isArray) {
 		this.name = name;
 		nameStr = Hasher.getPropName(name);
 		this.type = getPropType(type);
 		this.flags = isArray ? 0x30 : 0;
 	}
-	public Property(int name) throws InstantiationException, IllegalAccessException {
+	public Property(int name) {
 		this.name = name;
 		nameStr = Hasher.getPropName(name);
 //		this.type = getPropType(type);
 //		this.flags = isArray ? 0x30 : 0;
 	}
-	public Property(String name) throws InstantiationException, IllegalAccessException, IOException {
+	public Property(String name) {
 		this.name = Hasher.getPropHash(name);
 		nameStr = name;
 	}
-	public Property(String name, int type) throws IOException {
+	public Property(String name, int type) {
 		if (name != null) 
 			this.name = Hasher.getPropHash(name);
 		nameStr = name;
@@ -66,10 +66,10 @@ public abstract class Property {
 	public abstract void readXML(Element elem) throws IOException;
 	public abstract void writeProp(OutputStreamAccessor out, boolean array) throws IOException;
 	
-	public abstract String toString(boolean array) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException;
+	public abstract String toString(boolean array);
 	
 	public abstract String getSingularName();
-	public abstract String getPluralName() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException ;
+	public abstract String getPluralName();
 	
 	public static Class<? extends Property> getPropType(int type) throws FileStructureException {
 		switch(type) {

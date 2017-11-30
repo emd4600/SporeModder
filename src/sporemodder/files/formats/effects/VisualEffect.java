@@ -123,11 +123,7 @@ public class VisualEffect extends FileStructure implements Effect {
 			ArgScriptException {
 		ArgScriptOption o = null;
 		
-		System.out.println("Now parsing effect " + block.getArguments().get(0));
-		if (block.getArguments().get(0).equals("#0429BB3D"))
-		{
-			System.out.println("BREAKPOINT");
-		}
+		// System.out.println("Now parsing effect " + block.getArguments().get(0));
 		
 		{ o = block.getOption("flags"); if (o != null) flags = Hasher.decodeInt(o.getSingleArgument()); }
 		{ o = block.getOption("notifyMessageID"); if (o != null) notifyMessageID = Hasher.decodeInt(o.getSingleArgument()); }

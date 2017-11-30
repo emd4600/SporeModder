@@ -348,11 +348,16 @@ public class BrushEffect extends EffectComponent {
 		}
 		{
 			ArgScriptCommand cSpacing = block.getCommand("spacing");
-			if (cSpacing != null) spacing = ArgScript.stringsToFloats(cSpacing.getArguments());
-			else spacing = new float[0];
-			
-			ArgScriptOption oVary = cSpacing.getOption("vary");
-			if (oVary != null) spacingVary = Float.parseFloat(oVary.getSingleArgument());
+			if (cSpacing != null) {
+				spacing = ArgScript.stringsToFloats(cSpacing.getArguments());
+				
+				ArgScriptOption oVary = cSpacing.getOption("vary");
+				if (oVary != null) spacingVary = Float.parseFloat(oVary.getSingleArgument());
+			}
+			else {
+				spacing = new float[0];
+			}
+
 		}
 
 		ArgScriptCommand cLife = block.getCommand("life");
@@ -362,7 +367,7 @@ public class BrushEffect extends EffectComponent {
 		if (cRate != null) rate = Float.parseFloat(cRate.getSingleArgument());
 		
 		{
-			ArgScriptCommand cTexture = new ArgScriptCommand("texture");
+			ArgScriptCommand cTexture = block.getCommand("texture");
 			if (cTexture != null) 
 			{
 				texture.parse(cTexture.getSingleArgument());
@@ -415,40 +420,44 @@ public class BrushEffect extends EffectComponent {
 		}
 		{
 			ArgScriptCommand cCond = block.getCommand("cond");
-			List<String> args = cCond.getArguments(2, 3);
-			cond = (byte)ENUM_COND.getValue(args.get(0));
-			cond_0 = Float.parseFloat(args.get(1));
-			
-			if (cond == 3) {
-				if (args.size() != 3) throw new ArgScriptException("Missing argument for cond 'between'.");
-				cond_1 = Float.parseFloat(args.get(2));
-			}
-			
-			ArgScriptOption oFalloff = cCond.getOption("falloff");
-			if (oFalloff != null) {
-				List<String> falloffArgs = oFalloff.getArguments(2);
-				falloff = 1;
-				falloff_0 = Float.parseFloat(falloffArgs.get(0));
-				falloff_1 = Float.parseFloat(falloffArgs.get(1));
+			if (cCond != null) {
+				List<String> args = cCond.getArguments(2, 3);
+				cond = (byte)ENUM_COND.getValue(args.get(0));
+				cond_0 = Float.parseFloat(args.get(1));
+				
+				if (cond == 3) {
+					if (args.size() != 3) throw new ArgScriptException("Missing argument for cond 'between'.");
+					cond_1 = Float.parseFloat(args.get(2));
+				}
+				
+				ArgScriptOption oFalloff = cCond.getOption("falloff");
+				if (oFalloff != null) {
+					List<String> falloffArgs = oFalloff.getArguments(2);
+					falloff = 1;
+					falloff_0 = Float.parseFloat(falloffArgs.get(0));
+					falloff_1 = Float.parseFloat(falloffArgs.get(1));
+				}
 			}
 		}
 		{
 			ArgScriptCommand cCond = block.getCommand("gradientCond");
-			List<String> args = cCond.getArguments(2, 3);
-			gradientCond = (byte)ENUM_COND.getValue(args.get(0));
-			gradientCond_0 = Float.parseFloat(args.get(1));
-			
-			if (gradientCond == 3) {
-				if (args.size() != 3) throw new ArgScriptException("Missing argument for gradientCond 'between'.");
-				gradientCond_1 = Float.parseFloat(args.get(2));
-			}
-			
-			ArgScriptOption oFalloff = cCond.getOption("falloff");
-			if (oFalloff != null) {
-				List<String> falloffArgs = oFalloff.getArguments(2);
-				gradientCondFalloff = 1;
-				gradientCondFalloff_0 = Float.parseFloat(falloffArgs.get(0));
-				gradientCondFalloff_1 = Float.parseFloat(falloffArgs.get(1));
+			if (cCond != null) {
+				List<String> args = cCond.getArguments(2, 3);
+				gradientCond = (byte)ENUM_COND.getValue(args.get(0));
+				gradientCond_0 = Float.parseFloat(args.get(1));
+				
+				if (gradientCond == 3) {
+					if (args.size() != 3) throw new ArgScriptException("Missing argument for gradientCond 'between'.");
+					gradientCond_1 = Float.parseFloat(args.get(2));
+				}
+				
+				ArgScriptOption oFalloff = cCond.getOption("falloff");
+				if (oFalloff != null) {
+					List<String> falloffArgs = oFalloff.getArguments(2);
+					gradientCondFalloff = 1;
+					gradientCondFalloff_0 = Float.parseFloat(falloffArgs.get(0));
+					gradientCondFalloff_1 = Float.parseFloat(falloffArgs.get(1));
+				}
 			}
 		}
 		{
@@ -514,6 +523,7 @@ public class BrushEffect extends EffectComponent {
 		if (rate != 1) block.putCommand(new ArgScriptCommand("rate", Float.toString(rate)));
 		
 		if (!texture.isDefault()) {
+			
 			ArgScriptCommand cTexture = new ArgScriptCommand("texture", texture.toString());
 			ArgScriptOption oDrawMode = new ArgScriptOption("draw", ENUM_DRAWMODE.getKey(drawMode));
 			if (drawMode == 3) {

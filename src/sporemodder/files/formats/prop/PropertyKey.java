@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -21,21 +22,19 @@ public class PropertyKey extends Property {
 	public static final int PROP_TYPE = 0x0020;
 	public static final int itemSize = 12;
 	
-	public PropertyKey(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyKey(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyKey(String name) throws IOException {
+	public PropertyKey(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyKey(String name, int group, int file, int type) throws IOException {
+	public PropertyKey(String name, int group, int file, int type) {
 		super(name, PROP_TYPE);
 		this.values[0] = group;
 		this.values[1] = file;
 		this.values[2] = type;
 	}
-	public PropertyKey(String name, int ... args) throws IOException {
+	public PropertyKey(String name, int ... args) {
 		super(name, PROP_TYPE);
 		for (int i = 0; i < args.length; i++) {
 			this.values[i] = args[i];
@@ -43,7 +42,7 @@ public class PropertyKey extends Property {
 	}
 
 	@Override
-	public String toString(boolean array) throws IOException {
+	public String toString(boolean array) {
 		if (array) {
 			String str = "\t\t<key ";
 			if (values[0] != 0) str += "groupid=\"" + Hasher.getFileName(values[0]) + "\" ";
@@ -150,8 +149,8 @@ public class PropertyKey extends Property {
 	
 	public void setKey(int group, int name, int type) {
 		this.values[0] = group;
-		this.values[1] = group;
-		this.values[2] = group;
+		this.values[1] = name;
+		this.values[2] = type;
 	}
 	
 	public int[] getValue() {
@@ -166,4 +165,36 @@ public class PropertyKey extends Property {
 	public int getUnk() {
 		return unk;
 	}
+	
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text, boolean bArray) throws IOException {
+		
+		int[] values = new int[3];
+		
+		String str = attributes.getValue("groupid");
+		if (str == null) str = attributes.getValue("groupID");
+		if (str != null && str.length() > 0) {
+			values[0] = Hasher.getFileHash(str);
+		}
+		
+		str = attributes.getValue("instanceid");
+		if (str == null) str = attributes.getValue("instanceID");
+		if (str != null && str.length() > 0) {
+			values[1] = Hasher.getFileHash(str);
+		}
+		
+		str = attributes.getValue("typeid");
+		if (str == null) str = attributes.getValue("typeID");
+		if (str != null && str.length() > 0) {
+			values[2] = Hasher.getTypeHash(str);
+		}
+		
+		stream.writeLEInt(values[1]);
+		stream.writeLEInt(values[2]);
+		stream.writeLEInt(values[0]);
+		if (!bArray) {
+			stream.writeLEInt(0);
+		}
+	}
+
 }

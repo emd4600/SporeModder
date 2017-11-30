@@ -362,7 +362,7 @@ public class UIDialogUnpack extends JDialog {
 				new UIProjectSettings(project, UIProjectSettings.SettingsMode.NONE);
 			}
 			else {
-				if (!MainApp.projectExists(project)) {
+				if (MainApp.projectExists(project)) {
 					project.setProjectName(name);
 				} else {
 					project = new Project(name);
@@ -382,16 +382,6 @@ public class UIDialogUnpack extends JDialog {
 			int result = JOptionPane.OK_OPTION;
 			String name = (String) comboBoxProject.getSelectedItem();
 			Project tempProject = MainApp.getProjectByName(name);
-			if (tempProject != null) {
-				project = tempProject;
-			}
-			else {
-				if (!MainApp.projectExists(project)) {
-					project.setProjectName(name);
-				} else {
-					project = new Project(name);
-				}
-			}
 			
 			//TODO check package name too?
 			if (MainApp.checkProjectName(name)) {
@@ -401,6 +391,18 @@ public class UIDialogUnpack extends JDialog {
 			}
 			
 			if (result == JOptionPane.OK_OPTION) {
+				if (tempProject != null) {
+					project = tempProject;
+				}
+				else {
+					if (MainApp.projectExists(project)) {
+						project.setProjectName(name);
+					} else {
+						project = new Project(name);
+						MainApp.addProject(project);
+					}
+				}
+				
 				project.createNewProject();
 				
 				List<ConvertAction> converters = new ArrayList<ConvertAction>();
@@ -412,7 +414,6 @@ public class UIDialogUnpack extends JDialog {
 				if (cbConvertSPUI.isSelected()) converters.add(getConverterByClass(SpuiToTxt.class));
 				if (cbConvertRAST.isSelected()) converters.add(getConverterByClass(RastToDDS.class));
 				if (cbConvertEffects.isSelected()) converters.add(getConverterByClass(EffectUnpacker.class));
-				//TODO GAIT
 				
 				
 				new UnpackDialog(converters);

@@ -114,13 +114,12 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 	private static final int SUPPORTED_VERSION = 4;
 	
 	private int version = SUPPORTED_VERSION;
-	private TreeMap<Integer, List<Effect>> effects;
+	private final TreeMap<Integer, List<Effect>> effects = new TreeMap<Integer, List<Effect>>();
 	private List<String> imports = new ArrayList<String>();
 	// <Hash, index>
-	private HashMap<Integer, Integer> exports = new HashMap<Integer, Integer>();
+	private final HashMap<Integer, Integer> exports = new HashMap<Integer, Integer>();
 	
 	public EffectMain() {
-		effects = new TreeMap<Integer, List<Effect>>();
 	}
 	
 	public EffectMain(InputStreamAccessor in) throws IOException {
@@ -248,7 +247,7 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 			int hash = in.readInt();
 			if ((effectIndex & IMPORT_MASK) != IMPORT_MASK) {
 				VisualEffect effect = (VisualEffect) visualEffects.get(effectIndex & 0xFFFFFF);
-				effect.setName(Hasher.getFileName(hash));
+				effect.setName(Hasher.getFileName(hash, "0x"));
 				effect.setIsExported(true);
 			}
 			exports.put(hash, effectIndex);
@@ -261,7 +260,7 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 		int importCount = in.readInt();
 		for (int i = 0; i < importCount; i++) {
 			in.readInt();
-			imports.add(Hasher.getFileName(in.readInt()));
+			imports.add(Hasher.getFileName(in.readInt(), "0x"));
 		}
 	}
 	
@@ -412,6 +411,9 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 	}
 	
 	private void parseFile(File f) throws IOException, ArgScriptException {
+		
+		// System.out.println("Now parsing file " + f.getName());
+		
 		ArgScript reader = new ArgScript(f);
 		reader.setParser(new EffectParser());
 		reader.parse();
@@ -544,7 +546,7 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 				VisualEffect effect = (VisualEffect) getEffect(effectFile.getEffectMap(), VisualEffect.TYPE, args.get(0));
 				if (effect == null) {
 					// maybe we're exporting an imported effect
-					int indexOf = imports.indexOf(args.get(0));
+					int indexOf = effectFile.getImports().indexOf(args.get(0));
 					if (indexOf == -1) {
 						throw new ArgScriptException("Can't export effect '" + args.get(0) + "' since it doesn't exist.");
 					}
@@ -552,16 +554,16 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 						if (args.size() < 2) {
 							throw new ArgScriptException("Can't export effect '" + args.get(0) + "'. Exporting imported effects requires 2 arguments.");
 						}
-						exports.put(Hasher.getFileHash(args.get(1)), indexOf | IMPORT_MASK);
+						effectFile.getExports().put(Hasher.getFileHash(args.get(1)), indexOf | IMPORT_MASK);
 					}
 				}
 				else {
 					effect.setIsExported(true);
 					if (args.size() >= 2) {
-						exports.put(Hasher.getFileHash(args.get(1)), visualEffectOffset + getEffectIndex(effectFile.getEffectMap(), VisualEffect.TYPE, effect));
+						effectFile.getExports().put(Hasher.getFileHash(args.get(1)), visualEffectOffset + getEffectIndex(effectFile.getEffectMap(), VisualEffect.TYPE, effect));
 					}
 					else {
-						exports.put(Hasher.getFileHash(effect.getName()), visualEffectOffset + getEffectIndex(effectFile.getEffectMap(), VisualEffect.TYPE, effect));
+						effectFile.getExports().put(Hasher.getFileHash(effect.getName()), visualEffectOffset + getEffectIndex(effectFile.getEffectMap(), VisualEffect.TYPE, effect));
 					}
 				}
 			}
@@ -710,9 +712,11 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 	
 	public static final Effect getEffect(TreeMap<Integer, List<Effect>> effectMap, int type, String name) throws ArgScriptException {
 		List<Effect> map = effectMap.get(type);
-		for (Effect eff : map) {
-			if (eff.getName().equals(name)) {
-				return eff;
+		if (map != null) {
+			for (Effect eff : map) {
+				if (eff.getName().equals(name)) {
+					return eff;
+				}
 			}
 		}
 		return null;
@@ -721,14 +725,24 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 	public static final int getEffectIndex(TreeMap<Integer, List<Effect>> effectMap, String keyword, String name) throws ArgScriptException {
 		List<Effect> map = effectMap.get(getType(keyword));
 		int index = 0;
-		for (Effect eff : map) {
-			if (eff.getName().equals(name)) {
-				break;
+		boolean error = false;
+
+		if (map == null) {
+			error = true;
+		} else {
+			for (Effect eff : map) {
+				if (eff.getName().equals(name)) {
+					break;
+				}
+				index++;
 			}
-			index++;
 		}
 		
 		if (index == map.size()) {
+			error = true;
+		}
+		
+		if (error) {
 			throw new ArgScriptException("Effect component '" + name + "' of type " + keyword + " doesn't exist.");
 		}
 		
@@ -761,15 +775,27 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 			}
 		}
 		List<Effect> map = effectMap.get(type);
+		
+		boolean error = false;
 		int index = 0;
-		for (Effect eff : map) {
-			if (eff.getName().equals(name)) {
-				break;
+		
+		if (map == null) {
+			error = true;
+		}
+		else {
+			for (Effect eff : map) {
+				if (eff.getName().equals(name)) {
+					break;
+				}
+				index++;
 			}
-			index++;
+			
+			if (index == map.size()) {
+				error = true;
+			}
 		}
 		
-		if (index == map.size()) {
+		if (error) {
 			throw new ArgScriptException("Effect component '" + name + "' of type 0x" + Integer.toHexString(type) + " doesn't exist.");
 		}
 		
@@ -937,16 +963,18 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 			
 			if (effect.supportsBlock()) {
 				ArgScriptBlock block = effect.toBlock();
+				out.newLine();
 				out.write(block.toString(0));
 				out.newLine();
 				
 				if (effect instanceof EffectComponent)
 				{
-					out.write("# " + Integer.toString(((EffectComponent) effect).position));
+					// out.write("# " + Integer.toString(((EffectComponent) effect).position));
 					out.newLine();
 				}
 			} else {
 				if (effect instanceof MapResource) {
+					out.newLine();
 					out.write(effect.toCommand().toString());
 					out.newLine();
 					out.newLine();
@@ -1037,7 +1065,8 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 		for (Map.Entry<Integer, Integer> entry : exports.entrySet()) {
 				
 			String name = Hasher.getFileName(entry.getKey());
-			try (BufferedWriter out = new BufferedWriter(new FileWriter(path + name + ".pfx")))
+			String hashName = Hasher.getFileName(entry.getKey(), "0x");  // the same but with "0x" prefix
+			try (BufferedWriter out = new BufferedWriter(new FileWriter(path + name + ".pfx", false)))
 			{
 				int index = entry.getValue();
 				if ((index & IMPORT_MASK) == IMPORT_MASK) {
@@ -1052,11 +1081,11 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 					List<Effect> writtenEffects = new ArrayList<Effect>();
 					writeEffectsPfxRecursive(effect, out, bitSets, writtenEffects);
 					
-					if (name.equals(effect.getName())) {
+					if (hashName.equals(effect.getName())) {
 						out.write("export " + effect.getName());
 					}
 					else {
-						out.write("export " + effect.getName() + " " + name);
+						out.write("export " + effect.getName() + " " + hashName);
 					}
 					out.newLine();
 				}
@@ -1217,100 +1246,112 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 	
 	/* --------------------------- */
 	
-	public static void main(String[] args) throws IOException {
-		MainApp.init();
-		
-		long time1 = System.currentTimeMillis();
-		
-		String path = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\gameEffects_3~\\";
-//		String file = "csa.effdir";
-//		String file = "planet.effdir";
-		String file = "games.effdir";
-//		String file = "editors.effdir";
-//		String file = "base.effdir";
-		
-//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Planet\\planet.effdir\\";
-//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Games\\games.effdir\\";
-		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Games\\games2.effdir\\";
-//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Editors\\editors.effdir\\";
-//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_CSA\\csa.effdir\\";
-//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Base\\base.effdir\\";
-		
-		try (FileStreamAccessor in = new FileStreamAccessor(path + file, "r");)
-		{
-			EffectMain effdir = new EffectMain(in);
-			
-			effdir.writeEffectsPfx(outputPath);
-			
-//			effdir.writeLog("E:\\Eric\\SporeMaster 2.0 beta\\csa_effects.package.unpacked\\" + file + "\\");
-		}
-		
-//		String inputFolder = "E:\\Eric\\SporeMaster 2.0 beta\\CustomSkinpaint.package.unpacked\\SkinpaintTest_Effects.effdir\\";
-//		String outputFolder = "E:\\Eric\\SporeMaster 2.0 beta\\CustomSkinpaint.package.unpacked\\ep1_effects_3~\\";
-//		String outputFile = "SkinpaintTest.effdir";
-//		
-//		try (FileStreamAccessor out = new FileStreamAccessor(outputFolder + outputFile, "rw")) {
-//			
-//			EffectMain effdir = new EffectMain();
-//			effdir.parse(inputFolder);
-//			effdir.write(out);
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		
-//		String inputFolder2 = "E:\\Eric\\SporeMaster 2.0 beta\\CustomSkinpaint.package.unpacked\\ep1_effects_3~\\";
-//		String inputFile2 = "SkinpaintTest.effdir";
-//		String outputFolder2 = "E:\\Eric\\SporeModder\\Projects\\SkinpaintTest\\unpacked_effects\\";
-//		
-//		try (FileStreamAccessor in = new FileStreamAccessor(inputFolder2 + inputFile2, "r")) {
-//			EffectMain effdir = new EffectMain(in);
-//			effdir.writeEffectsPfx(outputFolder2, true);
-//		}
-		
-		System.out.println((System.currentTimeMillis() - time1) / 1000.0f + " seconds");
-		
-		
-		/* --- SPEED TEST --- */
-		
-		
-//		String path = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\gameEffects_3~\\";
-////		String file = "csa.effdir";
-//		String file = "planet.effdir";
-//		
-//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Planet\\planet_decals\\";
-//		String outputPathFast = "E:\\Eric\\SporeModder\\Projects\\Effects_Planet\\planet_decals_fast\\";
-////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_CSA\\csa.effdir\\";
+//	public static void main(String[] args) throws IOException {
+//		MainApp.init();
 //		
 //		long time1 = System.currentTimeMillis();
 //		
+//		String path = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\gameEffects_3~\\";
+////		String file = "csa.effdir";
+////		String file = "planet.effdir";
+//		String file = "games.effdir";
+////		String file = "editors.effdir";
+////		String file = "base.effdir";
+//		
+////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Planet\\planet.effdir\\";
+////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Games\\games.effdir\\";
+//		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Games\\games2.effdir\\";
+////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Editors\\editors.effdir\\";
+////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_CSA\\csa.effdir\\";
+////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Base\\base.effdir\\";
+//		
 //		try (FileStreamAccessor in = new FileStreamAccessor(path + file, "r");)
 //		{
 //			EffectMain effdir = new EffectMain(in);
 //			
-//			effdir.writeEffectsPfx(outputPath, true);
-//		}
-//		
-//		time1 = System.currentTimeMillis() - time1;
-//		
-//		long time2 = System.currentTimeMillis();
-//		
-//		try (FileStreamAccessor in = new FileStreamAccessor(path + file, "r");)
-//		{
-//			EffectMain effdir = new EffectMain(in);
+//			effdir.writeEffectsPfx(outputPath);
 //			
-//			effdir.writeEffectsPfxFast(outputPathFast);
+////			effdir.writeLog("E:\\Eric\\SporeMaster 2.0 beta\\csa_effects.package.unpacked\\" + file + "\\");
 //		}
 //		
-//		time2 = System.currentTimeMillis() - time2;
+////		String inputFolder = "E:\\Eric\\SporeMaster 2.0 beta\\CustomSkinpaint.package.unpacked\\SkinpaintTest_Effects.effdir\\";
+////		String outputFolder = "E:\\Eric\\SporeMaster 2.0 beta\\CustomSkinpaint.package.unpacked\\ep1_effects_3~\\";
+////		String outputFile = "SkinpaintTest.effdir";
+////		
+////		try (FileStreamAccessor out = new FileStreamAccessor(outputFolder + outputFile, "rw")) {
+////			
+////			EffectMain effdir = new EffectMain();
+////			effdir.parse(inputFolder);
+////			effdir.write(out);
+////			
+////		} catch (Exception e) {
+////			e.printStackTrace();
+////		}
+////		
+////		String inputFolder2 = "E:\\Eric\\SporeMaster 2.0 beta\\CustomSkinpaint.package.unpacked\\ep1_effects_3~\\";
+////		String inputFile2 = "SkinpaintTest.effdir";
+////		String outputFolder2 = "E:\\Eric\\SporeModder\\Projects\\SkinpaintTest\\unpacked_effects\\";
+////		
+////		try (FileStreamAccessor in = new FileStreamAccessor(inputFolder2 + inputFile2, "r")) {
+////			EffectMain effdir = new EffectMain(in);
+////			effdir.writeEffectsPfx(outputFolder2, true);
+////		}
 //		
-//		System.out.println("ArgScript: " + time1 / 1000.0f + " seconds (" + time1 + " ms)");
-//		System.out.println("Fast method: " + time2 / 1000.0f + " seconds (" + time2 + " ms)");
-	}
+//		System.out.println((System.currentTimeMillis() - time1) / 1000.0f + " seconds");
+//		
+//		
+//		/* --- SPEED TEST --- */
+//		
+//		
+////		String path = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\gameEffects_3~\\";
+//////		String file = "csa.effdir";
+////		String file = "planet.effdir";
+////		
+////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_Planet\\planet_decals\\";
+////		String outputPathFast = "E:\\Eric\\SporeModder\\Projects\\Effects_Planet\\planet_decals_fast\\";
+//////		String outputPath = "E:\\Eric\\SporeModder\\Projects\\Effects_CSA\\csa.effdir\\";
+////		
+////		long time1 = System.currentTimeMillis();
+////		
+////		try (FileStreamAccessor in = new FileStreamAccessor(path + file, "r");)
+////		{
+////			EffectMain effdir = new EffectMain(in);
+////			
+////			effdir.writeEffectsPfx(outputPath, true);
+////		}
+////		
+////		time1 = System.currentTimeMillis() - time1;
+////		
+////		long time2 = System.currentTimeMillis();
+////		
+////		try (FileStreamAccessor in = new FileStreamAccessor(path + file, "r");)
+////		{
+////			EffectMain effdir = new EffectMain(in);
+////			
+////			effdir.writeEffectsPfxFast(outputPathFast);
+////		}
+////		
+////		time2 = System.currentTimeMillis() - time2;
+////		
+////		System.out.println("ArgScript: " + time1 / 1000.0f + " seconds (" + time1 + " ms)");
+////		System.out.println("Fast method: " + time2 / 1000.0f + " seconds (" + time2 + " ms)");
+//	}
 
 	@Override
 	public List<FileStructureError> getAllErrors() {
 		return null;
 	}
 	
+	
+	public static void main(String[] args) throws IOException, ArgScriptException
+	{
+		MainApp.init();
+		
+		String folderPath = "E:\\Eric\\Mod Projects\\Effects Errors\\games\\";
+		String filePath = "E:\\Eric\\Mod Projects\\Effects Errors\\games.effdir";
+		
+//		EffectMain.unpackEffdir(filePath + "_2", folderPath);
+		
+		EffectMain.packEffdir(folderPath, filePath);
+	}
 }

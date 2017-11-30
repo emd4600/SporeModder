@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -20,15 +21,13 @@ public class PropertyWChar extends Property {
 	public static final int PROP_TYPE = 0x0003;
 	public static final int itemSize = 2;
 	
-	public PropertyWChar(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyWChar(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyWChar(String name) throws IOException {
+	public PropertyWChar(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyWChar(String name, char value) throws IOException {
+	public PropertyWChar(String name, char value) {
 		super(name, PROP_TYPE);
 		this.value = value;
 	}
@@ -167,9 +166,7 @@ public class PropertyWChar extends Property {
 	}
 
 	@Override
-	public String toString(boolean array) throws IllegalArgumentException,
-			IllegalAccessException, NoSuchFieldException, SecurityException,
-			IOException {
+	public String toString(boolean array) {
 		if (array) {
 			return "\t\t<wchar>" + Character.toString(value) + "</wchar>" + PROPMain.eol;
 		} else {
@@ -184,5 +181,10 @@ public class PropertyWChar extends Property {
 	
 	public char getValue() {
 		return value;
+	}
+	
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text) throws IOException {
+		stream.writeShort((int)text.charAt(0));
 	}
 }

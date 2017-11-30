@@ -173,7 +173,7 @@ public class UIGeneralSettings extends SettingsCategory {
 		tfAlternativePackPath.setEnabled(project.getPackPathType() == GamePathType.CUSTOM);
 		btnPackPathFind = new JButton("Find");
 		btnPackPathFind.setEnabled(project.getPackPathType() == GamePathType.CUSTOM);
-		btnPackPathFind.addActionListener(new AdvancedFileChooser(tfAlternativePackPath, contentPanel, JFileChooser.DIRECTORIES_ONLY, false, ChooserType.SAVE));
+		btnPackPathFind.addActionListener(new AdvancedFileChooser(tfAlternativePackPath, parent, JFileChooser.DIRECTORIES_ONLY, false, ChooserType.SAVE));
 		
 		customPackPathPanel.add(tfAlternativePackPath, BorderLayout.CENTER);
 		customPackPathPanel.add(btnPackPathFind, BorderLayout.EAST);

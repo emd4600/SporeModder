@@ -13,8 +13,8 @@ public class CascadeEffect extends SPUIDefaultWinProc {
 	public CascadeEffect(SPUIBlock block) throws InvalidBlockException {
 		super(block);
 		
-		addUnassignedFloat(block, 0x4F2B0000, 0);
-		addUnassignedFloat(block, 0x4F2B0001, 0);
+		addUnassignedFloat(block, 0x4F2B0000, (float) 0);
+		addUnassignedFloat(block, 0x4F2B0001, (float) 0);
 	}
 
 	private CascadeEffect() {
@@ -24,8 +24,8 @@ public class CascadeEffect extends SPUIDefaultWinProc {
 	public CascadeEffect(SPUIViewer viewer) {
 		super(viewer);
 		
-		unassignedProperties.put(0x4F2B0000, (int) 0);
-		unassignedProperties.put(0x4F2B0001, (int) 0);
+		unassignedProperties.put(0x4F2B0000, (float) 0);
+		unassignedProperties.put(0x4F2B0001, (float) 0);
 	}
 	
 	@Override

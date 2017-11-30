@@ -12,6 +12,8 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -25,19 +27,35 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import sporemodder.files.FileStreamAccessor;
 import sporemodder.files.FileStructureException;
 import sporemodder.files.InputStreamAccessor;
+import sporemodder.files.MemoryOutputStream;
 import sporemodder.files.OutputStreamAccessor;
 import sporemodder.files.formats.FileFormatStructure;
 import sporemodder.files.formats.FileStructureError;
 import sporemodder.utilities.Hasher;
+import sporemodder.utilities.performance.Profiler;
 
 public class PROPMain implements FileFormatStructure {
-	public static enum ReadMode {BINARY, XML};
 	
+	// Profiler things
+	public static Profiler profiler;
+	
+	public static final String PROFILE_READ_XML = "Read XML";
+	public static final String PROFILE_PROCESS_XML = "Process XML";
+	public static final String PROFILE_SORT_PROPERTIES = "Sort Properties";
+	public static final String PROFILE_WRITE_PROPERTIES = "Write Properties";
+	
+	public static final String[] PROFILES = new String[] {
+			PROFILE_READ_XML, PROFILE_PROCESS_XML, PROFILE_SORT_PROPERTIES, PROFILE_WRITE_PROPERTIES
+	};
+	
+	public static enum ReadMode {BINARY, XML};
 	public static String eol = System.getProperty("line.separator");
 	
 	public List<Property> properties = new ArrayList<Property>();
@@ -98,12 +116,12 @@ public class PROPMain implements FileFormatStructure {
 	@SuppressWarnings("unchecked")
 	public void readProp(InputStreamAccessor in, boolean debugMode) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, NoSuchFieldException, FileStructureException {
 		int propCount = in.readInt();
-//		propCount = 1;
+		
 		properties = new ArrayList<Property>(propCount);
 		for (int i = 0; i < propCount; i++) {
-			//System.out.println(in.getFilePointer());
+			System.out.println(in.getFilePointer());
+			
 			int name = in.readInt();
-			//System.out.println(Hasher.getPropName(name));
 			int type = in.readShort();
 			int flags = in.readShort();
 			Property prop;
@@ -138,7 +156,7 @@ public class PROPMain implements FileFormatStructure {
 					in.skipBytes(16);
 				}
 			} else {
-				throw new IOException("PROP000; Unknown property flag: " + flags);
+				throw new IOException("PROP000; Unknown property flag: " + flags + ". Offset: " + in.getFilePointer());
 			}
 			properties.add(prop);
 		}
@@ -230,91 +248,129 @@ public class PROPMain implements FileFormatStructure {
 	
 	
 	public void readXML(InputStream in) throws ParserConfigurationException, TransformerFactoryConfigurationError, TransformerException, IOException, DOMException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, SAXException, InstantiationException {
-		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-		Element root = doc.getDocumentElement();
 		
+		Element root = null;
 		
-		properties = new ArrayList<Property>();
-		NodeList items = root.getChildNodes();
-		int size = items.getLength();
-		for (int i = 0; i < size; i++) {
-			Node item = items.item(i);
-			if (item.getNodeType() == Node.ELEMENT_NODE) {
-//				long time1 = System.currentTimeMillis();
-				
-				Element elem = (Element) item;
-				String name = item.getNodeName();
-				
-				if (name.startsWith("bbox")) 			properties.add(PropertyBBox.processNewProperty(elem));
-				else if (name.startsWith("bool")) 		properties.add(PropertyBool.processNewProperty(elem));
-				else if (name.startsWith("char"))		properties.add(PropertyChar.processNewProperty(elem));
-				else if (name.startsWith("colorRGBA"))	properties.add(PropertyColorRGBA.processNewProperty(elem));
-				else if (name.startsWith("colorRGB"))	properties.add(PropertyColorRGB.processNewProperty(elem));
-				else if (name.startsWith("double"))		properties.add(PropertyDouble.processNewProperty(elem));
-				else if (name.startsWith("float")) 		properties.add(PropertyFloat.processNewProperty(elem));
-				else if (name.startsWith("int16")) 		properties.add(PropertyInt16.processNewProperty(elem));
-				else if (name.startsWith("int32")) 		properties.add(PropertyInt32.processNewProperty(elem));
-				else if (name.startsWith("int64")) 		properties.add(PropertyInt64.processNewProperty(elem));
-				else if (name.startsWith("int8")) 		properties.add(PropertyInt8.processNewProperty(elem));
-				else if (name.startsWith("key")) 		properties.add(PropertyKey.processNewProperty(elem));
-				else if (name.startsWith("string16")) 	properties.add(PropertyString16.processNewProperty(elem));
-				else if (name.startsWith("string8")) 	properties.add(PropertyString8.processNewProperty(elem));
-				else if (name.startsWith("text")) 		properties.add(PropertyText.processNewProperty(elem));
-				else if (name.startsWith("transform")) 	properties.add(PropertyTransform.processNewProperty(elem));
-				else if (name.startsWith("uint16")) 	properties.add(PropertyUint16.processNewProperty(elem));
-				else if (name.startsWith("uint32")) 	properties.add(PropertyUint32.processNewProperty(elem));
-				else if (name.startsWith("uint64")) 	properties.add(PropertyUint64.processNewProperty(elem));
-				else if (name.startsWith("uint8")) 		properties.add(PropertyUint8.processNewProperty(elem));
-				else if (name.startsWith("vector2"))	properties.add(PropertyVector2.processNewProperty(elem));
-				else if (name.startsWith("vector3")) 	properties.add(PropertyVector3.processNewProperty(elem));
-				else if (name.startsWith("vector4")) 	properties.add(PropertyVector4.processNewProperty(elem));
-				else if (name.startsWith("wchar")) 		properties.add(PropertyWChar.processNewProperty(elem));
-				
+		if (profiler != null) profiler.startMeasure(PROFILE_READ_XML);
+		{
+			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
+			root = doc.getDocumentElement();
+			
+			properties = new ArrayList<Property>();
+		}
+		if (profiler != null) profiler.endMeasure(PROFILE_READ_XML);
+		
+		if (profiler != null) profiler.startMeasure(PROFILE_PROCESS_XML);
+		{
+			NodeList items = root.getChildNodes();
+			int size = items.getLength();
+			for (int i = 0; i < size; i++) {
+				Node item = items.item(i);
+				if (item.getNodeType() == Node.ELEMENT_NODE) {
+					
+					Element elem = (Element) item;
+					String name = item.getNodeName();
+					
+					if (name.startsWith("bbox")) 			properties.add(PropertyBBox.processNewProperty(elem));
+					else if (name.startsWith("bool")) 		properties.add(PropertyBool.processNewProperty(elem));
+					else if (name.startsWith("char"))		properties.add(PropertyChar.processNewProperty(elem));
+					else if (name.startsWith("colorRGBA"))	properties.add(PropertyColorRGBA.processNewProperty(elem));
+					else if (name.startsWith("colorRGB"))	properties.add(PropertyColorRGB.processNewProperty(elem));
+					else if (name.startsWith("double"))		properties.add(PropertyDouble.processNewProperty(elem));
+					else if (name.startsWith("float")) 		properties.add(PropertyFloat.processNewProperty(elem));
+					else if (name.startsWith("int16")) 		properties.add(PropertyInt16.processNewProperty(elem));
+					else if (name.startsWith("int32")) 		properties.add(PropertyInt32.processNewProperty(elem));
+					else if (name.startsWith("int64")) 		properties.add(PropertyInt64.processNewProperty(elem));
+					else if (name.startsWith("int8")) 		properties.add(PropertyInt8.processNewProperty(elem));
+					else if (name.startsWith("key")) 		properties.add(PropertyKey.processNewProperty(elem));
+					else if (name.startsWith("string16")) 	properties.add(PropertyString16.processNewProperty(elem));
+					else if (name.startsWith("string8")) 	properties.add(PropertyString8.processNewProperty(elem));
+					else if (name.startsWith("text")) 		properties.add(PropertyText.processNewProperty(elem));
+					else if (name.startsWith("transform")) 	properties.add(PropertyTransform.processNewProperty(elem));
+					else if (name.startsWith("uint16")) 	properties.add(PropertyUint16.processNewProperty(elem));
+					else if (name.startsWith("uint32")) 	properties.add(PropertyUint32.processNewProperty(elem));
+					else if (name.startsWith("uint64")) 	properties.add(PropertyUint64.processNewProperty(elem));
+					else if (name.startsWith("uint8")) 		properties.add(PropertyUint8.processNewProperty(elem));
+					else if (name.startsWith("vector2"))	properties.add(PropertyVector2.processNewProperty(elem));
+					else if (name.startsWith("vector3")) 	properties.add(PropertyVector3.processNewProperty(elem));
+					else if (name.startsWith("vector4")) 	properties.add(PropertyVector4.processNewProperty(elem));
+					else if (name.startsWith("wchar")) 		properties.add(PropertyWChar.processNewProperty(elem));
+					
+				}
 			}
 		}
-//		propCount = properties.size();
-//		this.properties = new ArrayList<Property>[propCount];
-//		this.properties = properties.toArray(this.properties);
+		if (profiler != null) profiler.endMeasure(PROFILE_PROCESS_XML);
 	}
 	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void write(OutputStreamAccessor out) throws IOException {
-//		for (Property prop : properties) {
-//			System.out.println(Hasher.getPropName(prop.name) + "\t" + Hasher.hashToHex(prop.name));
-//		}
 		
-		List<Property> newProps = new ArrayList<Property>(properties);
-		Collections.sort(newProps, new Comparator<Property>() {
-            @Override
-            public int compare(final Property object1, final Property object2) {
-                return (object1.name & 0xffffffffL) > (object2.name & 0xffffffffL) ? +1 : (object1.name & 0xffffffffL) < (object2.name & 0xffffffffL) ? -1 : 0;
-            }
-      	});
+		List<Property> newProps = null;
 		
-//		System.out.println();
-//		for (Property prop : newProps) {
-//			System.out.println(Hasher.getPropName(prop.name) + "\t" + Hasher.hashToHex(prop.name));
-//		}
+		if (profiler != null) profiler.startMeasure(PROFILE_SORT_PROPERTIES);
+		{
+			newProps = new ArrayList<Property>(properties);
+			Collections.sort(newProps, new Comparator<Property>() {
+	            @Override
+	            public int compare(final Property object1, final Property object2) {
+	                return (object1.name & 0xffffffffL) > (object2.name & 0xffffffffL) ? +1 : (object1.name & 0xffffffffL) < (object2.name & 0xffffffffL) ? -1 : 0;
+	            }
+	      	});
+		}
+		if (profiler != null) profiler.endMeasure(PROFILE_SORT_PROPERTIES);
 		
-		out.writeInt(properties.size());
-		for (Property prop : newProps) {
-			out.writeInt(prop.name);
-			out.writeShort(prop.type);
-			out.writeShort(prop.flags);
-			if (prop instanceof ArrayProperty) {
-				ArrayProperty array = (ArrayProperty) prop;
-				out.writeInt(array.values.size());
-				out.writeInt(array.arrayItemSize);
-				@SuppressWarnings("unchecked")
-				List<Property> props = array.getValues();
-				for (Property p : props) {
-					p.writeProp(out, true);
+		if (profiler != null) profiler.startMeasure(PROFILE_WRITE_PROPERTIES);
+		{
+			out.writeInt(properties.size());
+			for (Property prop : newProps) {
+				out.writeInt(prop.name);
+				out.writeShort(prop.type);
+				out.writeShort(prop.flags);
+				if (prop instanceof ArrayProperty) {
+					ArrayProperty array = (ArrayProperty) prop;
+					out.writeInt(array.values.size());
+					out.writeInt(array.arrayItemSize);
+					@SuppressWarnings("unchecked")
+					List<Property> props = array.getValues();
+					for (Property p : props) {
+						p.writeProp(out, true);
+					}
+				} else {
+					prop.writeProp(out, false);
 				}
-			} else {
-				prop.writeProp(out, false);
 			}
 		}
+		if (profiler != null) profiler.endMeasure(PROFILE_WRITE_PROPERTIES);
+	}
+	
+	public static OutputStreamAccessor fastConvertToProp(InputStream in) throws ParserConfigurationException, SAXException, IOException {
+		
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		SAXParser parser = factory.newSAXParser();
+		
+		DefaultHandler handler = new DefaultHandler() {
+			@Override
+			public void startElement(String uri, String localName,String qName, Attributes attributes) throws SAXException {
+				
+			}
+			
+			@Override
+			public void endElement(String uri, String localName,String qName) throws SAXException {
+				
+			}
+			
+			@Override
+			public void characters(char[] ch, int start, int length) throws SAXException {
+				
+			}
+		};
+		
+		parser.parse(in, handler);
+		
+		OutputStreamAccessor out = new MemoryOutputStream();
+		
+		return out;
 	}
 	
 	/**
@@ -640,6 +696,22 @@ public class PROPMain implements FileFormatStructure {
 		if (!hasAutolocale)
 		{
 			return null;
+		}
+		
+		return sb.toString();
+	}
+	
+	public static String createAutolocaleFile(List<String> strings) {
+				
+		StringBuilder sb = new StringBuilder();
+		sb.append("# This file was autogenerated by SporeModder");
+		sb.append(eol);
+		
+		int index = 1;
+		for (String str : strings) {
+			sb.append(Hasher.hashToHex(index, "0x") + " " + str);
+			sb.append(eol);
+			index++;
 		}
 		
 		return sb.toString();

@@ -378,6 +378,7 @@ public class GameModelEffect extends EffectComponent {
 			}
 		}
 		
+		split.field_4C = new int[argCount - argIndex];
 		for (int i = argIndex; i < argCount; i++) {
 			split.field_4C[i - argIndex] = Integer.parseInt(args.get(i));
 		}
@@ -434,7 +435,7 @@ public class GameModelEffect extends EffectComponent {
 		{
 			ArgScriptCommand c = new ArgScriptCommand("name", model.toString());
 			if ((flags & FLAG_MESSAGE) == FLAG_MESSAGE) {
-				c.putOption(new ArgScriptOption("message", Hasher.getFileName(message)));
+				c.putOption(new ArgScriptOption("message", Hasher.getFileName(message, "0x")));
 			}
 			if (overrideSet != 0) {
 				c.putOption(new ArgScriptOption("overrideSet", Integer.toString(overrideSet)));
@@ -454,7 +455,7 @@ public class GameModelEffect extends EffectComponent {
 		block.putCommand(new ArgScriptCommand("color", color.toString()));
 		block.putCommand(new ArgScriptCommand("alpha", Float.toString(alpha)));
 		if (world != 0) {
-			block.putCommand(new ArgScriptCommand("world", Hasher.getFileName(world)));
+			block.putCommand(new ArgScriptCommand("world", Hasher.getFileName(world, "0x")));
 		}
 		if ((flags & FLAG_PERSIST) == FLAG_PERSIST) {
 			block.putCommand(new ArgScriptCommand("persist", "true"));
@@ -463,7 +464,7 @@ public class GameModelEffect extends EffectComponent {
 			ArgScriptCommand c = new ArgScriptCommand("groups");
 			for (int i : groups) {
 				String key = ENUM_GROUPS.getKey(i);
-				c.addArgument(key == null || key.equals(ArgScriptEnum.DEFAULT_KEY) ? Hasher.getFileName(i) : key);
+				c.addArgument(key == null || key.equals(ArgScriptEnum.DEFAULT_KEY) ? Hasher.getFileName(i, "0x") : key);
 			}
 			block.putCommand(c);
 		}

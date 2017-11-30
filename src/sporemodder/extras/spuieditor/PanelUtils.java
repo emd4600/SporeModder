@@ -437,6 +437,10 @@ public class PanelUtils {
 							Color originalColor = ((JGradientButton) component).getColor();
 							((JGradientButton) component).setColor((Color) value);
 							
+							if (action != null) {
+								action.valueChanged((Color) value);
+							}
+							
 							editor.addCommandAction(new ComponentValueAction<Color>(originalColor, (Color) value, new ComponentValueListener<Color>() {
 								@Override
 								public void valueChanged(Color value) {

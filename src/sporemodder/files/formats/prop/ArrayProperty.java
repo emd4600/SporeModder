@@ -17,12 +17,12 @@ public class ArrayProperty<T extends Property> extends Property {
 	public int numValues;
 	public Class<? extends Property> valueType;
 	
-	public ArrayProperty(int name, int type, int flags) throws InstantiationException, IllegalAccessException {
+	public ArrayProperty(int name, int type, int flags) {
 		super(name, type, flags);
 	}
 	
 	//Used when it has no values
-	public ArrayProperty(String name, Class<? extends Property> type) throws InstantiationException, IllegalAccessException, IOException {
+	public ArrayProperty(String name, Class<? extends Property> type) {
 		super(name);
 		valueType = type;
 		this.type = Property.getPropType(type);
@@ -30,7 +30,7 @@ public class ArrayProperty<T extends Property> extends Property {
 		try {
 			arrayItemSize = type.getField("itemSize").getInt(null);
 		} catch (IllegalArgumentException | NoSuchFieldException
-				| SecurityException e) {
+				| SecurityException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		values = new ArrayList<T>();
@@ -73,7 +73,7 @@ public class ArrayProperty<T extends Property> extends Property {
 		}
 	}
 	@Override
-	public String toString(boolean array) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
+	public String toString(boolean array) {
 		String line = "\t<" + getPluralName() + " name=\"" + Hasher.getPropName(name) + "\">" + PROPMain.eol;
 		for (Property prop : values) {
 			line += prop.toString(true);
@@ -96,8 +96,15 @@ public class ArrayProperty<T extends Property> extends Property {
 		return singularName;
 	}
 	@Override
-	public String getPluralName() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		return (String)valueType.getDeclaredField("pluralName").get(null);
+	public String getPluralName() {
+		String result = null;
+		try {
+			result = (String)valueType.getDeclaredField("pluralName").get(null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return result;
 	}
 	
 	

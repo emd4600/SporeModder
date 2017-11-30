@@ -2,7 +2,6 @@ package sporemodder.files.formats.prop;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,37 +22,35 @@ public class PropertyVector4 extends Property {
 	public static final int PROP_TYPE = 0x0033;
 	public static final int itemSize = 16;
 	
-	public PropertyVector4(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyVector4(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyVector4(String name) throws IOException {
+	public PropertyVector4(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyVector4(String name, float x, float y, float z, float alpha) throws IOException {
+	public PropertyVector4(String name, float x, float y, float z, float alpha) {
 		super(name, PROP_TYPE);
 		values[0] = x;
 		values[1] = y;
 		values[2] = z;
 		values[2] = alpha;
 	}
-	public PropertyVector4(String name, int r, int g, int b, int alpha) throws IOException {
+	public PropertyVector4(String name, int r, int g, int b, int alpha) {
 		super(name, PROP_TYPE);
 		setColor(r, g, b, alpha);
 	}
-	public PropertyVector4(String name, Color color) throws IOException {
+	public PropertyVector4(String name, Color color) {
 		super(name, PROP_TYPE);
 		setColor(color);
 	}
-	public PropertyVector4(String name, int color) throws IOException {
+	public PropertyVector4(String name, int color) {
 		super(name, PROP_TYPE);
 		setColor(color);
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
-		NumberFormat nf = new DecimalFormat("#.#######");
+	public String toString(boolean array) {
+		NumberFormat nf = Hasher.getDecimalFormat("#.#######");
 		if (array) {
 			return "\t\t<vector4>" + PROPMain.eol + 
 					"\t\t\t<x>" + nf.format(values[0]) + "</x>" + PROPMain.eol +

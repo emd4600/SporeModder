@@ -1,7 +1,6 @@
 package sporemodder.files.formats.prop;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -22,22 +22,20 @@ public class PropertyFloat extends Property {
 	private float value;
 	public static final int itemSize = 4;
 	
-	public PropertyFloat(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyFloat(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyFloat(String name) throws IOException {
+	public PropertyFloat(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyFloat(String name, float value) throws IOException {
+	public PropertyFloat(String name, float value) {
 		super(name, PROP_TYPE);
 		this.value = value;
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
-		NumberFormat nf = new DecimalFormat("#.#######");
+	public String toString(boolean array) {
+		NumberFormat nf = Hasher.getDecimalFormat("#.#######");
 		if (array) {
 			return "\t\t<float>" + nf.format(value) + "</float>" + PROPMain.eol;
 		} else {
@@ -105,5 +103,11 @@ public class PropertyFloat extends Property {
 	
 	public float getValue() {
 		return value;
+	}
+	
+
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text) throws IOException {
+		stream.writeFloat(Float.parseFloat(text));
 	}
 }

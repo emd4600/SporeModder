@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -20,21 +21,19 @@ public class PropertyBool extends Property {
 	public static final int PROP_TYPE = 0x0001;
 	public static final int itemSize = 1;
 	
-	public PropertyBool(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyBool(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyBool(String name) throws IOException {
+	public PropertyBool(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyBool(String name, boolean value) throws IOException {
+	public PropertyBool(String name, boolean value) {
 		super(name, PROP_TYPE);
 		this.value = value;
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
+	public String toString(boolean array) {
 		if (array) {
 			return "\t\t<bool>" + Boolean.toString(value) + "</bool>" + PROPMain.eol;
 		} else {
@@ -102,5 +101,10 @@ public class PropertyBool extends Property {
 	
 	public boolean getValue() {
 		return value;
+	}
+	
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text) throws IOException {
+		stream.writeBoolean(Boolean.parseBoolean(text));
 	}
 }

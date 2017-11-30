@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.MainApp;
 import sporemodder.files.InputStreamAccessor;
@@ -22,21 +23,19 @@ public class PropertyUint32 extends Property {
 	public static final int PROP_TYPE = 0x000A;
 	public static final int itemSize = 4;
 	
-	public PropertyUint32(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyUint32(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyUint32(String name) throws IOException {
+	public PropertyUint32(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyUint32(String name, long value) throws IOException {
+	public PropertyUint32(String name, long value) {
 		super(name, PROP_TYPE);
 		this.value = value;
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
+	public String toString(boolean array) {
 		String str = null;
 		if (!getDebugMode() && value != 0) {
 			str = MainApp.getRegistry(NameRegistry.NAME_FILE).getName((int)(value & 0xFFFFFFFF));
@@ -125,5 +124,10 @@ public class PropertyUint32 extends Property {
 	
 	public long getValue() {
 		return value;
+	}
+	
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text) throws IOException {
+		stream.writeUInt(Hasher.decodeUInt(text));
 	}
 }

@@ -277,7 +277,7 @@ public class MaterialResource extends Resource {
 			case 5: String s2 = "booleans " + getNameString(valuesB.length);
 					for (boolean f : valuesB) s2 += " " + f;
 					return s2;
-			case 6: return "texture sampler" + name.getNameID() + " " + Hasher.getFileName(valuesI[1]);
+			case 6: return "texture sampler" + name.getNameID() + " " + Hasher.getFileName(valuesI[1], "0x");
 			default: return null;
 			}
 		}

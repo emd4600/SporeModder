@@ -1,5 +1,10 @@
 package sporemodder.utilities;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import sporemodder.MainApp;
 import sporemodder.utilities.names.NameRegistry;
 import sporemodder.utilities.names.SimpleNameRegistry;
@@ -7,6 +12,12 @@ import sporemodder.utilities.names.SimpleNameRegistry;
 public class Hasher {
 	
 	public static SimpleNameRegistry UsedNames = null;
+	
+	public static NumberFormat getDecimalFormat(String pattern) {
+		DecimalFormatSymbols decimalSymbol = new DecimalFormatSymbols(Locale.getDefault());
+		decimalSymbol.setDecimalSeparator('.');
+		return new DecimalFormat(pattern, decimalSymbol);
+	}
 	
 	/**
 	 * Decodes the given String into the byte it represents. If str starts with <code>0x</code> or <code>#</code>, the 
@@ -33,6 +44,33 @@ public class Hasher {
 		
 		return result;
 	}
+	
+	/**
+	 * Decodes the given String into the byte it represents. If str starts with <code>0x</code> or <code>#</code>, the 
+	 * string will be treated as an hexadecimal number. 
+	 * 
+	 * @param str The string representation of the byte to decode.
+	 * @return The byte value of the String str.
+	 */
+	public static short decodeUByte(String str) {
+		short result = 0;
+		
+		if (str.startsWith("0x")) {
+			result = (short) (Short.parseShort(str.substring(2), 16) & 0xFF);
+		}
+		else if (str.startsWith("#")) {
+			result = (short) (Short.parseShort(str.substring(1), 16) & 0xFF);
+		}
+		else if (str.endsWith("b")) {
+			result = (short) (Short.parseShort(str.substring(0, str.length() - 1), 2) & 0xFF);
+		}
+		else {
+			result = (short) (Short.parseShort(str) & 0xFF);
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * Decodes the given String into the short it represents. If str starts with <code>0x</code> or <code>#</code>, the 
 	 * string will be treated as an hexadecimal number. 
@@ -58,6 +96,33 @@ public class Hasher {
 		
 		return result;
 	}
+	
+	/**
+	 * Decodes the given String into the short it represents. If str starts with <code>0x</code> or <code>#</code>, the 
+	 * string will be treated as an hexadecimal number. 
+	 * 
+	 * @param str The string representation of the short to decode.
+	 * @return The short value of the String str.
+	 */
+	public static int decodeUShort(String str) {
+		short result = 0;
+		
+		if (str.startsWith("0x")) {
+			result = (short) (Integer.parseInt(str.substring(2), 16) & 0xFFFF);
+		}
+		else if (str.startsWith("#")) {
+			result = (short) (Integer.parseInt(str.substring(1), 16) & 0xFFFF);
+		}
+		else if (str.endsWith("b")) {
+			result = (short) (Integer.parseInt(str.substring(0, str.length() - 1), 2) & 0xFFFF);
+		}
+		else {
+			result = (short) (Integer.parseInt(str) & 0xFFFF);
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * Decodes the given String into the int it represents. If str starts with <code>0x</code> or <code>#</code>, the 
 	 * string will be treated as an hexadecimal number. 
@@ -92,6 +157,107 @@ public class Hasher {
 		return result;
 	}
 	
+	/**
+	 * Decodes the given String into the int it represents. If str starts with <code>0x</code> or <code>#</code>, the 
+	 * string will be treated as an hexadecimal number. 
+	 * 
+	 * @param str The string representation of the int to decode.
+	 * @return The int value of the String str.
+	 */
+	public static int decodeUInt(String str) {
+		int result = 0;
+		
+		if (str == null || str.length() == 0) {
+			return 0;
+		}
+		
+		if (str.startsWith("0x")) {
+			result = Integer.parseUnsignedInt(str.substring(2), 16);
+		}
+		else if (str.startsWith("#")) {
+			result = Integer.parseUnsignedInt(str.substring(1), 16);
+		else if (str.startsWith("$")) {
+			//result = Hasher.stringToFNVHash(str.substring(1));
+			result = Hasher.getFileHash(str.substring(1));
+		}
+		else if (str.endsWith("b")) {
+			result = Integer.parseUnsignedInt(str.substring(0, str.length() - 1), 2);
+		}
+		else {
+			result = Integer.parseUnsignedInt(str);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Decodes the given String into the long it represents. If str starts with <code>0x</code> or <code>#</code>, the 
+	 * string will be treated as an hexadecimal number. 
+	 * 
+	 * @param str The string representation of the long to decode.
+	 * @return The long value of the String str.
+	 */
+	public static long decodeLong(String str) {
+		long result = 0;
+		
+		if (str == null || str.length() == 0) {
+			return 0;
+		}
+		
+		if (str.startsWith("0x")) {
+			result = Long.parseUnsignedLong(str.substring(2), 16);
+		}
+		else if (str.startsWith("#")) {
+			result = Long.parseUnsignedLong(str.substring(1), 16);
+		}
+		else if (str.startsWith("$")) {
+			//result = Hasher.stringToFNVHash(str.substring(1));
+			result = Long.parseUnsignedLong(str.substring(1));
+		}
+		else if (str.endsWith("b")) {
+			result = Long.parseUnsignedLong(str.substring(0, str.length() - 1), 2);
+		}
+		else {
+			result = Long.parseLong(str);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Decodes the given String into the long it represents. If str starts with <code>0x</code> or <code>#</code>, the 
+	 * string will be treated as an hexadecimal number. 
+	 * 
+	 * @param str The string representation of the long to decode.
+	 * @return The long value of the String str.
+	 */
+	public static long decodeULong(String str) {
+		long result = 0;
+		
+		if (str == null || str.length() == 0) {
+			return 0;
+		}
+		
+		if (str.startsWith("0x")) {
+			result = Long.parseUnsignedLong(str.substring(2), 16);
+		}
+		else if (str.startsWith("#")) {
+			result = Long.parseUnsignedLong(str.substring(1), 16);
+		}
+		else if (str.startsWith("$")) {
+			//result = Hasher.stringToFNVHash(str.substring(1));
+			result = Long.parseUnsignedLong(str.substring(1));
+		}
+		else if (str.endsWith("b")) {
+			result = Long.parseUnsignedLong(str.substring(0, str.length() - 1), 2);
+		}
+		else {
+			result = Long.parseUnsignedLong(str);
+		}
+		
+		return result;
+	}
+	
 	public static String validateIntString(String text, int offset, String str) {
 		if (str.length() == 0) {
 			return str;
@@ -116,27 +282,27 @@ public class Hasher {
 		}
 	}
 	
-	public static long decodeUInt(String str) {
-		long result = 0;
-		if (str.startsWith("0x")) {
-			result = Long.parseLong(str.substring(2), 16);
-		}
-		else if (str.startsWith("#")) {
-			result = Long.parseLong(str.substring(1), 16);
-		}
-		else if (str.startsWith("$")) {
-			//result = Hasher.stringToFNVHash(str.substring(1));
-			result = Hasher.getFileHash(str.substring(1)) & 0xFFFFFFFF;
-		}
-		else if (str.endsWith("b")) {
-			result = Long.parseLong(str.substring(0, str.length() - 1), 2);
-		}
-		else {
-			result = Integer.parseUnsignedInt(str) & 0xFFFFFFFFL;
-		}
-		
-		return result;
-	}
+//	public static long decodeUInt(String str) {
+//		long result = 0;
+//		if (str.startsWith("0x")) {
+//			result = Long.parseLong(str.substring(2), 16);
+//		}
+//		else if (str.startsWith("#")) {
+//			result = Long.parseLong(str.substring(1), 16);
+//		}
+//		else if (str.startsWith("$")) {
+//			//result = Hasher.stringToFNVHash(str.substring(1));
+//			result = Hasher.getFileHash(str.substring(1)) & 0xFFFFFFFF;
+//		}
+//		else if (str.endsWith("b")) {
+//			result = Long.parseLong(str.substring(0, str.length() - 1), 2);
+//		}
+//		else {
+//			result = Integer.parseUnsignedInt(str) & 0xFFFFFFFFL;
+//		}
+//		
+//		return result;
+//	}
 	
 	public static String fillZeroInHexString(int num) {
 		return String.format("%8s", Integer.toHexString(num)).replace(' ', '0');

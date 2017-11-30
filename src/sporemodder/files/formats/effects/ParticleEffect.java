@@ -1175,7 +1175,9 @@ public class ParticleEffect extends EffectComponent {
 			List<String> args = c.getArguments();
 			randomWalk.turnOffsetCurve = new float[args.size()];
 			for (int i = 0; i < randomWalk.turnOffsetCurve.length; i++) {
-				randomWalk.turnOffsetCurve[i] = ArgScript.parseRangedFloat(args.get(i), -1, 1);
+				// randomWalk.turnOffsetCurve[i] = ArgScript.parseRangedFloat(args.get(i), -1, 1);
+				
+				randomWalk.turnOffsetCurve[i] = Float.parseFloat(args.get(i));
 			}
 			flags |= FLAG_RANDOMWALK;
 			

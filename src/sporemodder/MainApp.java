@@ -120,7 +120,7 @@ public class MainApp {
 		}
 	}
 	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 2, 0, VersionInfo.BETA);
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 3, 0, null);
 	
 	private static final String PROPERTY_SAVE_MODE = "saveMode";
 	private static final String PROPERTY_SEARCHABLE_EXT = "searchableExtensions";
@@ -140,7 +140,7 @@ public class MainApp {
 	private static final int MAX_PRESETS = 10;
 	
 	// for debugging purposes only
-	public static boolean redirectConsole = false;
+	public static boolean redirectConsole = true;
 	
 	//TODO disable when compiling
 //	public static boolean DEBUG = false;
@@ -256,19 +256,8 @@ public class MainApp {
 	}
 	
 	public static List<Project> getProjectsByNames(List<String> names) {
-		//TODO This might need optimization
 		List<Project> result = new ArrayList<Project>();
 
-//		for (Project project : projects)
-//		{
-//			for (String name : names) {
-//				if (project.getProjectName().equals(name))
-//				{
-//					result.add(project);
-//				}
-//			}
-//		}
-		
 		for (String name : names) {
 			Project p = projectsMap.get(name);
 			if (p != null) result.add(p);

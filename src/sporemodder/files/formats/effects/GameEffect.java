@@ -111,7 +111,7 @@ public class GameEffect extends EffectComponent {
 		
 		ArgScriptCommand c = new ArgScriptCommand(KEYWORD, new String[0]);
 		
-		c.putOption(new ArgScriptOption("id", Hasher.getFileName(messageID)));
+		c.putOption(new ArgScriptOption("id", Hasher.getFileName(messageID, "0x")));
 		if (life != 0) {
 			c.putOption(new ArgScriptOption("life", Float.toString(life)));
 		}

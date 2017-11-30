@@ -96,7 +96,7 @@ public class UIFileMenu extends JMenu {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogPack(MainApp.getUserInterface());
+				new UIDialogPack(MainApp.getUserInterface(), false);
 			}
 			
 		});

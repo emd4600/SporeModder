@@ -812,7 +812,7 @@ public class SkinpaintParticleEffect extends EffectComponent {
 		{
 			ArgScriptCommand c = new ArgScriptCommand("brush");
 			for (int brush : brushes) {
-				c.addArgument(Hasher.getFileName(brush));
+				c.addArgument(Hasher.getFileName(brush, "0x"));
 			}
 			if ((flags & BRUSH_RANDOM) == BRUSH_RANDOM) c.putFlag("random");
 			if ((flags & BRUSH_RANDOMSTART) == BRUSH_RANDOMSTART) c.putFlag("randomStart");

@@ -8,6 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 
 import sporemodder.files.InputStreamAccessor;
 import sporemodder.files.OutputStreamAccessor;
@@ -20,21 +21,19 @@ public class PropertyInt16 extends Property {
 	public static final int PROP_TYPE = 0x0007;
 	public static final int itemSize = 2;
 	
-	public PropertyInt16(int name, int type, int flags)
-			throws InstantiationException, IllegalAccessException {
+	public PropertyInt16(int name, int type, int flags) {
 		super(name, type, flags);
-		// TODO Auto-generated constructor stub
 	}
-	public PropertyInt16(String name) throws IOException {
+	public PropertyInt16(String name) {
 		super(name, PROP_TYPE);
 	}
-	public PropertyInt16(String name, short value) throws IOException {
+	public PropertyInt16(String name, short value) {
 		super(name, PROP_TYPE);
 		this.value = value;
 	}
 	
 	@Override
-	public String toString(boolean array) throws IOException {
+	public String toString(boolean array) {
 		if (array) {
 			return "\t\t<int16>" + Short.toString(value) + "</int16>" + PROPMain.eol;
 		} else {
@@ -102,5 +101,10 @@ public class PropertyInt16 extends Property {
 	
 	public short getValue() {
 		return value;
+	}
+	
+	@SuppressWarnings("unused")
+	public static void fastConvert(OutputStreamAccessor stream, Attributes attributes, String text) throws IOException {
+		stream.writeShort(Hasher.decodeShort(text));
 	}
 }

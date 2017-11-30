@@ -615,17 +615,16 @@ public class RW4Main extends FileStructure implements FileFormatStructure {
 		
 		//String inputPath = "E:\\Eric\\SporeMaster 2.0 beta\\spore.unpacked\\editor_rigblocks~\\ce_details_armor_03.rw4\\raw.rw4";
 		
-		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\SkeletonTest.rw4";
-		String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\SkeletonTest2.rw4";
-		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\Working_SkeletonTest2.rw4";
 		
-		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\Horn.rw4";
-		//String inputPath = "C:\\Users\\Eric\\Desktop\\SporeModder Addons Test\\StaticModel_Cube.rw4";
-		//String inputPath = "E:\\Eric\\SporeModder\\Projects\\SporeModder Models Test\\ModAPITestModels\\StaticModel_Cube.rw4";
+//		String inputPath = "E:\\Eric\\SporeModder\\Projects\\DebuggingTest\\editor_rigblocks~\\SRNS-be_structure_triangular-sharp.rw4";
+//		String inputPath = "E:\\Eric\\SporeModder\\Projects\\DebuggingTest\\editor_rigblocks~\\CreaturePartTest.rw4";
 		
-		//String inputPath = "C:\\Users\\Eric\\Desktop\\Working_StaticModel_Cube.rw4";
+//		String inputPath = "C:\\Users\\Eric\\Desktop\\be_platonic_01.rw4";
+//		String inputPath = "C:\\Users\\Eric\\Desktop\\WorkingPart.rw4";
 		
-		//String inputPath = "C:\\Users\\Eric\\Desktop\\trg_sacrifice_altar1.rw4";
+//		String inputPath = "E:\\Eric\\Mod Projects\\Model Importer Test\\be_classic_05.rw4";
+		String inputPath = "E:\\Eric\\Mod Projects\\Model Importer Test\\Building_4_bones_1branch 2.rw4";
+		
 		RW4TexMetadata.READ_COMPILED_STATE = false;
 		
 		try (FileStreamAccessor in = new FileStreamAccessor(inputPath, "r")) {

@@ -5,22 +5,18 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 
 import sporemodder.MainApp;
 import sporemodder.userinterface.dialogs.UIDialogPack;
 import sporemodder.userinterface.dialogs.UIDialogUnpack;
-import sporemodder.utilities.SporeGame;
 
 public class UIToolBar extends JToolBar {
 	
@@ -48,6 +44,8 @@ public class UIToolBar extends JToolBar {
 	private JButton btnPack;
 	private JButton btnPackAndRun;
 	private JButton btnRunWOPack;
+	
+	private JButton btnDebugPack;
 
 	public UIToolBar()
 	{
@@ -81,7 +79,7 @@ public class UIToolBar extends JToolBar {
 		btnPack.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				new UIDialogPack();
+				new UIDialogPack(false);
 			}
 		});
 		
@@ -123,7 +121,7 @@ public class UIToolBar extends JToolBar {
 			}
 		};
 		
-		ImageIcon iconRunWOPack = createImageIcon("/sporemodder/userinterface/images/RunWOPack_32x32.png", "Save");
+		ImageIcon iconRunWOPack = createImageIcon("/sporemodder/userinterface/images/RunWOPack_32x32.png", "Run w/o packing");
 		btnRunWOPack = new JButton(iconRunWOPack);
 		btnRunWOPack.setToolTipText("Run game (F7)");
 		// VK_F8 already does something related with split panes...
@@ -132,33 +130,42 @@ public class UIToolBar extends JToolBar {
 		btnRunWOPack.setPreferredSize(new Dimension(32, 32));
 		btnRunWOPack.addActionListener(runAction);
 		
+				
+		Action debugPackAction = new AbstractAction("Debug Pack") {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 930418025391158170L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new UIDialogPack(true);
+			}
+		};
+		
+		ImageIcon iconDebugPack = createImageIcon("/sporemodder/userinterface/images/DebugPack_32x32.png", "Debug Pack");
+		btnDebugPack = new JButton(iconDebugPack);
+		btnDebugPack.setToolTipText("Pack mod with debug info");
+		// VK_F8 already does something related with split panes...
+		btnDebugPack.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0), "Debug Pack");
+		btnDebugPack.getActionMap().put("Debug Pack", debugPackAction);
+		btnDebugPack.setPreferredSize(new Dimension(32, 32));
+		btnDebugPack.addActionListener(debugPackAction);
+		
 		add(btnPackAndRun);
 		add(btnPack);
 		add(btnRunWOPack);
 		add(btnUnpack);
+		add(btnDebugPack);
+		
+		update();
 	}
 	
 	public void update() {
 		boolean enabled = MainApp.getCurrentProject() != null;
 		btnPack.setEnabled(enabled);
 		btnPackAndRun.setEnabled(enabled);
-	}
-	
-	private class ALRun implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			SporeGame game = SporeGame.getGalacticAdventures();
-			if (game == null) game = SporeGame.getSpore();
-			if (game == null) {
-				JOptionPane.showMessageDialog(MainApp.getUserInterface(), "Spore/Galactic Adventures couldn't be found on your computer.", "Error", JOptionPane.ERROR_MESSAGE);
-			}
-			
-			//TODO args?
-			try {
-				game.execute();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(MainApp.getUserInterface(), "An error occurred while starting Spore/Galactic Adventures:\n" + e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
-			}
-		}
+		btnDebugPack.setEnabled(enabled);
 	}
 }

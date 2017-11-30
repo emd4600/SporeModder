@@ -95,10 +95,10 @@ public class ResourceID {
 		
 		StringBuilder sb = new StringBuilder();
 		if (groupID != 0) {
-			sb.append(Hasher.getFileName(groupID));
+			sb.append(Hasher.getFileName(groupID, "0x"));
 			sb.append("!");
 		}
-		sb.append(Hasher.getFileName(nameID));
+		sb.append(Hasher.getFileName(nameID, "0x"));
 		
 		return sb.toString();
 	}

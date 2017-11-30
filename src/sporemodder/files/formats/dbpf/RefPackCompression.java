@@ -284,8 +284,7 @@ public class RefPackCompression {
 	}
 	
 	
-	public static void compress(byte[] input, CompressorOutput out) throws IOException {
-		//TODO implement quick compress?
+	public static void compress(byte[] input, int inputLength, CompressorOutput out) throws IOException {
 		
 		int len;
 		int tlen; //uint
@@ -313,7 +312,7 @@ public class RefPackCompression {
 		int[] hashtbl; // int32 *
 		int hashptr = 0; // int32 *
 		
-		len = input.length;
+		len = inputLength;
 		out.data = new byte[len * 2 + 8192]; 
 		
 		byte[] in = new byte[len + 2]; //we need more size?
