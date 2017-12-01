@@ -176,6 +176,7 @@ public class Hasher {
 		}
 		else if (str.startsWith("#")) {
 			result = Integer.parseUnsignedInt(str.substring(1), 16);
+		}
 		else if (str.startsWith("$")) {
 			//result = Hasher.stringToFNVHash(str.substring(1));
 			result = Hasher.getFileHash(str.substring(1));

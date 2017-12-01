@@ -173,7 +173,7 @@ public class DBPFPackingTask extends SwingWorker<Void, Void> {
 					
 					String[] splits = name.split("\\.", 2);
 					currentFileName = splits[0];
-					currentExtension = splits.length > 1 ? splits[1] : null;
+					currentExtension = splits.length > 1 ? splits[1] : "";
 					
 					currentInstanceID = Hasher.getFileHash(currentFileName);
 					
