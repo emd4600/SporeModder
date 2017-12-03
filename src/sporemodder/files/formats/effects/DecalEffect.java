@@ -140,9 +140,9 @@ public class DecalEffect extends EffectComponent {
 
 	@Override
 	public boolean write(OutputStreamAccessor out) throws IOException {
-		out.writeInt(0);
-		out.writeByte(0);
-		out.writeByte(0);
+		out.writeInt(field_8);
+		out.writeByte(field_C);
+		out.writeByte(field_D);
 		texture.write(out);
 		
 		out.writeFloat(lifeTime);

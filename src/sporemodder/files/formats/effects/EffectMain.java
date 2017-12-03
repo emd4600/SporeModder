@@ -569,6 +569,8 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 			}
 		}
 		
+		exports.putAll(effectFile.getExports());
+		
 		// put our effects into the main effectMap
 		for (Map.Entry<Integer, List<Effect>> entry : effectFile.getEffectMap().entrySet()) {
 			int type = entry.getKey();
@@ -1347,11 +1349,11 @@ public class EffectMain extends FileStructure implements FileFormatStructure {
 	{
 		MainApp.init();
 		
-		String folderPath = "E:\\Eric\\Mod Projects\\Effects Errors\\games\\";
-		String filePath = "E:\\Eric\\Mod Projects\\Effects Errors\\games.effdir";
+		String folderPath = "E:\\Eric\\Mod Projects\\Effects Errors\\test_2\\";
+		String filePath = "E:\\Eric\\Mod Projects\\Effects Errors\\test.effdir";
 		
-//		EffectMain.unpackEffdir(filePath + "_2", folderPath);
+  		EffectMain.unpackEffdir(filePath, folderPath);
 		
-		EffectMain.packEffdir(folderPath, filePath);
+		// EffectMain.packEffdir(folderPath, filePath);
 	}
 }
