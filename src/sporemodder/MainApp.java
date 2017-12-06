@@ -120,7 +120,7 @@ public class MainApp {
 		}
 	}
 	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 3, 2, null);
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 3, 3, null);
 	
 	private static final String PROPERTY_SAVE_MODE = "saveMode";
 	private static final String PROPERTY_SEARCHABLE_EXT = "searchableExtensions";

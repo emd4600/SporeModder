@@ -38,7 +38,7 @@ public class DBPFItem extends FileStructure {
 		if (dbpfType == DBPFHeader.TYPE_DBBF) in.skipBytes(4);
 		compressedSize = in.readLEInt() & 0x7FFFFFFF;
 		memSize = in.readLEInt(); //Decompressed size
-		switch(in.readShort()) {
+		switch(in.readLEShort()) {
 			case 0: isCompressed = false;
 					break;
 			case -1: isCompressed = true;

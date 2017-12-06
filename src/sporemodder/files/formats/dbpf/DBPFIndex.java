@@ -15,9 +15,13 @@ public class DBPFIndex extends FileStructure {
 	public List<DBPFItem> items;
 	public int itemsPos;
 	
+	public int dbpfType;
+	
 	public void read(InputStreamAccessor in, int dbpfType) throws IOException {
 		int typeInt = in.readLEInt();
 		itemSize = (dbpfType == DBPFHeader.TYPE_DBPF) ? 28 : 32;
+		
+		this.dbpfType = dbpfType;
 		
 		// type id
 		if ((typeInt & (1 << 0)) == 1 << 0)
@@ -58,7 +62,7 @@ public class DBPFIndex extends FileStructure {
 			DBPFItem item = new DBPFItem();
 			item.key.setGroupID(groupID);
 			item.key.setTypeID(typeID);
-			item.readInfo(in, typeID);
+			item.readInfo(in, dbpfType);
 			items.add(item);
 		}
 	}
