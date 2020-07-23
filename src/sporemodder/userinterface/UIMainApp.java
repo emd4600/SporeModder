@@ -2,15 +2,20 @@ package sporemodder.userinterface;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
@@ -19,6 +24,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 
 import sporemodder.MainApp;
+import sporemodder.userinterface.dialogs.UIDialogSporeModderFX;
 import sporemodder.userinterface.fileview.FileView;
 
 public class UIMainApp extends JFrame {
@@ -228,6 +234,20 @@ public class UIMainApp extends JFrame {
 		// Display the window
 		pack();
 		setVisible(true);
+		
+		//new UIDialogSporeModderFX();
+		String message = "<html><body style='width: 400px'>This program is obsolete and no longer development. Spore modding has moved to a new program: SporeModder FX. It has many more features and a better UI.<br><a href='https://emd4600.github.io/SporeModder-FX/'>https://emd4600.github.io/SporeModder-FX/</a></body></html>";
+		if (JOptionPane.showOptionDialog(this, message, "Obsolete program. Use SporeModder FX instead.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, 
+				new String[] {"DOWNLOAD NOW", "Ignore"}, "DOWNLOAD NOW") == JOptionPane.YES_OPTION) {
+			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+			    try {
+					Desktop.getDesktop().browse(new URI("https://emd4600.github.io/SporeModder-FX/"));
+					this.dispose();
+				} catch (IOException | URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	// Updates all those things dependant on the current project

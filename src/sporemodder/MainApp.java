@@ -120,7 +120,7 @@ public class MainApp {
 		}
 	}
 	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 3, 3, null);
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 4, 0, null);
 	
 	private static final String PROPERTY_SAVE_MODE = "saveMode";
 	private static final String PROPERTY_SEARCHABLE_EXT = "searchableExtensions";
@@ -140,7 +140,7 @@ public class MainApp {
 	private static final int MAX_PRESETS = 10;
 	
 	// for debugging purposes only
-	public static boolean redirectConsole = true;
+	public static boolean redirectConsole = false;
 	
 	//TODO disable when compiling
 //	public static boolean DEBUG = false;
